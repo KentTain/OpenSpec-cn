@@ -503,7 +503,7 @@ describe('workspace command', () => {
     });
 
     expect(update.exitCode).toBe(0);
-    expect(update.stdout).toContain('No configured tools found');
+    expect(update.stdout).toContain('未找到配置的工具');
     expect(`${update.stdout}\n${update.stderr}`).not.toContain('Run `openspec workspace update`');
     expect(update.stdout).not.toContain('Workspace update complete');
     expect(fs.readFileSync(getWorkspaceViewStatePath(workspaceRoot), 'utf-8')).toBe(workspaceStateBefore);
@@ -548,7 +548,7 @@ describe('workspace command', () => {
     expect(update.exitCode).toBe(0);
     expect(update.stdout).not.toContain('Workspace update complete');
     expect(update.stderr).not.toContain('Invalid workspace state');
-    expect(update.stdout).toContain('No configured tools found');
+    expect(update.stdout).toContain('未找到配置的工具');
     expect(fs.readFileSync(getWorkspaceViewStatePath(existingWorkspaceRoot), 'utf-8')).toBe(
       existingWorkspaceStateBefore
     );

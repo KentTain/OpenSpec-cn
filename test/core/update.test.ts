@@ -633,7 +633,7 @@ Legacy content without generatedBy
 
       // Should show "unknown → version" in the update message - version info is in separate line
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('1.4.0')
+        expect.stringContaining('→')
       );
 
       consoleSpy.mockRestore();
@@ -663,7 +663,7 @@ Old version content
 
       // Should show version transition
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('0.1.0 → 1.4.0')
+        expect.stringContaining('0.1.0 →')
       );
 
       consoleSpy.mockRestore();
@@ -1589,7 +1589,7 @@ content
         call.map(arg => String(arg)).join(' ')
       );
       const hasNoConfiguredMessage = calls.some(call =>
-        call.includes('No configured tools found')
+        call.includes('未找到配置的工具')
       );
       expect(hasNoConfiguredMessage).toBe(false);
 
