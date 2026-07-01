@@ -5,6 +5,7 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getSyncSpecsSkillTemplate(): SkillTemplate {
   return {
@@ -13,6 +14,8 @@ export function getSyncSpecsSkillTemplate(): SkillTemplate {
     instructions: `将变更中的增量规范同步到主规范。
 
 这是一个**代理驱动**的操作 - 你将读取增量规范并直接编辑主规范来应用变更。这允许智能合并（例如，添加一个场景而无需复制整个需求）。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -32,8 +35,6 @@ export function getSyncSpecsSkillTemplate(): SkillTemplate {
    \`\`\`bash
    openspec-cn status --change "<name>" --json
    \`\`\`
-
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明工作区规范同步在当前版本中不支持并停止。不要回退到仓库本地路径或编辑链接的仓库。
 
 3. **查找增量规范**
 
@@ -147,7 +148,7 @@ The system SHALL do something new.
 - 进行中展示你在修改什么
 - 操作应该是幂等的 - 运行两次应该得到相同结果`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -161,6 +162,8 @@ export function getOpsxSyncCommandTemplate(): CommandTemplate {
     content: `将变更中的增量规范同步到主规范。
 
 这是一个**代理驱动**的操作 - 你将读取增量规范并直接编辑主规范来应用变更。这允许智能合并（例如，添加一个场景而无需复制整个需求）。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选在 \`/opsx:sync\` 后指定变更名称（如 \`/opsx:sync add-auth\`）。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -180,8 +183,6 @@ export function getOpsxSyncCommandTemplate(): CommandTemplate {
    \`\`\`bash
    openspec-cn status --change "<name>" --json
    \`\`\`
-
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明工作区规范同步在当前版本中不支持并停止。不要回退到仓库本地路径或编辑链接的仓库。
 
 3. **查找增量规范**
 

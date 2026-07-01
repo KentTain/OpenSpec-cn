@@ -1,27 +1,27 @@
-# OpenSpec Scripts
+# OpenSpec 脚本
 
-Utility scripts for OpenSpec maintenance and development.
+OpenSpec 维护与开发用的实用脚本。
 
 ## update-flake.sh
 
-Updates `flake.nix` pnpm dependency hash automatically.
+自动更新 `flake.nix` 的 pnpm 依赖哈希。
 
-**When to use**: After updating dependencies (`pnpm install`, `pnpm update`).
+**何时使用**：更新依赖后（`pnpm install`、`pnpm update`）。
 
-**Usage**:
+**用法**：
 ```bash
 ./scripts/update-flake.sh
 ```
 
-**What it does**:
-1. Reads version from `package.json` (dynamically used by `flake.nix`)
-2. Automatically determines the correct pnpm dependency hash
-3. Updates the hash in `flake.nix`
-4. Verifies the build succeeds
+**做什么**：
+1. 从 `package.json` 读取版本号（`flake.nix` 会动态使用）
+2. 自动计算正确的 pnpm 依赖哈希
+3. 更新 `flake.nix` 中的哈希
+4. 验证构建是否成功
 
-**Example workflow**:
+**示例流程**：
 ```bash
-# After dependency updates
+# 更新依赖后
 pnpm install
 ./scripts/update-flake.sh
 git add flake.nix
@@ -30,8 +30,8 @@ git commit -m "chore: update flake.nix dependency hash"
 
 ## postinstall.js
 
-Post-installation script that runs after package installation.
+包安装完成后运行的安装后脚本。
 
 ## pack-version-check.mjs
 
-Validates package version consistency before publishing.
+发布前校验包版本一致性。

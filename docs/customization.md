@@ -277,7 +277,7 @@ Schema: my-workflow
 
 ### 快速迭代工作流
 
-A minimal workflow for quick iterations:
+一个用于快速迭代的最小工作流：
 
 ```yaml
 # openspec/schemas/rapid/schema.yaml
@@ -288,16 +288,16 @@ description: 最小开销的快速迭代
 artifacts:
   - id: proposal
     generates: proposal.md
-    description: Quick proposal
+    description: 快速 proposal
     template: proposal.md
     instruction: |
-      Create a brief proposal for this change.
-      Focus on what and why, skip detailed specs.
+      为这个变更创建一份简短的 proposal。
+      聚焦于做什么和为什么，跳过详细 spec。
     requires: []
 
   - id: tasks
     generates: tasks.md
-    description: Implementation checklist
+    description: 实现清单
     template: tasks.md
     requires: [proposal]
 
@@ -319,20 +319,20 @@ openspec-cn schema fork spec-driven with-review
 ```yaml
   - id: review
     generates: review.md
-    description: Pre-implementation review checklist
+    description: 实现前的审查清单
     template: review.md
     instruction: |
-      Create a review checklist based on the design.
-      Include security, performance, and testing considerations.
+      基于 design 创建一份审查清单。
+      包含安全、性能和测试方面的考量。
     requires:
       - design
 
   - id: tasks
-    # ... existing tasks config ...
+    # ... 现有 tasks 配置 ...
     requires:
       - specs
       - design
-      - review    # Now tasks require review too
+      - review    # 现在 tasks 也依赖 review
 ```
 
 ---

@@ -1,30 +1,25 @@
-# OpenSpec Test Guidance
+# OpenSpec 测试指南
 
-Applies to tests under `test/`.
+适用于 `test/` 下的测试。
 
-## Running Tests
+## 运行测试
 
-- Focused file: `pnpm exec vitest run test/path/to/file.test.ts`
-- Focused case: `pnpm exec vitest run test/path/to/file.test.ts -t "case name"`
-- Full suite: `pnpm test`
-- Run `pnpm run build` before focused CLI tests when implementation changes may leave `dist/` stale.
+- 聚焦单个文件：`pnpm exec vitest run test/path/to/file.test.ts`
+- 聚焦单个用例：`pnpm exec vitest run test/path/to/file.test.ts -t "case name"`
+- 完整测试套件：`pnpm test`
+- 当实现变更可能让 `dist/` 过期时，在运行聚焦 CLI 测试前先跑 `pnpm run build`。
 
-## Cross-Platform Paths
+## 跨平台路径
 
-- Do not hard-code Unix path separators in CLI output expectations unless the implementation intentionally emits POSIX paths.
-- For filesystem paths, build expected values with `path.join(...)`, `path.relative(...)`, or `FileSystemUtils.joinPath(...)`.
-- For human-readable output, either assert a deliberately normalized display format or normalize both actual and expected strings before comparing, for example with `FileSystemUtils.toPosixPath()` to convert backslashes to forward slashes for cross-platform consistency.
-- When touching path behavior, add coverage that would fail on Windows path separators.
+- 除非实现刻意输出 POSIX 路径，否则不要在 CLI 输出预期中硬编码 Unix 路径分隔符。
+- 对于文件系统路径，用 `path.join(...)`、`path.relative(...)` 或 `FileSystemUtils.joinPath(...)` 构建预期值。
+- 对于人类可读输出，要么断言一种刻意规范化的显示格式，要么在比较前规范化实际值与预期值（例如用 `FileSystemUtils.toPosixPath()` 把反斜杠转成正斜杠，保证跨平台一致）。
+- 触及路径行为时，加一条在 Windows 路径分隔符上会失败的覆盖。
 
-## Path Canonicalization
+## 路径规范化
 
-Path identity is a recurring CI failure mode: Windows short/long paths, symlink or
-junction aliases, and case-insensitive file systems can spell the same existing
-directory differently.
+路径同一性是反复出现的 CI 失败模式：Windows 短/长路径、symlink 或 junction 别名、以及大小写不敏感的文件系统可能把同一个已存在的目录拼写成不同形式。
 
-When asserting existing filesystem paths as identities, canonicalize both actual
-and expected paths first. Prefer `FileSystemUtils.canonicalizeExistingPath()` in
-project code and `fs.realpathSync.native()` in test-only expectations.
+在把已存在的文件系统路径当作同一性断言时，先规范化实际值与预期值。项目代码中优先用 `FileSystemUtils.canonicalizeExistingPath()`，仅在测试预期里用 `fs.realpathSync.native()`。
 
-Add an alias-path regression when touching path identity logic. If preserving
-user-typed path spelling is intentional, assert it separately from identity comparisons.
+触及路径同一性逻辑时加一条别名路径回归测试。如果保留用户输入的路径拼写是刻意的，把它与同一性比较分开单独断言。

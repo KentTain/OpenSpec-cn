@@ -28,8 +28,18 @@ export interface RunCLIResult {
   signal: NodeJS.Signals | null;
   stdout: string;
   stderr: string;
+  /** stderr with macOS Keychain trust-settings noise stripped. */
+  get cleanStderr(): string;
   timedOut: boolean;
   command: string;
+}
+
+/** Pattern matching the macOS Keychain certificate trust-settings noise that
+ *  can leak to stderr on some macOS configurations. */
+const CERT_NOISE_RE = /^ERROR: failed to copy trust settings of system certificate-\d+\n?/gm;
+
+function stripCertNoise(stderr: string): string {
+  return stderr.replace(CERT_NOISE_RE, '');
 }
 
 function runCommand(command: string, args: string[], options: RunCommandOptions = {}) {
@@ -129,11 +139,13 @@ export async function runCLI(args: string[] = [], options: RunCLIOptions = {}): 
       child.stdout?.destroy();
       child.stderr?.destroy();
       child.stdin?.destroy();
+      const rawStderr = stderr;
       resolve({
         exitCode: code,
         signal,
         stdout,
         stderr,
+        get cleanStderr() { return stripCertNoise(rawStderr); },
         timedOut,
         command: `node ${invocation}`,
       });

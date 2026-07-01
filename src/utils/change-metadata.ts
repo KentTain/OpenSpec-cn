@@ -5,7 +5,7 @@ import { ChangeMetadataSchema, type ChangeMetadata } from '../core/change-metada
 import { listSchemas } from '../core/artifact-graph/resolver.js';
 import { readProjectConfig } from '../core/project-config.js';
 
-const METADATA_FILENAME = '.openspec.yaml';
+export const METADATA_FILENAME = '.openspec.yaml';
 
 /**
  * Error thrown when change metadata validation fails.
@@ -36,7 +36,7 @@ export function validateSchemaName(
   const availableSchemas = listSchemas(projectRoot);
   if (!availableSchemas.includes(schemaName)) {
     throw new Error(
-      `未知 Schema '${schemaName}'。可选值：${availableSchemas.join(', ')}`
+      `未知 Schema '${schemaName}'。可用的 Schema：${availableSchemas.join(', ')}`
     );
   }
   return schemaName;

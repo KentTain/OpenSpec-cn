@@ -915,7 +915,7 @@ export function registerSchemaCommand(program: Command): void {
             error: (error as Error).message,
           }, null, 2));
         } else {
-          console.error(`Error: ${(error as Error).message}`);
+          console.error(`错误：${(error as Error).message}`);
         }
         process.exitCode = 1;
       }

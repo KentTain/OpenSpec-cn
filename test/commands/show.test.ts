@@ -113,7 +113,7 @@ describe('top-level show command', () => {
       expect(err.status).not.toBe(0);
       const stderr = err.stderr.toString();
       expect(stderr).toContain("未知项目");
-      expect(stderr).toContain('您是否想要：');
+      expect(stderr).toContain('你是否想输入：');
     } finally {
       process.chdir(originalCwd);
     }

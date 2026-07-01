@@ -1,6 +1,13 @@
 import ora from 'ora';
 import path from 'path';
 import { Validator } from '../core/validation/validator.js';
+import {
+  resolveRootForCommand,
+  toRootOutput,
+  withStoreFlag,
+  type ResolvedOpenSpecRoot,
+  isStoreSelectedRoot,
+} from '../core/root-selection.js';
 import { isInteractive, resolveNoInteractive } from '../utils/interactive.js';
 import { getActiveChangeIds, getSpecIds } from '../utils/item-discovery.js';
 import { nearestMatches } from '../utils/match.js';
@@ -17,6 +24,8 @@ interface ExecuteOptions {
   noInteractive?: boolean;
   interactive?: boolean; // Commander sets this to false when --no-interactive is used
   concurrency?: string;
+  store?: string;
+  storePath?: string;
 }
 
 interface BulkItemResult {
@@ -29,11 +38,16 @@ interface BulkItemResult {
 
 export class ValidateCommand {
   async execute(itemName: string | undefined, options: ExecuteOptions = {}): Promise<void> {
+    const root = await resolveRootForCommand(options, { json: options.json });
+    if (!root) {
+      return;
+    }
+
     const interactive = isInteractive(options);
 
     // Handle bulk flags first
     if (options.all || options.changes || options.specs) {
-      await this.runBulkValidation({
+      await this.runBulkValidation(root, {
         changes: !!options.all || !!options.changes,
         specs: !!options.all || !!options.specs,
       }, { strict: !!options.strict, json: !!options.json, concurrency: options.concurrency, noInteractive: resolveNoInteractive(options) });
@@ -43,17 +57,17 @@ export class ValidateCommand {
     // No item and no flags
     if (!itemName) {
       if (interactive) {
-        await this.runInteractiveSelector({ strict: !!options.strict, json: !!options.json, concurrency: options.concurrency });
+        await this.runInteractiveSelector(root, { strict: !!options.strict, json: !!options.json, concurrency: options.concurrency });
         return;
       }
-      this.printNonInteractiveHint();
+      this.printNonInteractiveHint(root);
       process.exitCode = 1;
       return;
     }
 
     // Direct item validation with type detection or override
     const typeOverride = this.normalizeType(options.type);
-    await this.validateDirectItem(itemName, { typeOverride, strict: !!options.strict, json: !!options.json });
+    await this.validateDirectItem(root, itemName, { typeOverride, strict: !!options.strict, json: !!options.json });
   }
 
   private normalizeType(value?: string): ItemType | undefined {
@@ -63,24 +77,24 @@ export class ValidateCommand {
     return undefined;
   }
 
-  private async runInteractiveSelector(opts: { strict: boolean; json: boolean; concurrency?: string }): Promise<void> {
+  private async runInteractiveSelector(root: ResolvedOpenSpecRoot, opts: { strict: boolean; json: boolean; concurrency?: string }): Promise<void> {
     const { select } = await import('@inquirer/prompts');
     const choice = await select({
       message: '您想要验证什么？',
       choices: [
-        { name: '全部（更改 + 规范）', value: 'all' },
-        { name: '所有更改', value: 'changes' },
+        { name: '全部（���更 + 规范）', value: 'all' },
+        { name: '所有变更', value: 'changes' },
         { name: '所有规范', value: 'specs' },
-        { name: '选择特定的更改或规范', value: 'one' },
+        { name: '选择特定的变更或规范', value: 'one' },
       ],
     });
 
-    if (choice === 'all') return this.runBulkValidation({ changes: true, specs: true }, opts);
-    if (choice === 'changes') return this.runBulkValidation({ changes: true, specs: false }, opts);
-    if (choice === 'specs') return this.runBulkValidation({ changes: false, specs: true }, opts);
+    if (choice === 'all') return this.runBulkValidation(root, { changes: true, specs: true }, opts);
+    if (choice === 'changes') return this.runBulkValidation(root, { changes: true, specs: false }, opts);
+    if (choice === 'specs') return this.runBulkValidation(root, { changes: false, specs: true }, opts);
 
     // one
-    const [changes, specs] = await Promise.all([getActiveChangeIds(), getSpecIds()]);
+    const [changes, specs] = await Promise.all([getActiveChangeIds(root.path), getSpecIds(root.path)]);
     const items: { name: string; value: { type: ItemType; id: string } }[] = [];
     items.push(...changes.map(id => ({ name: `change/${id}`, value: { type: 'change' as const, id } })));
     items.push(...specs.map(id => ({ name: `spec/${id}`, value: { type: 'spec' as const, id } })));
@@ -90,66 +104,103 @@ export class ValidateCommand {
       return;
     }
     const picked = await select<{ type: ItemType; id: string }>({ message: '选择一个项目', choices: items });
-    await this.validateByType(picked.type, picked.id, opts);
+    await this.validateByType(root, picked.type, picked.id, opts);
   }
 
-  private printNonInteractiveHint(): void {
+  private printNonInteractiveHint(root: ResolvedOpenSpecRoot): void {
     console.error('没有要验证的内容。请尝试以下之一：');
-    console.error('  openspec-cn validate --all');
-    console.error('  openspec-cn validate --changes');
-    console.error('  openspec-cn validate --specs');
-    console.error('  openspec-cn validate <项目名称>');
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --all')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --changes')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --specs')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate <项目名称>')}`);
     console.error('或在交互式终端中运行。');
   }
 
-  private async validateDirectItem(itemName: string, opts: { typeOverride?: ItemType; strict: boolean; json: boolean }): Promise<void> {
-    const [changes, specs] = await Promise.all([getActiveChangeIds(), getSpecIds()]);
+  private async validateDirectItem(root: ResolvedOpenSpecRoot, itemName: string, opts: { typeOverride?: ItemType; strict: boolean; json: boolean }): Promise<void> {
+    const [changes, specs] = await Promise.all([getActiveChangeIds(root.path), getSpecIds(root.path)]);
     const isChange = changes.includes(itemName);
     const isSpec = specs.includes(itemName);
 
     const type = opts.typeOverride ?? (isChange ? 'change' : isSpec ? 'spec' : undefined);
 
     if (!type) {
-      console.error(`未知项目 '${itemName}'`);
       const suggestions = nearestMatches(itemName, [...changes, ...specs]);
-      if (suggestions.length) console.error(`您是否想要：${suggestions.join(', ')}?`);
+      const message = suggestions.length
+        ? `未知项目 '${itemName}'。你是否想输入：${suggestions.join(', ')}？`
+        : `未知项目 '${itemName}'。`;
+      if (opts.json) {
+        console.log(
+          JSON.stringify(
+            { status: [{ severity: 'error', code: 'unknown_item', message }] },
+            null,
+            2
+          )
+        );
+      } else {
+        console.error(message);
+      }
       process.exitCode = 1;
       return;
     }
 
     if (!opts.typeOverride && isChange && isSpec) {
+      if (opts.json) {
+        console.log(
+          JSON.stringify(
+            {
+              status: [
+                {
+                  severity: 'error',
+                  code: 'ambiguous_item',
+                  message: `模糊的项目 '${itemName}' 同时匹配变更和规范。`,
+                  fix: '请传递 --type change|spec。',
+                },
+              ],
+            },
+            null,
+            2
+          )
+        );
+        process.exitCode = 1;
+        return;
+      }
       console.error(`模糊的项目 '${itemName}' 同时匹配变更和规范。`);
-      console.error('传递 --type change|spec，或使用：openspec-cn change validate / openspec-cn spec validate');
+      // The noun-form commands are cwd-based and cannot reach a selected store.
+      if (isStoreSelectedRoot(root)) {
+        console.error('请传递 --type change|spec。');
+      } else {
+        console.error('传递 --type change|spec，或使用：openspec-cn change validate / openspec-cn spec validate');
+      }
       process.exitCode = 1;
       return;
     }
 
-    await this.validateByType(type, itemName, opts);
+    await this.validateByType(root, type, itemName, opts);
   }
 
-  private async validateByType(type: ItemType, id: string, opts: { strict: boolean; json: boolean }): Promise<void> {
+  private async validateByType(root: ResolvedOpenSpecRoot, type: ItemType, id: string, opts: { strict: boolean; json: boolean }): Promise<void> {
     const validator = new Validator(opts.strict);
     if (type === 'change') {
-      const changeDir = path.join(process.cwd(), 'openspec', 'changes', id);
+      const changeDir = path.join(root.changesDir, id);
       const start = Date.now();
       const report = await validator.validateChangeDeltaSpecs(changeDir);
       const durationMs = Date.now() - start;
-      this.printReport('change', id, report, durationMs, opts.json);
+      this.printReport('change', id, report, durationMs, opts.json, root);
       // Non-zero exit if invalid (keeps enriched output test semantics)
       process.exitCode = report.valid ? 0 : 1;
       return;
     }
-    const file = path.join(process.cwd(), 'openspec', 'specs', id, 'spec.md');
+    const file = path.join(root.specsDir, id, 'spec.md');
     const start = Date.now();
     const report = await validator.validateSpec(file);
     const durationMs = Date.now() - start;
-    this.printReport('spec', id, report, durationMs, opts.json);
+    this.printReport('spec', id, report, durationMs, opts.json, root);
     process.exitCode = report.valid ? 0 : 1;
   }
 
-  private printReport(type: ItemType, id: string, report: { valid: boolean; issues: any[] }, durationMs: number, json: boolean): void {
+  private printReport(type: ItemType, id: string, report: { valid: boolean; issues: any[] }, durationMs: number, json: boolean, root: ResolvedOpenSpecRoot): void {
     if (json) {
-      const out = { items: [{ id, type, valid: report.valid, issues: report.issues, durationMs }], summary: { totals: { items: 1, passed: report.valid ? 1 : 0, failed: report.valid ? 0 : 1 }, byType: { [type]: { items: 1, passed: report.valid ? 1 : 0, failed: report.valid ? 0 : 1 } } }, version: '1.0' };
+      const out = { items: [{ id, type, valid: report.valid, issues: report.issues, durationMs }], summary: { totals: { items: 1, passed: report.valid ? 1 : 0, failed: report.valid ? 0 : 1 }, byType: { [type]: { items: 1, passed: report.valid ? 1 : 0, failed: report.valid ? 0 : 1 } } }, version: '1.0', root: toRootOutput(root) };
       console.log(JSON.stringify(out, null, 2));
       return;
     }
@@ -162,16 +213,16 @@ export class ValidateCommand {
         const prefix = issue.level === 'ERROR' ? '✗' : issue.level === 'WARNING' ? '⚠' : 'ℹ';
         console.error(`${prefix} [${label}] ${issue.path}: ${issue.message}`);
       }
-      this.printNextSteps(type);
+      this.printNextSteps(type, id, root);
     }
   }
 
-  private printNextSteps(type: ItemType): void {
+  private printNextSteps(type: ItemType, id: string, root: ResolvedOpenSpecRoot): void {
     const bullets: string[] = [];
     if (type === 'change') {
-      bullets.push('- 确保变更在specs/中有增量：使用标题## 新增|修改|移除|重命名需求');
-      bullets.push('- 每个需求必须至少包含一个#### 场景:块');
-      bullets.push('- 调试解析的增量：openspec-cn change show <id> --json --deltas-only');
+      bullets.push('- 确保变更在 specs/ 中有增量：使用标题 ## 新增|修改|移除|重命名需求');
+      bullets.push('- 每个需求必须至少包含一个 #### 场景: 块');
+      bullets.push(`- 调试解析的增量：${withStoreFlag(root, `openspec-cn show ${id} --json --deltas-only`)}`);
     } else {
       bullets.push('- 确保规范包含## 目的和## 需求部分');
       bullets.push('- 每个需求必须至少包含一个#### 场景:块');
@@ -181,11 +232,11 @@ export class ValidateCommand {
     bullets.forEach(b => console.error(`  ${b}`));
   }
 
-  private async runBulkValidation(scope: { changes: boolean; specs: boolean }, opts: { strict: boolean; json: boolean; concurrency?: string; noInteractive?: boolean }): Promise<void> {
+  private async runBulkValidation(root: ResolvedOpenSpecRoot, scope: { changes: boolean; specs: boolean }, opts: { strict: boolean; json: boolean; concurrency?: string; noInteractive?: boolean }): Promise<void> {
     const spinner = !opts.json && !opts.noInteractive ? ora('正在验证...').start() : undefined;
     const [changeIds, specIds] = await Promise.all([
-      scope.changes ? getActiveChangeIds() : Promise.resolve<string[]>([]),
-      scope.specs ? getSpecIds() : Promise.resolve<string[]>([]),
+      scope.changes ? getActiveChangeIds(root.path) : Promise.resolve<string[]>([]),
+      scope.specs ? getSpecIds(root.path) : Promise.resolve<string[]>([]),
     ]);
 
     const DEFAULT_CONCURRENCY = 6;
@@ -197,7 +248,7 @@ export class ValidateCommand {
     for (const id of changeIds) {
       queue.push(async () => {
         const start = Date.now();
-        const changeDir = path.join(process.cwd(), 'openspec', 'changes', id);
+        const changeDir = path.join(root.changesDir, id);
         const report = await validator.validateChangeDeltaSpecs(changeDir);
         const durationMs = Date.now() - start;
         return { id, type: 'change' as const, valid: report.valid, issues: report.issues, durationMs };
@@ -206,7 +257,7 @@ export class ValidateCommand {
     for (const id of specIds) {
       queue.push(async () => {
         const start = Date.now();
-        const file = path.join(process.cwd(), 'openspec', 'specs', id, 'spec.md');
+        const file = path.join(root.specsDir, id, 'spec.md');
         const report = await validator.validateSpec(file);
         const durationMs = Date.now() - start;
         return { id, type: 'spec' as const, valid: report.valid, issues: report.issues, durationMs };
@@ -225,7 +276,7 @@ export class ValidateCommand {
       } as const;
 
       if (opts.json) {
-        const out = { items: [] as BulkItemResult[], summary, version: '1.0' };
+        const out = { items: [] as BulkItemResult[], summary, version: '1.0', root: toRootOutput(root) };
         console.log(JSON.stringify(out, null, 2));
       } else {
         console.log('未找到要验证的项目。');
@@ -247,14 +298,14 @@ export class ValidateCommand {
           const currentIndex = index++;
           const task = queue[currentIndex];
           running++;
-          if (spinner) spinner.text = `Validating (${currentIndex + 1}/${queue.length})...`;
+          if (spinner) spinner.text = `正在验证 (${currentIndex + 1}/${queue.length})...`;
           task()
             .then(res => {
               results.push(res);
               if (res.valid) passed++; else failed++;
             })
             .catch((error: any) => {
-              const message = error?.message || 'Unknown error';
+              const message = error?.message || '未知错误';
               const res: BulkItemResult = { id: getPlannedId(currentIndex, changeIds, specIds) ?? 'unknown', type: getPlannedType(currentIndex, changeIds, specIds) ?? 'change', valid: false, issues: [{ level: 'ERROR', path: 'file', message }], durationMs: 0 };
               results.push(res);
               failed++;
@@ -281,7 +332,7 @@ export class ValidateCommand {
     } as const;
 
     if (opts.json) {
-      const out = { items: results, summary, version: '1.0' };
+      const out = { items: results, summary, version: '1.0', root: toRootOutput(root) };
       console.log(JSON.stringify(out, null, 2));
     } else {
       for (const res of results) {
@@ -290,6 +341,13 @@ export class ValidateCommand {
         else console.error(`✗ ${typeLabel}/${res.id}`);
       }
       console.log(`汇总：通过 ${summary.totals.passed} 项，失败 ${summary.totals.failed} 项（共 ${summary.totals.items} 项）`);
+      const firstFailure = results.find((res) => !res.valid);
+      if (firstFailure) {
+        const storeFlag = isStoreSelectedRoot(root) ? ` --store ${root.storeId}` : '';
+        console.log(
+          `详情：openspec-cn validate ${firstFailure.id} --type ${firstFailure.type}${storeFlag}`
+        );
+      }
     }
 
     process.exitCode = failed > 0 ? 1 : 0;

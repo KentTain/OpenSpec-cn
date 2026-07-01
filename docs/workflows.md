@@ -32,9 +32,9 @@ OPSX（流畅行动）：
 
 ### 默认快速路径（`core` 配置文件）
 
-新安装默认使用 `core`，提供以下命令：
-- `/opsx:propose`
+新安装默认使用 `core`，它提供：
 - `/opsx:explore`
+- `/opsx:propose`
 - `/opsx:apply`
 - `/opsx:sync`
 - `/opsx:archive`
@@ -42,8 +42,35 @@ OPSX（流畅行动）：
 典型流程：
 
 ```text
-/opsx:propose ──► /opsx:apply ──► /opsx:sync ──► /opsx:archive
+/opsx:explore ──► /opsx:propose ──► /opsx:apply ──► /opsx:sync ──► /opsx:archive
+  (可选)
 ```
+
+#### 从探索开始（值得养成的习惯）
+
+`/opsx:explore` 是默认 profile 的一部分，不是高级附加项。每当你有一个问题但还没有方案时，这就是该做的动作——而和 AI 助手共事时，大多数时候都是这样。
+
+```text
+You: /opsx:explore
+
+AI:  你想探索什么？
+
+You: 我们的搜索结果感觉过时。我不确定是缓存、
+     索引，还是查询本身的问题。
+
+AI:  让我看看…… [阅读 search service 和 cache layer]
+     是索引：它只在夜间重建，所以编辑要等到
+     第二天才生效。两个选项：写入时重建（简单、
+     负载更高）或短 TTL 缓存失效（更多活动部件、
+     负载更低）。鉴于你的写入量低，写入时重建是
+     更干净的修法。要把它圈成提案吗？
+
+You: 好。
+
+You: /opsx:propose rebuild-search-index-on-write
+```
+
+explore 不创建任何制品，也不写任何代码。它是一场免费、零成本的对话，把模糊担忧变成精确的变更，所以随后的 proposal 是锋利的。已经确切知道想要什么？跳过它，直接 `/opsx:propose`。完整指南：[先做探索](explore.md)。
 
 ### 扩展/完整工作流（自定义选择）
 
@@ -430,16 +457,16 @@ implement-2fa                 wip
 
 | 命令 | 目的 | 何时使用 |
 |---------|---------|-------------|
-| `/opsx:propose` | 创建变更 + 规划制品 | 默认快速路径（`core` 配置文件） |
-| `/opsx:explore` | 思考探索想法 | 需求不明确、需要调查时 |
-| `/opsx:new` | 创建变更脚手架 | 扩展模式，显式控制制品 |
-| `/opsx:continue` | 创建下一个制品 | 扩展模式，逐步创建制品 |
-| `/opsx:ff` | 创建所有规划制品 | 扩展模式，范围明确时 |
-| `/opsx:apply` | 实施任务 | 准备好编写代码时 |
-| `/opsx:verify` | 验证实施 | 扩展模式，归档前使用 |
-| `/opsx:sync` | 合并增量规范 | 扩展模式，可选 |
-| `/opsx:archive` | 完成变更 | 所有工作完成时 |
-| `/opsx:bulk-archive` | 批量归档多个变更 | 扩展模式，并行工作时 |
+| `/opsx:propose` | 创建 change 与规划制品 | 默认快速路径（`core` profile） |
+| `/opsx:explore` | 与 AI 一起想清楚 | 不确定时从这里开始：需求不清、需要调查、比较选项 |
+| `/opsx:new` | 起一个 change 脚手架 | 扩展模式，显式控制制品 |
+| `/opsx:continue` | 创建下一份制品 | 扩展模式，逐步创建制品 |
+| `/opsx:ff` | 一次性创建所有规划制品 | 扩展模式，范围清晰 |
+| `/opsx:apply` | 实现 tasks | 准备写代码时 |
+| `/opsx:verify` | 校验实现 | 扩展模式，归档前 |
+| `/opsx:sync` | 合并 delta spec | 扩展模式，可选 |
+| `/opsx:archive` | 完成 change | 所有工作完成时 |
+| `/opsx:bulk-archive` | 批量归档多个 change | 扩展模式，并行工作 |
 
 ## 下一步
 

@@ -74,7 +74,7 @@ ${commandCases}
     }
 }
 
-Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
+Register-ArgumentCompleter -CommandName openspec-cn -ScriptBlock $openspecCompleter
 `;
   }
 

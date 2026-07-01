@@ -16,11 +16,11 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'force',
-        description: 'Auto-cleanup legacy files without prompting',
+        description: '自动清理旧文件，无需提示',
       },
       {
         name: 'profile',
-        description: 'Override global config profile (core or custom)',
+        description: '覆盖全局配置档案（core 或 custom）',
         takesValue: true,
         values: ['core', 'custom'],
       },
@@ -35,7 +35,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
     flags: [
       {
         name: 'force',
-        description: 'Force update even when tools are up to date',
+        description: '即使工具已是最新也强制更新',
       },
     ],
   },
@@ -53,11 +53,12 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'sort',
-        description: 'Sort order: "recent" (default) or "name"',
+        description: '排序方式："recent"（默认，按最近）或 "name"（按名称）',
         takesValue: true,
         values: ['recent', 'name'],
       },
       COMMON_FLAGS.json,
+      COMMON_FLAGS.store,
     ],
   },
   {
@@ -93,6 +94,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
         takesValue: true,
       },
       COMMON_FLAGS.noInteractive,
+      COMMON_FLAGS.store,
     ],
   },
   {
@@ -127,6 +129,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
         description: '按 ID 显示特定需求（仅限 JSON，针对规范）',
         takesValue: true,
       },
+      COMMON_FLAGS.store,
     ],
   },
   {
@@ -149,51 +152,58 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
         name: 'no-validate',
         description: '跳过验证（不推荐）',
       },
+      {
+        name: 'json',
+        description: '以 JSON 格式输出（非交互模式）',
+      },
+      COMMON_FLAGS.store,
     ],
   },
   {
     name: 'status',
-    description: 'Display artifact completion status for a change',
+    description: '显示变更的产出物完成状态',
     flags: [
       {
         name: 'change',
-        description: 'Change name to show status for',
+        description: '要显示状态的变更名称',
         takesValue: true,
       },
       {
         name: 'schema',
-        description: 'Schema override',
+        description: 'Schema 覆盖',
         takesValue: true,
       },
       COMMON_FLAGS.json,
+      COMMON_FLAGS.store,
     ],
   },
   {
     name: 'instructions',
-    description: 'Output enriched instructions for creating an artifact or applying tasks',
+    description: '输出用于创建产出物或应用任务的丰富指令',
     acceptsPositional: true,
     positionals: [{ name: 'artifact', optional: true }],
     flags: [
       {
         name: 'change',
-        description: 'Change name',
+        description: '变更名称',
         takesValue: true,
       },
       {
         name: 'schema',
-        description: 'Schema override',
+        description: 'Schema 覆盖',
         takesValue: true,
       },
       COMMON_FLAGS.json,
+      COMMON_FLAGS.store,
     ],
   },
   {
     name: 'templates',
-    description: 'Show resolved template paths for all artifacts in a schema',
+    description: '显示 Schema 中所有产出物的已解析模板路径',
     flags: [
       {
         name: 'schema',
-        description: 'Schema to use',
+        description: '要使用的 Schema',
         takesValue: true,
       },
       COMMON_FLAGS.json,
@@ -201,306 +211,97 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
   },
   {
     name: 'schemas',
-    description: 'List available workflow schemas with descriptions',
+    description: '列出可用的工作流 Schema 及其描述',
     flags: [
       COMMON_FLAGS.json,
     ],
   },
   {
     name: 'new',
-    description: 'Create new items',
+    description: '创建新项目',
     flags: [],
     subcommands: [
       {
         name: 'change',
-        description: 'Create a new change directory',
+        description: '创建新的变更目录',
         acceptsPositional: true,
         positionals: [{ name: 'name' }],
         flags: [
           {
             name: 'description',
-            description: 'Description to add to README.md',
+            description: '添加到 README.md 的描述',
             takesValue: true,
           },
           {
             name: 'goal',
-            description: 'Workspace product goal to store with the change',
-            takesValue: true,
-          },
-          {
-            name: 'areas',
-            description: 'Comma-separated affected workspace link names',
-            takesValue: true,
-          },
-          {
-            name: 'initiative',
-            description: 'Link the repo-local change to an initiative',
-            takesValue: true,
-          },
-          {
-            name: 'store',
-            description: 'Context store id for --initiative',
-            takesValue: true,
-          },
-          {
-            name: 'store-path',
-            description: 'Existing local context store root for --initiative',
+            description: '与变更一起存储的可选目标元数据',
             takesValue: true,
           },
           {
             name: 'schema',
-            description: 'Workflow schema to use',
+            description: '要使用的工作流 Schema',
             takesValue: true,
           },
           COMMON_FLAGS.json,
+          COMMON_FLAGS.store,
         ],
       },
     ],
   },
   {
-    name: 'set',
-    description: 'Set checked-in OpenSpec metadata',
-    flags: [],
-    subcommands: [
-      {
-        name: 'change',
-        description: 'Set repo-local change metadata',
-        acceptsPositional: true,
-        positionalType: 'change-id',
-        positionals: [{ name: 'name', type: 'change-id' }],
-        flags: [
-          {
-            name: 'initiative',
-            description: 'Link the repo-local change to an initiative',
-            takesValue: true,
-          },
-          {
-            name: 'store',
-            description: 'Context store id for --initiative',
-            takesValue: true,
-          },
-          {
-            name: 'store-path',
-            description: 'Existing local context store root for --initiative',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'workspace',
-    description: 'Set up and inspect coordination workspaces',
+    name: 'store',
+    description:
+      '创建和管理 Store（已注册的独立 OpenSpec 仓库）',
     flags: [],
     subcommands: [
       {
         name: 'setup',
-        description: 'Set up a workspace and link existing repos or folders',
-        flags: [
-          {
-            name: 'name',
-            description: 'Workspace name',
-            takesValue: true,
-          },
-          {
-            name: 'link',
-            description: 'Repo or folder link. Use <path> or <name>=<path>',
-            takesValue: true,
-          },
-          {
-            name: 'opener',
-            description: 'Preferred opener: codex-cli, claude, github-copilot, or editor',
-            takesValue: true,
-            values: ['codex-cli', 'claude', 'github-copilot', 'editor'],
-          },
-          {
-            name: 'tools',
-            description: 'Install OpenSpec skills for agents (all, none, or comma-separated tool IDs)',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-      {
-        name: 'list',
-        description: 'List known OpenSpec workspaces',
-        flags: [
-          COMMON_FLAGS.json,
-        ],
-      },
-      {
-        name: 'ls',
-        description: 'List known OpenSpec workspaces',
-        flags: [
-          COMMON_FLAGS.json,
-        ],
-      },
-      {
-        name: 'link',
-        description: 'Link an existing repo or folder to a workspace',
-        acceptsPositional: true,
-        positionals: [
-          { name: 'name-or-path', type: 'path', optional: true },
-          { name: 'path', type: 'path', optional: true },
-        ],
-        flags: [
-          {
-            name: 'workspace',
-            description: 'Workspace name from local workspace views',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-      {
-        name: 'relink',
-        description: 'Update the local path for an existing workspace link',
-        acceptsPositional: true,
-        positionals: [
-          { name: 'name' },
-          { name: 'path', type: 'path' },
-        ],
-        flags: [
-          {
-            name: 'workspace',
-            description: 'Workspace name from local workspace views',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-      {
-        name: 'doctor',
-        description: 'Check what a workspace can resolve on this machine',
-        flags: [
-          {
-            name: 'workspace',
-            description: 'Workspace name from local workspace views',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-      {
-        name: 'update',
-        description: 'Refresh workspace-local OpenSpec guidance and agent skills',
-        acceptsPositional: true,
-        positionals: [{ name: 'name', optional: true }],
-        flags: [
-          {
-            name: 'workspace',
-            description: 'Workspace name from local workspace views',
-            takesValue: true,
-          },
-          {
-            name: 'tools',
-            description: 'Select agents for workspace skills-only delivery; global profile selects workflows',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-      {
-        name: 'open',
-        description: 'Open a workspace in an agent or VS Code editor',
-        acceptsPositional: true,
-        positionals: [{ name: 'name', optional: true }],
-        flags: [
-          {
-            name: 'workspace',
-            description: 'Workspace name from local workspace views',
-            takesValue: true,
-          },
-          {
-            name: 'initiative',
-            description: 'Open an initiative as a local workspace view',
-            takesValue: true,
-          },
-          {
-            name: 'store',
-            description: 'Context store id for --initiative',
-            takesValue: true,
-          },
-          {
-            name: 'store-path',
-            description: 'Existing local context store root for --initiative',
-            takesValue: true,
-          },
-          {
-            name: 'agent',
-            description: 'Use an agent for this session: codex-cli, claude, or github-copilot',
-            takesValue: true,
-            values: ['codex-cli', 'claude', 'github-copilot'],
-          },
-          {
-            name: 'editor',
-            description: 'Open the workspace in VS Code editor mode',
-          },
-          {
-            name: 'prepare-only',
-            description: 'Unsupported: preview surfaces belong to a future context/query command',
-          },
-          COMMON_FLAGS.json,
-          {
-            name: 'change',
-            description: 'Unsupported: change-scoped open belongs to future workspace change planning',
-            takesValue: true,
-          },
-          COMMON_FLAGS.noInteractive,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'context-store',
-    description: 'Set up and inspect context stores',
-    flags: [],
-    subcommands: [
-      {
-        name: 'setup',
-        description: 'Create or register a local context store',
+        description: '创建或注册本地 Store',
         acceptsPositional: true,
         positionals: [{ name: 'id', optional: true }],
         flags: [
           {
             name: 'path',
-            description: 'Directory to use for the context store',
+            description: 'Store 要使用的目录',
             takesValue: true,
           },
           {
             name: 'init-git',
-            description: 'Initialize a Git repository in the context store',
+            description: '在 Store 中初始化 Git 仓库',
           },
           {
             name: 'no-init-git',
-            description: 'Skip Git repository initialization',
+            description: '跳过 Git 仓库初始化',
+          },
+          {
+            name: 'remote',
+            description: '记录在 store.yaml 中的规范克隆源',
+            takesValue: true,
           },
           COMMON_FLAGS.json,
         ],
       },
       {
         name: 'register',
-        description: 'Register an existing context store directory',
+        description: '注册现有的 Store 目录',
         acceptsPositional: true,
         positionals: [{ name: 'path', type: 'path', optional: true }],
         flags: [
           {
             name: 'id',
-            description: 'Context store id',
+            description: 'Store ID',
             takesValue: true,
+          },
+          {
+            name: 'yes',
+            description: '确认创建 Store 标识元数据',
           },
           COMMON_FLAGS.json,
         ],
       },
       {
         name: 'unregister',
-        description: 'Forget a local context-store registration without deleting files',
+        description: '取消注册本地 Store 但不删除文件',
         acceptsPositional: true,
         positionals: [{ name: 'id' }],
         flags: [
@@ -509,34 +310,34 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'remove',
-        description: 'Forget a local context-store registration and delete its local folder',
+        description: '取消注册本地 Store 并删除其本地文件夹',
         acceptsPositional: true,
         positionals: [{ name: 'id' }],
         flags: [
           {
             name: 'yes',
-            description: 'Confirm local context-store folder deletion',
+            description: '确认删除本地 Store 文件夹',
           },
           COMMON_FLAGS.json,
         ],
       },
       {
         name: 'list',
-        description: 'List registered context stores',
+        description: '列出已注册的 Store',
         flags: [
           COMMON_FLAGS.json,
         ],
       },
       {
         name: 'ls',
-        description: 'List registered context stores',
+        description: '列出已注册的 Store',
         flags: [
           COMMON_FLAGS.json,
         ],
       },
       {
         name: 'doctor',
-        description: 'Check local context-store registration and metadata',
+        description: '检查本地 Store 注册和元数据',
         acceptsPositional: true,
         positionals: [{ name: 'id', optional: true }],
         flags: [
@@ -546,53 +347,50 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
     ],
   },
   {
-    name: 'initiative',
-    description: 'Create and list coordinated initiatives',
+    name: 'context',
+    description: '打印已解析的 OpenSpec 根目录的工作上下文',
+    flags: [
+      COMMON_FLAGS.json,
+      COMMON_FLAGS.store,
+      {
+        name: 'code-workspace',
+        description: '同时为工作集写入 VS Code 工作区文件',
+        takesValue: true,
+      },
+      {
+        name: 'force',
+        description: '覆盖现有的 --code-workspace 文件',
+      },
+    ],
+  },
+  {
+    name: 'doctor',
+    description: '报告已解析的 OpenSpec 根目录的关系健康状况',
+    flags: [
+      COMMON_FLAGS.json,
+      COMMON_FLAGS.store,
+    ],
+  },
+  {
+    name: 'workset',
+    description: '组合、保存并打开个人工作视图（纯本地）',
     flags: [],
     subcommands: [
       {
         name: 'create',
-        description: 'Create an initiative in a context store',
+        description: '组合并保存你选择的文件夹的命名工作视图',
         acceptsPositional: true,
-        positionals: [{ name: 'id', optional: true }],
+        positionals: [{ name: 'name', optional: true }],
         flags: [
           {
-            name: 'store',
-            description: 'Context store id from the local context-store registry',
+            name: 'member',
+            description:
+              '成员文件夹，格式为 <路径> 或 <名称>=<路径>；可重复，第一个为主文件夹',
             takesValue: true,
           },
           {
-            name: 'store-path',
-            description: 'Existing local context store root',
-            takesValue: true,
-          },
-          {
-            name: 'title',
-            description: 'Initiative title',
-            takesValue: true,
-          },
-          {
-            name: 'summary',
-            description: 'Initiative summary',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-        ],
-      },
-      {
-        name: 'show',
-        description: 'Show where an initiative lives and how to read it',
-        acceptsPositional: true,
-        positionals: [{ name: 'id' }],
-        flags: [
-          {
-            name: 'store',
-            description: 'Context store id from the local context-store registry',
-            takesValue: true,
-          },
-          {
-            name: 'store-path',
-            description: 'Existing local context store root',
+            name: 'tool',
+            description: '打开此工作集的首选工具',
             takesValue: true,
           },
           COMMON_FLAGS.json,
@@ -600,34 +398,37 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'list',
-        description: 'List initiatives across registered context stores',
-        flags: [
-          {
-            name: 'store',
-            description: 'Context store id from the local context-store registry',
-            takesValue: true,
-          },
-          {
-            name: 'store-path',
-            description: 'Existing local context store root',
-            takesValue: true,
-          },
-          COMMON_FLAGS.json,
-        ],
+        description: '显示已保存的工作集及其成员',
+        flags: [COMMON_FLAGS.json],
       },
       {
         name: 'ls',
-        description: 'List initiatives across registered context stores',
+        description: '显示已保存的工作集及其成员',
+        flags: [COMMON_FLAGS.json],
+      },
+      {
+        name: 'open',
+        description:
+          '在你的工具中打开已保存的工作集（编辑器窗口或 agent 会话）',
+        acceptsPositional: true,
+        positionals: [{ name: 'name' }],
         flags: [
           {
-            name: 'store',
-            description: 'Context store id from the local context-store registry',
+            name: 'tool',
+            description: '仅本次使用此工具打开',
             takesValue: true,
           },
+        ],
+      },
+      {
+        name: 'remove',
+        description: '删除已保存的工作集（成员文件夹不会被改动）',
+        acceptsPositional: true,
+        positionals: [{ name: 'name' }],
+        flags: [
           {
-            name: 'store-path',
-            description: 'Existing local context store root',
-            takesValue: true,
+            name: 'yes',
+            description: '非交互式确认删除',
           },
           COMMON_FLAGS.json,
         ],
@@ -869,7 +670,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'profile',
-        description: 'Configure workflow profile (interactive picker or preset shortcut)',
+        description: '配置工作流档案（交互式选择器或预设快捷方式）',
         acceptsPositional: true,
         positionals: [{ name: 'preset', optional: true }],
         flags: [],

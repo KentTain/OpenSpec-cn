@@ -1,31 +1,31 @@
-# 核心概念
+# 概念
 
-本指南解释了 OpenSpec 背后的核心思想以及它们如何协同工作。关于实际使用，请参阅[入门指南](getting-started.md)和[工作流](workflows.md)。
+本指南解释 OpenSpec 背后的核心 idea 以及它们如何拼在一起。实战用法见 [快速开始](getting-started.md) 和 [工作流](workflows.md)。
 
-## 设计哲学
+## 哲学
 
-OpenSpec 围绕四个原则构建：
+OpenSpec 围绕四条原则构建：
 
 ```
-灵活而非僵化         — 无阶段门限，按需工作
-迭代而非瀑布       — 边构建边学习，逐步完善
-简单而非复杂       — 轻量级设置，最小化仪式感
-棕地优先           — 适用于现有代码库，不限于绿地项目
+fluid not rigid         — 没有阶段门槛，做当下合理的事
+iterative not waterfall — 边建边学，边走边精炼
+easy not complex        — 轻量设置，最少仪式
+brownfield-first        — 适配已有代码库，不只是全新项目
 ```
 
 ### 为什么这些原则重要
 
-**灵活而非僵化。** 传统的规范系统将你锁定在阶段中：先规划，再实施，然后完成。OpenSpec 更加灵活——你可以按工作需求以任何顺序创建制品。
+**流式而非僵硬。** 传统 spec 系统把你锁进阶段：先规划、再实现、再完成。OpenSpec 更灵活——你可以按对当前工作合理的任意顺序创建制品。
 
-**迭代而非瀑布。** 需求会变化。理解会加深。开始时看似不错的方法在查看代码库后可能不再适用。OpenSpec 拥抱这一现实。
+**迭代而非瀑布。** 需求会变。理解会加深。开头看起来好的方案，看了代码后未必站得住。OpenSpec 拥抱这个现实。
 
-**简单而非复杂。** 一些规范框架需要大量设置、严格格式或重量级流程。OpenSpec 不会妨碍你的工作。几秒钟内初始化，立即开始工作，仅在需要时自定义。
+**简单而非复杂。** 一些 spec 框架需要大量设置、僵硬的格式或重型流程。OpenSpec 不挡你的路。几秒初始化、立即开工、只在需要时自定义。
 
-**棕地优先。** 大多数软件工作不是从零开始构建——而是修改现有系统。OpenSpec 基于增量的方法使得指定对现有行为的更改变得容易，而不仅仅是描述新系统。
+**Brownfield-first。** 大多数软件工作不是从零开始——是改已有系统。OpenSpec 基于 delta 的方式让你方便地描述对已有行为的修改，而不只是描述新系统。
 
-## 整体架构
+## 全景
 
-OpenSpec 将你的工作组织为两个主要区域：
+OpenSpec 把你的工作组织成两个主要区域：
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -34,152 +34,26 @@ OpenSpec 将你的工作组织为两个主要区域：
 │   ┌─────────────────────┐      ┌───────────────────────────────┐   │
 │   │       specs/        │      │         changes/              │   │
 │   │                     │      │                               │   │
-│   │  单一事实来源       │◄─────│  提议的修改                   │   │
-│   │  描述系统当前的     │ 合并 │  每个变更 = 一个文件夹        │   │
-│   │  工作方式           │      │  包含制品 + 增量              │   │
+│   │  Source of truth    │◄─────│  Proposed modifications       │   │
+│   │  How your system    │ merge│  Each change = one folder     │   │
+│   │  currently works    │      │  Contains artifacts + deltas  │   │
 │   │                     │      │                               │   │
 │   └─────────────────────┘      └───────────────────────────────┘   │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-**规范（Specs）** 是单一事实来源——它们描述系统当前的行为方式。
+**Specs** 是真相源——它们描述系统当前如何运转。
 
-**变更（Changes）** 是提议的修改——它们存在于独立的文件夹中，直到你准备好合并它们。
+**Changes** 是提议中的修改——它们各自待在独立文件夹里，直到你准备好合并。
 
-这种分离是关键。你可以并行处理多个变更而不会产生冲突。你可以在变更影响主规范之前进行审查。当你归档变更时，其增量会干净地合并到单一事实来源中。
+这种分离是关键。你可以并行做多个 change 而不冲突。你可以在 change 影响主 spec 之前审查它。当你归档一个 change 时，它的 delta 干净地合并进真相源。
 
-## 协调工作区（Coordination Workspaces）
+## Specs
 
-工作区支持处于 beta 阶段。以下本地视图模型是当前方向，但外部自动化、集成和长期工作流应仍将命令行为、状态文件和 JSON 输出视为可能变化的。
+Specs 用结构化的 requirement 和 scenario 描述系统行为。
 
-以下命令提供了打开关联仓库或文件夹本地视图的首个设置流程。
-
-仓库本地 OpenSpec 项目是在一个仓库拥有规划、实施和归档流程时的正确默认选择。某些工作跨越多个仓库或文件夹。对于这种情况，OpenSpec 协调工作区是一个机器本地视图，将关联路径、打开器状态和 Agent 设置保存在一起。
-
-工作区心智模型：
-
-```text
-workspace（工作区）     = 覆盖上下文存储、initiative、仓库和文件夹的私有本地视图
-context store（上下文存储） = 持久化共享上下文容器
-initiative              = 上下文存储内的持久化协调上下文
-link（关联）             = 工作区可在本地解析的仓库或文件夹的稳定名称
-change（变更）           = 一个计划中的工作；实施属于拥有的仓库
-```
-
-工作区与仓库本地项目有不同的结构：
-
-```text
-getGlobalDataDir()/workspaces/<workspace-name>/
-├── .openspec-workspace/
-│   └── view.yaml                  # 私有本地视图记录
-├── AGENTS.md                      # 生成的运行时指引
-└── <workspace-name>.code-workspace # 生成的编辑器工作区文件
-```
-
-仓库本地 OpenSpec 状态保持现有结构：
-
-```text
-repo-root/
-└── openspec/
-    ├── specs/
-    └── changes/
-```
-
-根级别的 `workspace.yaml` 文件不是 OpenSpec 工作区状态。工作区状态命名空间在 `.openspec-workspace/` 下，因此其他工具可以继续拥有同名的根级别文件。
-
-这个区别很重要。工作区文件夹是用于打开和检查关联仓库或文件夹的本地协调界面。每个仓库的 `openspec/` 目录仍然是仓库拥有的规范、仓库本地变更和实施规划的主目录。用户不需要在工作区文件夹内运行仓库本地 `openspec-cn init`。
-
-稳定关联名称是工作区引用仓库和文件夹的方式。私有工作区记录保持如 `api`、`web` 或 `checkout` 之类的名称，并将它们映射到当前运行时的本地路径。
-
-```yaml
-# .openspec-workspace/view.yaml
-version: 1
-name: platform
-context: null
-links:
-  api: /repos/api
-  web: /repos/web
-```
-
-当工作区打开 initiative 时，`context` 记录选定的上下文存储绑定和 initiative ID。注册表选择的存储通过 ID 保持可移植性；路径选择的存储有意保留运行时本地路径，因为 `.openspec-workspace/view.yaml` 是私有本地状态。
-
-```yaml
-context:
-  kind: initiative
-  store:
-    id: platform
-    selector:
-      kind: registry
-      id: platform
-  initiative:
-    id: billing-launch
-```
-
-关联路径可以是完整仓库、大型 monorepo 内的文件夹，或其他现有文件夹。它们不需要在参与工作区规划之前具有仓库本地 `openspec/` 状态。稍后的实施、验证或归档工作流可能需要更多的仓库就绪状态，但规划可见性从关联开始。
-
-```text
-多仓库：
-  api      -> /repos/api
-  web      -> /repos/web
-
-大型 monorepo：
-  billing  -> /repos/platform/services/billing
-  checkout -> /repos/platform/apps/checkout
-```
-
-受管工作区位于标准 OpenSpec 数据目录下：
-
-```text
-getGlobalDataDir()/workspaces
-```
-
-即设置了 `XDG_DATA_HOME` 时为 `$XDG_DATA_HOME/openspec/workspaces`，Unix 风格回退为 `~/.local/share/openspec/workspaces`，Windows 原生回退为 `%LOCALAPPDATA%\openspec\workspaces`。
-
-工作区可见性不等同于变更承诺。当 OpenSpec 应该知道哪些仓库或文件夹相关时设置工作区；当你准备好规划功能、修复、项目或其他工作时再创建变更。
-
-常用命令：
-
-```bash
-# 引导式设置
-openspec-cn workspace setup
-
-# 自动化友好的设置
-openspec-cn workspace setup --no-interactive --name platform --link /repos/api --link web=/repos/web
-openspec-cn workspace setup --no-interactive --name platform --link /repos/api --opener codex-cli
-
-# 查看本地注册表中已知的工作区
-openspec-cn workspace list
-openspec-cn workspace ls
-
-# 为选定的工作区添加或修复关联
-openspec-cn workspace link /repos/api
-openspec-cn workspace link api-service /repos/api
-openspec-cn workspace relink api-service /new/path/to/api
-
-# 检查此机器能解析什么
-openspec-cn workspace doctor
-openspec-cn workspace doctor --workspace platform
-
-# 刷新工作区本地指引和 Agent 技能
-openspec-cn workspace update
-openspec-cn workspace update --workspace platform --tools codex,claude
-
-# 打开关联的工作集
-openspec-cn workspace open
-openspec-cn workspace open platform --agent github-copilot
-openspec-cn workspace open --editor
-
-# 以本地工作区视图打开 initiative
-openspec-cn workspace open --initiative billing-launch --store platform
-openspec-cn workspace open --initiative billing-launch --store-path /repos/platform-context
-```
-
-## 规范（Specs）
-
-规范使用结构化的需求和场景来描述系统的行为。
-
-### 目录结构
+### 结构
 
 ```
 openspec/specs/
@@ -190,230 +64,234 @@ openspec/specs/
 ├── notifications/
 │   └── spec.md           # 通知系统
 └── ui/
-    └── spec.md           # UI 行为和主题
+    └── spec.md           # UI 行为与主题
 ```
 
-按领域组织规范——为你的系统创建有意义的逻辑分组。常见模式：
+按 domain 组织 specs——对系统有意义的逻辑分组。常见模式：
 
 - **按功能区域**：`auth/`、`payments/`、`search/`
 - **按组件**：`api/`、`frontend/`、`workers/`
-- **按限界上下文**：`ordering/`、`fulfillment/`、`inventory/`
+- **按 bounded context**：`ordering/`、`fulfillment/`、`inventory/`
 
-### 规范格式
+### Spec 格式
 
-一个规范包含需求，每个需求都有场景：
+一份 spec 包含 requirement，每个 requirement 又包含 scenario：
 
 ```markdown
-# 认证规范
+# Auth Specification
 
-## 目的
-应用程序的认证和会话管理。
+## Purpose
+Authentication and session management for the application.
 
-## 需求
+## Requirements
 
-### 需求:用户认证
-系统应在成功登录时发放 JWT 令牌。
+### Requirement: User Authentication
+The system SHALL issue a JWT token upon successful login.
 
-#### 场景:有效凭据
-- 给定具有有效凭据的用户
-- 当用户提交登录表单时
-- 则返回 JWT 令牌
-- 并且用户被重定向到仪表板
+#### Scenario: Valid credentials
+- GIVEN a user with valid credentials
+- WHEN the user submits login form
+- THEN a JWT token is returned
+- AND the user is redirected to dashboard
 
-#### 场景:无效凭据
-- 给定无效凭据
-- 当用户提交登录表单时
-- 则显示错误消息
-- 并且不发放令牌
+#### Scenario: Invalid credentials
+- GIVEN invalid credentials
+- WHEN the user submits login form
+- THEN an error message is displayed
+- AND no token is issued
 
-### 需求:会话过期
-系统必须在 30 分钟不活动后使会话过期。
+### Requirement: Session Expiration
+The system MUST expire sessions after 30 minutes of inactivity.
 
-#### 场景:空闲超时
-- 给定已认证的会话
-- 当 30 分钟过去且没有活动时
-- 则会话失效
-- 并且用户必须重新认证
+#### Scenario: Idle timeout
+- GIVEN an authenticated session
+- WHEN 30 minutes pass without activity
+- THEN the session is invalidated
+- AND the user must re-authenticate
 ```
 
 **关键元素：**
 
-| 元素 | 目的 |
+| 元素 | 用途 |
 |---------|---------|
-| `## 目的` | 此规范领域的高级描述 |
-| `### 需求:` | 系统必须具有的特定行为 |
-| `#### 场景:` | 需求在行动中的具体示例 |
-| SHALL/MUST/SHOULD | RFC 2119 关键词，表示需求强度 |
+| `## Purpose` | 这份 spec 的 domain 的高层描述 |
+| `### Requirement:` | 系统必须具备的某条具体行为 |
+| `#### Scenario:` | 该 requirement 的具体示例 |
+| SHALL/MUST/SHOULD | RFC 2119 关键字，表示 requirement 的严格程度 |
 
-### 为什么这样结构化规范
+### 为什么这样结构化 spec
 
-**需求是"做什么"**——它们说明系统应该做什么而不指定实现。
+**Requirement 是"做什么"**——它陈述系统该做什么，不指定实现。
 
-**场景是"何时"**——它们提供可验证的具体示例。好的场景：
-- 是可测试的（你可以为它们编写自动化测试）
-- 涵盖正常路径和边缘情况
+**Scenario 是"什么时候"**——它提供可验证的具体示例。好的 scenario：
+- 可测试（你能为它写自动化测试）
+- 覆盖 happy path 和边缘情况
 - 使用 Given/When/Then 或类似结构化格式
 
-**RFC 2119 关键词**（SHALL、MUST、SHOULD、MAY）传达意图：
-- **MUST/SHALL**——绝对需求
-- **SHOULD**——推荐，但存在例外
-- **MAY**——可选
+**RFC 2119 关键字**（SHALL、MUST、SHOULD、MAY）传达意图：
+- **MUST/SHALL** —— 绝对要求
+- **SHOULD** —— 推荐，但允许例外
+- **MAY** —— 可选
 
-### 规范是什么（以及不是什么）
+### spec 是什么（与不是）
 
-规范是**行为契约**，而不是实施计划。
+spec 是**行为契约**，不是实现计划。
 
-好的规范内容：
+好的 spec 内容：
 - 用户或下游系统依赖的可观察行为
-- 输入、输出和错误条件
-- 外部约束（安全性、隐私、可靠性、兼容性）
-- 可以测试或明确验证的场景
+- 输入、输出与错误条件
+- 外部约束（安全、隐私、可靠性、兼容性）
+- 可测试或可显式校验的 scenario
 
-规范中应避免的内容：
-- 内部类/函数名称
-- 库或框架选择
-- 逐步实施细节
-- 详细的执行计划（这些属于 `design.md` 或 `tasks.md`）
+避免在 spec 里写：
+- 内部类/函数名
+- 库或框架选型
+- 逐步实现细节
+- 详细的执行计划（那些属于 `design.md` 或 `tasks.md`）
 
 快速判断：
-- 如果实现方式可以改变而不影响外部可见行为，那它很可能不属于规范。
+- 如果实现可以在不改变外部可见行为的前提下换方式，它大概不属于 spec。
 
-### 保持轻量：渐进式严谨
+### 保持轻量：渐进式严格
 
-OpenSpec 旨在避免官僚主义。使用能使变更可验证的最轻量级别即可。
+OpenSpec 不想变成官僚主义。用仍能让变更可验证的最轻量级别。
 
-**轻量规范（默认）：**
-- 简短的行为优先需求
-- 清晰的范围和非目标
-- 少量具体的验收检查
+**Lite spec（默认）：**
+- 简短的行为优先 requirement
+- 清晰的范围与非目标
+- 几条具体的验收检查
 
-**完整规范（适用于较高风险）：**
+**Full spec（用于更高风险）：**
 - 跨团队或跨仓库的变更
-- API/契约变更、迁移、安全/隐私问题
-- 模糊性可能导致高成本返工的变更
+- API/契约变更、迁移、安全/隐私相关
+- 歧义可能引发昂贵返工的变更
 
-大多数变更应保持轻量模式。
+大多数变更应保持在 Lite 模式。
 
-### 人类 + Agent 协作
+### 人 + Agent 协作
 
-在许多团队中，人类负责探索，Agent 负责起草制品。预期的协作循环是：
+在很多团队里，人探索、agent 起草制品。预期循环是：
 
-1. 人类提供意图、上下文和约束条件。
-2. Agent 将其转化为行为优先的需求和场景。
-3. Agent 将实施细节保留在 `design.md` 和 `tasks.md` 中，而不是 `spec.md` 中。
-4. 验证在实施之前确认结构和清晰性。
+1. 人提供意图、上下文与约束。
+2. Agent 把它转成行为优先的 requirement 和 scenario。
+3. Agent 把实现细节放在 `design.md` 和 `tasks.md`，不放进 `spec.md`。
+4. 校验在实现之前确认结构与清晰度。
 
-这使规范对人类可读，对 Agent 保持一致。
+这样能让 spec 对人可读、对 agent 一致。
 
-## 变更（Changes）
+## Changes
 
-变更是对系统的提议修改，打包为一个包含理解和实施所需所有内容的文件夹。
+一个 change 是对系统的一次提议修改，打包成一个文件夹，里面包含理解和实现它所需的一切。
 
-### 变更结构
+### Change 结构
 
 ```
 openspec/changes/add-dark-mode/
-├── proposal.md           # 为什么和做什么
-├── design.md             # 如何做（技术方案）
-├── tasks.md              # 实施清单
-├── .openspec.yaml        # 变更元数据（可选）
-└── specs/                # 增量规范
+├── proposal.md           # 为什么与做什么
+├── design.md             # 怎么做（技术方案）
+├── tasks.md              # 实现清单
+├── .openspec.yaml        # Change 元数据（可选）
+└── specs/                # Delta spec
     └── ui/
-        └── spec.md       # ui/spec.md 中的更改内容
+        └── spec.md       # ui/spec.md 里在变什么
 ```
 
-每个变更都是自包含的。它包含：
-- **制品**——捕获意图、设计和任务的文档
-- **增量规范**——对添加、修改或删除内容的规范
-- **元数据**——此特定变更的可选配置
+每个 change 自包含。它有：
+- **Artifacts** —— 捕获意图、design 和 task 的文档
+- **Delta spec** —— 关于新增、修改、删除什么的规范
+- **Metadata** —— 针对该 change 的可选配置
 
-### 为什么变更组织为文件夹
+### 为什么 change 是文件夹
 
-将变更打包为文件夹有几个好处：
+把 change 打包成文件夹有几个好处：
 
-1. **一切在一起。** 提案、设计、任务和规范位于同一位置。无需在不同位置查找。
+1. **一切在一起。** Proposal、design、tasks 和 spec 放在一处。不必到处找。
 
-2. **并行工作。** 多个变更可以同时存在而不会冲突。在 `fix-auth-bug` 进行时，可以同时处理 `add-dark-mode`。
+2. **并行工作。** 多个 change 可同时存在不冲突。一边做 `add-dark-mode`，一边 `fix-auth-bug` 也在进行。
 
-3. **清晰历史。** 归档时，变更会移动到 `changes/archive/` 并保留完整上下文。你可以回顾并理解不仅发生了什么变化，还有为什么变化。
+3. **干净的历史。** 归档时，change 移到 `changes/archive/`，完整上下文保留。你可以回看，理解不止是改了什么，还有为什么。
 
-4. **便于审查。** 变更文件夹易于审查——打开它，阅读提案，检查设计，查看规范增量。
+4. **便于审查。** 一个 change 文件夹容易审查——打开它，读 proposal，查 design，看 spec delta。
 
-## 制品（Artifacts）
+## Artifacts
 
-制品是变更中的文档，用于指导工作。
+制品是 change 内部指导工作的文档。
 
-### 制品流程
+### 制品流
 
 ```
 proposal ──────► specs ──────► design ──────► tasks ──────► implement
     │               │             │              │
-   为什么           改变什么      如何做          实施步骤
- + 范围           变化          方法           要执行
+   why            what           how          steps
+ + scope        changes       approach      to take
 ```
 
-制品相互构建。每个制品为下一个提供上下文。
+制品互相喂养。每个为下一个提供上下文。
 
 ### 制品类型
 
-#### 提案（`proposal.md`）
+#### Proposal（`proposal.md`）
 
-提案在高级别捕获**意图**、**范围**和**方法**。
+proposal 在高层捕获**意图**、**范围**和**方案**。
 
 ```markdown
-# 提案：添加深色模式
+# Proposal: Add Dark Mode
 
-## 意图
-用户要求提供深色模式选项，以在夜间使用时减少眼睛疲劳并匹配系统偏好。
+## Intent
+Users have requested a dark mode option to reduce eye strain
+during nighttime usage and match system preferences.
 
-## 范围
-包含：
-- 设置中的主题切换
-- 系统偏好检测
-- 在 localStorage 中持久化偏好
+## Scope
+In scope:
+- Theme toggle in settings
+- System preference detection
+- Persist preference in localStorage
 
-不包含：
-- 自定义颜色主题（未来工作）
-- 每页主题覆盖
+Out of scope:
+- Custom color themes (future work)
+- Per-page theme overrides
 
-## 方法
-使用 CSS 自定义属性进行主题化，配合 React context 进行状态管理。在首次加载时检测系统偏好，允许手动覆盖。
+## Approach
+Use CSS custom properties for theming with a React context
+for state management. Detect system preference on first load,
+allow manual override.
 ```
 
-**何时更新提案：**
-- 范围变化（缩小或扩大）
-- 意图明确（对问题有更好理解）
-- 方法发生根本性变化
+**何时更新 proposal：**
+- 范围变化（收窄或扩大）
+- 意图更清楚（对问题理解更好）
+- 方案根本转变
 
-#### 规范（增量规范在 `specs/` 中）
+#### Specs（`specs/` 中的 delta spec）
 
-增量规范描述相对于当前规范的**变化内容**。详见下面的[增量规范](#delta-specs)。
+delta spec 描述相对当前 spec **在变什么**。见下面 [Delta Specs](#delta-specs)。
 
-#### 设计（`design.md`）
+#### Design（`design.md`）
 
-设计捕获**技术方法**和**架构决策**。
+design 捕获**技术方案**与**架构决策**。
 
 ````markdown
-# 设计：添加深色模式
+# Design: Add Dark Mode
 
-## 技术方法
-通过 React Context 管理主题状态以避免属性传递。CSS 自定义属性支持运行时切换而无需类切换。
+## Technical Approach
+Theme state managed via React Context to avoid prop drilling.
+CSS custom properties enable runtime switching without class toggling.
 
-## 架构决策
+## Architecture Decisions
 
-### 决策：Context 优于 Redux
-使用 React Context 管理主题状态的原因：
-- 简单的二元状态（浅色/深色）
-- 无复杂状态转换
-- 避免添加 Redux 依赖
+### Decision: Context over Redux
+Using React Context for theme state because:
+- Simple binary state (light/dark)
+- No complex state transitions
+- Avoids adding Redux dependency
 
-### 决策：CSS 自定义属性优于 CSS-in-JS
-使用 CSS 变量而非 CSS-in-JS 的原因：
-- 与现有样式表配合使用
-- 无运行时开销
-- 浏览器原生解决方案
+### Decision: CSS Custom Properties
+Using CSS variables instead of CSS-in-JS because:
+- Works with existing stylesheet
+- No runtime overhead
+- Browser-native solution
 
-## 数据流
+## Data Flow
 ```
 ThemeProvider (context)
        │
@@ -421,116 +299,116 @@ ThemeProvider (context)
 ThemeToggle ◄──► localStorage
        │
        ▼
-CSS Variables (应用于 :root)
+CSS Variables (applied to :root)
 ```
 
-## 文件变更
-- `src/contexts/ThemeContext.tsx`（新建）
-- `src/components/ThemeToggle.tsx`（新建）
-- `src/styles/globals.css`（修改）
+## File Changes
+- `src/contexts/ThemeContext.tsx` (new)
+- `src/components/ThemeToggle.tsx` (new)
+- `src/styles/globals.css` (modified)
 ````
 
-**何时更新设计：**
-- 实施显示方法不可行
-- 发现更好的解决方案
-- 依赖项或约束条件变化
+**何时更新 design：**
+- 实现发现方案行不通
+- 发现更好的方案
+- 依赖或约束变化
 
-#### 任务（`tasks.md`）
+#### Tasks（`tasks.md`）
 
-任务是**实施清单**——带有复选框的具体步骤。
+task 是**实现清单**——带复选框的具体步骤。
 
 ```markdown
-# 任务
+# Tasks
 
-## 1. 主题基础设施
-- [ ] 1.1 创建具有浅色/深色状态的 ThemeContext
-- [ ] 1.2 添加 CSS 自定义属性用于颜色
-- [ ] 1.3 实现 localStorage 持久化
-- [ ] 1.4 添加系统偏好检测
+## 1. Theme Infrastructure
+- [ ] 1.1 Create ThemeContext with light/dark state
+- [ ] 1.2 Add CSS custom properties for colors
+- [ ] 1.3 Implement localStorage persistence
+- [ ] 1.4 Add system preference detection
 
-## 2. UI 组件
-- [ ] 2.1 创建 ThemeToggle 组件
-- [ ] 2.2 在设置页面添加切换器
-- [ ] 2.3 更新 Header 包含快速切换
+## 2. UI Components
+- [ ] 2.1 Create ThemeToggle component
+- [ ] 2.2 Add toggle to settings page
+- [ ] 2.3 Update Header to include quick toggle
 
-## 3. 样式
-- [ ] 3.1 定义深色主题调色板
-- [ ] 3.2 更新组件使用 CSS 变量
-- [ ] 3.3 测试可访问性的对比度比率
+## 3. Styling
+- [ ] 3.1 Define dark theme color palette
+- [ ] 3.2 Update components to use CSS variables
+- [ ] 3.3 Test contrast ratios for accessibility
 ```
 
-**任务最佳实践：**
-- 将相关任务分组在标题下
-- 使用分层编号（1.1、1.2 等）
-- 保持任务足够小，可在一个会话中完成
-- 完成任务时勾选复选框
+**task 的好实践：**
+- 把相关 task 分到标题下
+- 用层级编号（1.1、1.2 等）
+- 每个 task 保持小到一次能做完
+- 完成后勾掉
 
-## 增量规范（Delta Specs）
+## Delta Specs
 
-增量规范是使 OpenSpec 适用于棕地开发的关键概念。它们描述**正在变化的内容**，而不是重述整个规范。
+delta spec 是让 OpenSpec 擅长已有代码库开发的关键概念。它描述**在变什么**，而不是重述整份 spec。
 
 ### 格式
 
 ```markdown
-# 认证增量
+# Delta for Auth
 
-## 新增需求
+## ADDED Requirements
 
-### 需求:双因素认证
-系统必须支持基于 TOTP 的双因素认证。
+### Requirement: Two-Factor Authentication
+The system MUST support TOTP-based two-factor authentication.
 
-#### 场景:2FA 注册
-- 给定未启用 2FA 的用户
-- 当用户在设置中启用 2FA 时
-- 则显示用于认证器应用设置的二维码
-- 并且用户在激活前必须用代码验证
+#### Scenario: 2FA enrollment
+- GIVEN a user without 2FA enabled
+- WHEN the user enables 2FA in settings
+- THEN a QR code is displayed for authenticator app setup
+- AND the user must verify with a code before activation
 
-#### 场景:2FA 登录
-- 给定已启用 2FA 的用户
-- 当用户提交有效凭据时
-- 则显示 OTP 挑战
-- 并且只有在有效 OTP 后登录才完成
+#### Scenario: 2FA login
+- GIVEN a user with 2FA enabled
+- WHEN the user submits valid credentials
+- THEN an OTP challenge is presented
+- AND login completes only after valid OTP
 
-## 修改需求
+## MODIFIED Requirements
 
-### 需求:会话过期
-系统必须在 15 分钟不活动后使会话过期。
-（之前：30 分钟）
+### Requirement: Session Expiration
+The system MUST expire sessions after 15 minutes of inactivity.
+(Previously: 30 minutes)
 
-#### 场景:空闲超时
-- 给定已认证的会话
-- 当 15 分钟过去且没有活动时
-- 则会话失效
+#### Scenario: Idle timeout
+- GIVEN an authenticated session
+- WHEN 15 minutes pass without activity
+- THEN the session is invalidated
 
-## 删除需求
+## REMOVED Requirements
 
-### 需求:记住我
-（已弃用，支持 2FA。用户应在每个会话重新认证。）
+### Requirement: Remember Me
+(Deprecated in favor of 2FA. Users should re-authenticate each session.)
 ```
 
-### 增量部分
+### Delta 段落
 
-| 部分 | 含义 | 归档时发生什么 |
+| 段落 | 含义 | 归档时发生什么 |
 |---------|---------|------------------------|
-| `## 新增需求` | 新行为 | 附加到主规范 |
-| `## 修改需求` | 改变的行为 | 替换现有需求 |
-| `## 删除需求` | 已弃用的行为 | 从主规范中删除 |
+| `## ADDED Requirements` | 新行为 | 追加到主 spec |
+| `## MODIFIED Requirements` | 变更的行为 | 替换现有 requirement |
+| `## REMOVED Requirements` | 废弃的行为 | 从主 spec 删除 |
 
-### 为什么使用增量而非完整规范
+### 为什么用 delta 而不是整份 spec
 
-**清晰性。** 增量明确显示正在变化的内容。阅读完整规范时，你必须与当前版本进行心理差异比较。
+**清晰。** delta 准确显示在变什么。读整份 spec，你得在脑子里和当前版本做 diff。
 
-**避免冲突。** 只要修改不同的需求，两个变更可以接触同一个规范文件而不会冲突。
+**避免冲突。** 两个 change 可以触同一份 spec 文件而不冲突，只要它们改不同的 requirement。
 
-**审查效率。** 审查者看到的是变更，而不是未改变的上下文。专注于重要内容。
+**审查效率。** 审查者看到的是变化，不是未变的上下文。聚焦在重要之处。
 
-**棕地适应性。** 大多数工作都是修改现有行为。增量使修改成为一等公民，而不是事后考虑。
+**适配已有代码库。** 大多数工作是修改已有行为。delta 让修改变成一等公民，而不是事后补丁。
 
-## 模式（Schemas）
+## Schemas
 
-模式定义工作流的制品类型及其依赖关系。
+schema 定义一个工作流的制品类型及其依赖。
 
-### 模式如何工作
+### schema 如何工作
 
 ```yaml
 # openspec/schemas/spec-driven/schema.yaml
@@ -538,45 +416,45 @@ name: spec-driven
 artifacts:
   - id: proposal
     generates: proposal.md
-    requires: []              # 无依赖，可首先创建
+    requires: []              # 无依赖，可最先创建
 
   - id: specs
     generates: specs/**/*.md
-    requires: [proposal]      # 需要提案后才能创建
+    requires: [proposal]      # 需要先有 proposal
 
   - id: design
     generates: design.md
-    requires: [proposal]      # 可与规范并行创建
+    requires: [proposal]      # 可与 specs 并行创建
 
   - id: tasks
     generates: tasks.md
-    requires: [specs, design] # 需要规范和设计后才能创建
+    requires: [specs, design] # 需要先有 specs 和 design
 ```
 
 **制品形成依赖图：**
 
 ```
                     proposal
-                   （根节点）
+                   (root node)
                        │
          ┌─────────────┴─────────────┐
          │                           │
          ▼                           ▼
       specs                       design
-   （需要：                  （需要：
-    proposal）                   proposal）
+   (requires:                  (requires:
+    proposal)                   proposal)
          │                           │
          └─────────────┬─────────────┘
                        │
                        ▼
                     tasks
-                （需要：
-                specs, design）
+                (requires:
+                specs, design)
 ```
 
-**依赖是赋能者，不是门限。** 它们显示可以创建什么，而不是必须创建什么。如果不需要，可以跳过设计。可以在设计之前或之后创建规范——两者都只依赖于提案。
+**依赖是 enabler，不是 gate。** 它们显示什么可以创建，而不是你接下来必须创建什么。你不需要 design 时可以跳过。你可以在 design 之前或之后创建 specs——两者都只依赖 proposal。
 
-### 内置模式
+### 内置 schema
 
 **spec-driven**（默认）
 
@@ -586,21 +464,21 @@ artifacts:
 proposal → specs → design → tasks → implement
 ```
 
-最适合：大多数功能工作，希望在实施前就规范达成一致。
+最适合：你想在实现前对 spec 达成共识的大多数功能开发。
 
-### 自定义模式
+### 自定义 schema
 
-为团队工作流创建自定义模式：
+为你的团队工作流创建自定义 schema：
 
 ```bash
-# 从零开始创建
+# 从零创建
 openspec-cn schema init research-first
 
-# 或从现有模式派生
+# 或复制现有的
 openspec-cn schema fork spec-driven research-first
 ```
 
-**示例自定义模式：**
+**自定义 schema 示例：**
 
 ```yaml
 # openspec/schemas/research-first/schema.yaml
@@ -608,22 +486,22 @@ name: research-first
 artifacts:
   - id: research
     generates: research.md
-    requires: []           # 首先进行研究
+    requires: []           # 先做研究
 
   - id: proposal
     generates: proposal.md
-    requires: [research]   # 提案基于研究
+    requires: [research]   # proposal 由研究支撑
 
   - id: tasks
     generates: tasks.md
-    requires: [proposal]   # 跳过规范/设计，直接进入任务
+    requires: [proposal]   # 跳过 specs/design，直接到 task
 ```
 
-有关创建和使用自定义模式的完整详情，请参阅[自定义](customization.md)。
+完整细节见 [自定义](customization.md)。
 
-## 归档（Archive）
+## Archive
 
-归档通过将增量规范合并到主规范中来完成变更，并保留变更用于历史记录。
+归档通过把 delta spec 合并进主 spec 并保留 change 供历史查阅来完成一个 change。
 
 ### 归档时发生什么
 
@@ -637,7 +515,7 @@ openspec/
 └── changes/                         │
     └── add-2fa/                     │
         ├── proposal.md              │
-        ├── design.md                │ 合并
+        ├── design.md                │ merge
         ├── tasks.md                 │
         └── specs/                   │
             └── auth/                │
@@ -649,10 +527,10 @@ openspec/
 openspec/
 ├── specs/
 │   └── auth/
-│       └── spec.md        # 现在包含 2FA 需求
+│       └── spec.md        # 现在包含 2FA requirement
 └── changes/
     └── archive/
-        └── 2025-01-24-add-2fa/    # 为历史保留
+        └── 2025-01-24-add-2fa/    # 保留供历史
             ├── proposal.md
             ├── design.md
             ├── tasks.md
@@ -663,25 +541,25 @@ openspec/
 
 ### 归档过程
 
-1. **合并增量。** 每个增量规范部分（新增/修改/删除）应用到相应的主规范。
+1. **合并 delta。** 每个 delta spec 段落（ADDED/MODIFIED/REMOVED）应用到对应主 spec。
 
-2. **移动到归档。** 变更文件夹移动到 `changes/archive/`，带有日期前缀以便按时间顺序排序。
+2. **移到 archive。** change 文件夹移到 `changes/archive/`，带日期前缀按时间排序。
 
-3. **保留上下文。** 所有制品在归档中保持完整。你总是可以回顾以理解为什么进行变更。
+3. **保留上下文。** 所有制品在 archive 中保持完整。你随时可以回头看一个 change 为何而做。
 
-### 为什么归档重要
+### 归档为什么重要
 
-**清洁状态。** 活动变更（`changes/`）仅显示进行中的工作。已完成的工作移出视线。
+**干净的状态。** 活跃 changes（`changes/`）只显示进行中的工作。已完成的工作移走。
 
-**审计追踪。** 归档保留每个变更的完整上下文——不仅是发生了什么变化，还有解释为什么的提案、解释如何的设计以及显示所做工作的任务。
+**审计轨迹。** archive 保留每个 change 的完整上下文——不止是改了什么，还有解释为什么的 proposal、解释怎么做的 design、展示做了什么的 task。
 
-**规范演进。** 随着变更被归档，规范有机地增长。每个归档合并其增量，随着时间的推移构建全面的规范。
+**Spec 演进。** 随着变更归档，spec 自然生长。每次归档合并它的 delta，逐步积累成一份全面的规范。
 
-## 整体如何协同工作
+## 整体如何拼起来
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                              OPENSPEC 流程                                   │
+│                              OPENSPEC FLOW                                   │
 │                                                                              │
 │   ┌────────────────┐                                                         │
 │   │  1. START      │  /opsx:propose (core) or /opsx:new (expanded)           │
@@ -690,61 +568,61 @@ openspec/
 │           │                                                                  │
 │           ▼                                                                  │
 │   ┌────────────────┐                                                         │
-│   │  2. 创建        │  /opsx:ff 或 /opsx:continue (expanded workflow)         │
-│   │    制品         │  创建提案 → 规范 → 设计 → 任务                             │
-│   │                │  （基于模式依赖关系）                                      │
+│   │  2. CREATE     │  /opsx:ff or /opsx:continue (expanded workflow)         │
+│   │     ARTIFACTS  │  Creates proposal → specs → design → tasks              │
+│   │                │  (based on schema dependencies)                         │
 │   └───────┬────────┘                                                         │
 │           │                                                                  │
 │           ▼                                                                  │
 │   ┌────────────────┐                                                         │
-│   │  3. 实施        │  /opsx:apply                                            │
-│   │    任务         │  处理任务，勾选完成项                                      │
-│   │                │◄──── 学习时更新制品                                       │
+│   │  3. IMPLEMENT  │  /opsx:apply                                            │
+│   │     TASKS      │  Work through tasks, checking them off                  │
+│   │                │◄──── Update artifacts as you learn                      │
 │   └───────┬────────┘                                                         │
 │           │                                                                  │
 │           ▼                                                                  │
 │   ┌────────────────┐                                                         │
-│   │  4. 验证        │  /opsx:verify（可选）                                    │
-│   │    工作         │  检查实施是否匹配规范                                      │
+│   │  4. VERIFY      │  /opsx:verify (optional)                                │
+│   │     WORK       │  Check implementation matches specs                     │
 │   └───────┬────────┘                                                         │
 │           │                                                                  │
 │           ▼                                                                  │
 │   ┌────────────────┐     ┌──────────────────────────────────────────────┐    │
-│   │  5. 归档        │────►│  增量规范合并到主规范                           │   │
-│   │    变更         │     │  变更文件夹移动到 archive/                      │  │
-│   └────────────────┘     │  规范现在是更新的单一事实来源                     │   │
-│                          └──────────────────────────────────────────────┘   │
-│                                                                             │
+│   │  5. ARCHIVE    │────►│  Delta specs merge into main specs           │    │
+│   │     CHANGE     │     │  Change folder moves to archive/             │    │
+│   └────────────────┘     │  Specs are now the updated source of truth   │    │
+│                          └──────────────────────────────────────────────┘    │
+│                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **良性循环：**
 
-1. 规范描述当前行为
-2. 变更提议修改（作为增量）
-3. 实施使变更成为现实
-4. 归档将增量合并到规范中
-5. 规范现在描述新行为
-6. 下一个变更基于更新的规范构建
+1. Spec 描述当前行为
+2. Change 提议修改（以 delta 形式）
+3. 实现让修改成真
+4. 归档把 delta 合并进 spec
+5. Spec 现在描述新行为
+6. 下一个 change 基于更新后的 spec
 
 ## 术语表
 
 | 术语 | 定义 |
 |------|------------|
-| **制品（Artifact）** | 变更中的文档（提案、设计、任务或增量规范） |
-| **归档（Archive）** | 完成变更并将其增量合并到主规范的过程 |
-| **变更（Change）** | 对系统的提议修改，打包为包含制品的文件夹 |
-| **增量规范（Delta spec）** | 描述相对于当前规范的变更（新增/修改/删除）的规范 |
-| **领域（Domain）** | 规范逻辑分组（例如 `auth/`、`payments/`） |
-| **需求（Requirement）** | 系统必须具有的特定行为 |
-| **场景（Scenario）** | 需求的具体示例，通常采用 Given/When/Then 格式 |
-| **模式（Schema）** | 制品类型及其依赖关系的定义 |
-| **规范（Spec）** | 描述系统行为的规范，包含需求和场景 |
-| **单一事实来源（Source of truth）** | `openspec/specs/` 目录，包含当前商定的行为 |
+| **Artifact** | change 内的一份文档（proposal、design、task 或 delta spec） |
+| **Archive** | 完成一个 change 并把其 delta 合并进主 spec 的过程 |
+| **Change** | 对系统的一次提议修改，打包成包含制品的文件夹 |
+| **Delta spec** | 相对当前 spec 描述变化（ADDED/MODIFIED/REMOVED）的 spec |
+| **Domain** | spec 的逻辑分组（如 `auth/`、`payments/`） |
+| **Requirement** | 系统必须具备的某条具体行为 |
+| **Scenario** | requirement 的具体示例，通常用 Given/When/Then 格式 |
+| **Schema** | 制品类型及其依赖的定义 |
+| **Spec** | 描述系统行为的规范，包含 requirement 和 scenario |
+| **Source of truth** | `openspec/specs/` 目录，存放当前公认的行为 |
 
 ## 下一步
 
-- [入门指南](getting-started.md) - 实用的第一步
-- [工作流](workflows.md) - 常见模式及何时使用
-- [命令参考](commands.md) - 完整命令参考
-- [自定义](customization.md) - 创建自定义模式并配置项目
+- [快速开始](getting-started.md) —— 实战入门
+- [工作流](workflows.md) —— 常见模式与何时用哪个
+- [命令](commands.md) —— 完整命令参考
+- [自定义](customization.md) —— 创建自定义 schema 并配置你的项目

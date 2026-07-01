@@ -5,12 +5,15 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getContinueChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-continue-change',
     description: '继续进行 OpenSpec 变更，创建下一个产出物。当用户想要推进变更、创建下一个产出物或继续工作流时使用。',
     instructions: `继续进行变更，创建下一个产出物。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -58,20 +61,20 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
      \`\`\`bash
      openspec-cn instructions <artifact-id> --change "<name>" --json
      \`\`\`
-   - 解析 JSON。关键字段：
-     - \`context\`：项目背景（你的约束 - 不要包含在输出中）
-     - \`rules\`：产出物特定规则（你的约束 - 不要包含在输出中）
+   - 解析 JSON。关键字段有：
+     - \`context\`：项目背景（对你的约束 - 不要包含在输出中）
+     - \`rules\`：产出物特定规则（对你的约束 - 不要包含在输出中）
      - \`template\`：用于输出文件的结构
-     - \`instruction\`：Schema 特定的指导
-     - \`resolvedOutputPath\`：解析后的路径或写入产出物的模式
-     - \`dependencies\`：需要读取以获取上下文的已完成产出物
+     - \`instruction\`：Schema 特定指导
+     - \`resolvedOutputPath\`：已解析的写入产出物的路径或模式
+     - \`dependencies\`：已完成的产出物，用于读取上下文
    - **创建产出物文件**：
      - 读取任何已完成的依赖文件以获取上下文
      - 使用 \`template\` 作为结构 - 填充其各个部分
-     - 将 \`context\` 和 \`rules\` 作为写作时的约束应用 - 但不要复制到文件中
-     - 写入指令中指定的 \`resolvedOutputPath\`。如果是 glob 模式，使用 Schema 指令和工作区规划上下文选择具体文件路径
-   - 显示创建了什么以及现在解锁了什么
-   - 创建一个产出物后停止
+     - 写入时应用 \`context\` 和 \`rules\` 作为约束 - 但不要将它们复制到文件中
+     - 写入指令中指定的 \`resolvedOutputPath\`。如果是 glob 模式，使用 Schema 指令和变更上下文选择具体的文件路径
+   - 显示创建了什么以及现在已解锁的内容
+   - 创建 ONE 个产出物后停止
 
    ---
 
@@ -119,7 +122,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
   - 不要将 \`<context>\`、\`<rules>\`、\`<project_context>\` 块复制到产出物中
   - 这些指导你写什么，但永远不应出现在输出中`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -131,6 +134,8 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
     content: `继续进行变更，创建下一个产出物。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选在 \`/opsx:continue\` 后指定变更名称（如 \`/opsx:continue add-auth\`）。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -178,20 +183,20 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
      \`\`\`bash
      openspec-cn instructions <artifact-id> --change "<name>" --json
      \`\`\`
-   - 解析 JSON。关键字段：
-     - \`context\`：项目背景（你的约束 - 不要包含在输出中）
-     - \`rules\`：产出物特定规则（你的约束 - 不要包含在输出中）
+   - 解析 JSON。关键字段有：
+     - \`context\`：项目背景（对你的约束 - 不要包含在输出中）
+     - \`rules\`：产出物特定规则（对你的约束 - 不要包含在输出中）
      - \`template\`：用于输出文件的结构
-     - \`instruction\`：Schema 特定的指导
-     - \`resolvedOutputPath\`：解析后的路径或写入产出物的模式
-     - \`dependencies\`：需要读取以获取上下文的已完成产出物
+     - \`instruction\`：Schema 特定指导
+     - \`resolvedOutputPath\`：已解析的写入产出物的路径或模式
+     - \`dependencies\`：已完成的产出物，用于读取上下文
    - **创建产出物文件**：
      - 读取任何已完成的依赖文件以获取上下文
      - 使用 \`template\` 作为结构 - 填充其各个部分
-     - 将 \`context\` 和 \`rules\` 作为写作时的约束应用 - 但不要复制到文件中
-     - 写入指令中指定的 \`resolvedOutputPath\`。如果是 glob 模式，使用 Schema 指令和工作区规划上下文选择具体文件路径
-   - 显示创建了什么以及现在解锁了什么
-   - 创建一个产出物后停止
+     - 写入时应用 \`context\` 和 \`rules\` 作为约束 - 但不要将它们复制到文件中
+     - 写入指令中指定的 \`resolvedOutputPath\`。如果是 glob 模式，使用 Schema 指令和变更上下文选择具体的文件路径
+   - 显示创建了什么以及现在已解锁的内容
+   - 创建 ONE 个产出物后停止
 
    ---
 

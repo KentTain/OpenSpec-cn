@@ -101,7 +101,8 @@ export async function findSpecUpdates(changeDir: string, mainSpecsDir: string): 
  */
 export async function buildUpdatedSpec(
   update: SpecUpdate,
-  changeName: string
+  changeName: string,
+  options: { silent?: boolean } = {}
 ): Promise<{ rebuilt: string; counts: { added: number; modified: number; removed: number; renamed: number } }> {
   // Read change spec content (delta-format expected)
   const changeContent = await fs.readFile(update.source, 'utf-8');
@@ -213,7 +214,7 @@ export async function buildUpdatedSpec(
       );
     }
     // Warn about REMOVED requirements being ignored for new specs
-    if (plan.removed.length > 0) {
+    if (plan.removed.length > 0 && !options.silent) {
       console.log(
         chalk.yellow(
           `⚠️  警告：${specName} - ${plan.removed.length} 条“移除需求”操作已被忽略（无内容可删除）。`
@@ -353,19 +354,22 @@ export async function buildUpdatedSpec(
 export async function writeUpdatedSpec(
   update: SpecUpdate,
   rebuilt: string,
-  counts: { added: number; modified: number; removed: number; renamed: number }
+  counts: { added: number; modified: number; removed: number; renamed: number },
+  options: { silent?: boolean; displayPath?: string } = {}
 ): Promise<void> {
   // Create target directory if needed
   const targetDir = path.dirname(update.target);
   await fs.mkdir(targetDir, { recursive: true });
   await fs.writeFile(update.target, rebuilt);
 
+  if (options.silent) return;
+
   const specName = path.basename(path.dirname(update.target));
-  console.log(`应用变更到 openspec/specs/${specName}/spec.md:`);
-  if (counts.added) console.log(`  + 新增 ${counts.added} 条`);
-  if (counts.modified) console.log(`  ~ 修改 ${counts.modified} 条`);
-  if (counts.removed) console.log(`  - 删除 ${counts.removed} 条`);
-  if (counts.renamed) console.log(`  → 重命名 ${counts.renamed} 条`);
+  console.log(`Applying changes to ${options.displayPath ?? `openspec/specs/${specName}/spec.md`}:`);
+  if (counts.added) console.log(`  + ${counts.added} added`);
+  if (counts.modified) console.log(`  ~ ${counts.modified} modified`);
+  if (counts.removed) console.log(`  - ${counts.removed} removed`);
+  if (counts.renamed) console.log(`  → ${counts.renamed} renamed`);
 }
 
 /**

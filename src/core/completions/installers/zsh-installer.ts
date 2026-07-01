@@ -259,6 +259,10 @@ export class ZshInstaller {
         console.debug(`无法在 ${targetPath} 读取现有的补全文件: ${error.message}`);
       }
 
+      if (!(await FileSystemUtils.canWriteFile(targetPath))) {
+        throw new Error(`Path is not writable: ${targetPath}`);
+      }
+
       // Ensure the directory exists
       const targetDir = path.dirname(targetPath);
       await fs.mkdir(targetDir, { recursive: true });

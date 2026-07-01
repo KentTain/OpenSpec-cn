@@ -5,6 +5,7 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getOnboardSkillTemplate(): SkillTemplate {
   return {
@@ -19,6 +20,8 @@ export function getOnboardSkillTemplate(): SkillTemplate {
 
 function getOnboardInstructions(): string {
   return `引导用户完成他们的第一个完整OpenSpec工作流周期。这是一个教学体验——你将在他们的代码库中完成实际工作，同时解释每个步骤。
+
+${STORE_SELECTION_GUIDANCE}
 
 ---
 
@@ -277,8 +280,8 @@ openspec-cn instructions proposal --change "<name>" --json
 
 **执行：** 创建规格说明文件：
 \`\`\`bash
-openspec instructions specs --change "<name>" --json
-# Use resolvedOutputPath from the JSON. If it is a glob, choose the concrete file path using the schema instruction and workspace planning context.
+openspec-cn instructions specs --change "<name>" --json
+# Use resolvedOutputPath from the JSON. If it is a glob, choose the concrete file path using the schema instruction and the change's context.
 \`\`\`
 
 起草规格说明内容：

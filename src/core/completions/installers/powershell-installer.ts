@@ -58,11 +58,20 @@ export class PowerShellInstaller {
   }
 
   /**
-   * Write a profile file, preserving the original BOM and encoding.
+   * Write a profile file, preserving UTF-16 LE encoding.
+   * For UTF-8 files, always adds BOM for Windows PowerShell 5.1 compatibility.
    */
   private async writeProfileFile(filePath: string, content: string, encoding: BufferEncoding, bom: Buffer): Promise<void> {
-    const body = Buffer.from(content, encoding);
-    await fs.writeFile(filePath, Buffer.concat([bom, body]));
+    if (encoding === 'utf16le') {
+      // Preserve UTF-16 LE with its BOM
+      const body = Buffer.from(content, 'utf16le');
+      await fs.writeFile(filePath, Buffer.concat([bom, body]));
+    } else {
+      // Always write UTF-8 with BOM for Windows PowerShell 5.1 compatibility
+      const utf8Bom = Buffer.from([0xef, 0xbb, 0xbf]);
+      const body = Buffer.from(content, 'utf-8');
+      await fs.writeFile(filePath, Buffer.concat([utf8Bom, body]));
+    }
   }
 
   /**
@@ -169,9 +178,23 @@ export class PowerShellInstaller {
 
     for (const profilePath of profilePaths) {
       try {
-        // Create profile file if it doesn't exist
         const profileDir = path.dirname(profilePath);
-        await fs.mkdir(profileDir, { recursive: true });
+        let profileExists = false;
+        try {
+          await fs.access(profilePath);
+          profileExists = true;
+        } catch (err: any) {
+          if (err?.code !== 'ENOENT') {
+            throw err;
+          }
+        }
+
+        if (!profileExists) {
+          if (!(await FileSystemUtils.canWriteFile(profilePath))) {
+            throw new Error(`Path is not writable: ${profilePath}`);
+          }
+          await fs.mkdir(profileDir, { recursive: true });
+        }
 
         let profileContent = '';
         let fileEncoding: BufferEncoding = 'utf-8';
@@ -208,9 +231,10 @@ export class PowerShellInstaller {
         ].join('\n');
 
         const newContent = profileContent + openspecBlock;
-        // Use UTF-8 with BOM for Windows PowerShell 5.1 compatibility
-        const bomContent = '\uFEFF' + newContent;
-        await this.writeProfileFile(profilePath, bomContent, fileEncoding, fileBom);
+        if (!(await FileSystemUtils.canWriteFile(profilePath))) {
+          throw new Error(`Path is not writable: ${profilePath}`);
+        }
+        await this.writeProfileFile(profilePath, newContent, fileEncoding, fileBom);
         anyConfigured = true;
       } catch (error) {
         // Continue to next profile if this one fails
@@ -271,9 +295,11 @@ export class PowerShellInstaller {
 
         // Clean up extra newlines
         const newContent = (beforeBlock.trimEnd() + '\n' + afterBlock.trimStart()).trim() + '\n';
-        // Use UTF-8 with BOM for Windows PowerShell 5.1 compatibility
-        const bomContent = '\uFEFF' + newContent;
-        await this.writeProfileFile(profilePath, bomContent, fileEncoding, fileBom);
+
+        if (!(await FileSystemUtils.canWriteFile(profilePath))) {
+          throw new Error(`Path is not writable: ${profilePath}`);
+        }
+        await this.writeProfileFile(profilePath, newContent, fileEncoding, fileBom);
         anyRemoved = true;
       } catch (error) {
         console.warn(`警告：无法清理 ${profilePath}: ${error}`);
@@ -318,6 +344,10 @@ export class PowerShellInstaller {
       } catch (error: any) {
         // File doesn't exist or can't be read, proceed with installation
         console.debug(`无法在 ${targetPath} 读取现有的补全文件: ${error.message}`);
+      }
+
+      if (!(await FileSystemUtils.canWriteFile(targetPath))) {
+        throw new Error(`Path is not writable: ${targetPath}`);
       }
 
       // Ensure the directory exists
@@ -407,6 +437,11 @@ export class PowerShellInstaller {
           success: false,
           message: '补全脚本未安装',
         };
+      }
+
+      const targetDir = path.dirname(targetPath);
+      if (!(await FileSystemUtils.canWriteFile(targetDir))) {
+        throw new Error(`Path is not writable: ${targetDir}`);
       }
 
       // Remove the completion script

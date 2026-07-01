@@ -5,12 +5,15 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getArchiveChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-archive-change',
     description: '归档已完成的变更。当用户希望在实现完成后归档一个变更时使用。',
     instructions: `归档已完成的变更。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -34,12 +37,10 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
    - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径和范围上下文
    - \`artifacts\`：产出物列表及其状态（\`done\` 或其他）
 
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明工作区归档在当前版本中不支持并停止。不要将工作区变更移动到仓库本地归档或编辑链接的仓库。
-
-   **如果有产出物未完成（不是 \`done\`）：**
-   - 显示警告，列出未完成的产出物
-   - 使用 **AskUserQuestion tool** 确认用户是否要继续
-   - 用户确认后继续
+   **If any artifacts are not \`done\`:**
+   - Display warning listing incomplete artifacts
+   - Use **AskUserQuestion tool** to confirm user wants to proceed
+   - Proceed if user confirms
 
 3. **检查任务完成状态**
 
@@ -117,7 +118,7 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 - 如果请求同步，使用 openspec-sync-specs 方式（代理驱动）
 - 如果存在增量规范，始终运行同步评估并在提示前显示合并摘要`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -129,6 +130,8 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
     category: 'Workflow',
     tags: ['workflow', 'archive', 'experimental'],
     content: `归档已完成的变更。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选在 \`/opsx:archive\` 后指定变更名称（如 \`/opsx:archive add-auth\`）。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -152,10 +155,8 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
    - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径和范围上下文
    - \`artifacts\`：产出物列表及其状态（\`done\` 或其他）
 
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明工作区归档在当前版本中不支持并停止。不要将工作区变更移动到仓库本地归档或编辑链接的仓库。
-
-   **如果有产出物未完成（不是 \`done\`）：**
-   - 显示警告，列出未完成的产出物
+   **如果有产出物不是 \`done\` 状态：**
+   - 显示未完成产出物列表的警告
    - 提示用户确认是否继续
    - 用户确认后继续
 

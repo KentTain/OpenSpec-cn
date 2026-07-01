@@ -1,18 +1,18 @@
-# Maintainers
+# 维护者
 
-People who maintain and guide OpenSpec.
+负责维护和指导 OpenSpec 的人员。
 
-## Core Maintainers
+## 核心维护者
 
-| Name            | GitHub                                 | Role           |
+| 姓名            | GitHub                                 | 角色           |
 |-----------------|----------------------------------------|----------------|
-| Tabish Bidiwale | [@TabishB](https://github.com/TabishB) | Lead maintainer |
-| Devin Zeng      | [@studyzy](https://github.com/studyzy)| 汉化作者           |
+| Tabish Bidiwale | [@TabishB](https://github.com/TabishB) | 首席维护者      |
+| Devin Zeng      | [@studyzy](https://github.com/studyzy)| 汉化作者        |
 
-## Advisors
+## 顾问
 
-Advisors help shape technical direction and provide guidance to the project.
+顾问负责把握技术方向，并为项目提供指导。
 
-| Name | GitHub | Focus |
-|------|--------|-------|
-| Hari Krishnan | [@harikrishnan83](https://github.com/harikrishnan83) | Technical direction |
+| 姓名 | GitHub | 关注方向 |
+|------|--------|---------|
+| Hari Krishnan | [@harikrishnan83](https://github.com/harikrishnan83) | 技术方向 |

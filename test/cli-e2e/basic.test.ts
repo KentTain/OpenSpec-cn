@@ -43,7 +43,7 @@ async function prepareFixture(fixtureName: string): Promise<string> {
 
 function expectJsonOnlyOutput(result: Awaited<ReturnType<typeof runCLI>>) {
   expect(result.exitCode).toBe(0);
-  expect(result.stderr).toBe('');
+  expect(result.cleanStderr).toBe('');
   expect(() => JSON.parse(result.stdout)).not.toThrow();
 }
 
@@ -56,8 +56,7 @@ describe('openspec CLI e2e basics', () => {
     const result = await runCLI(['--help']);
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Usage: openspec-cn');
-    expect(result.stderr).toBe('');
-
+    expect(result.cleanStderr).toBe('');
   });
 
   it('shows dynamic tool ids in init help', async () => {

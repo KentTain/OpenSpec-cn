@@ -69,7 +69,7 @@ ${commandList}
 
   case $state in
     command)
-      _describe "openspec command" commands
+      _describe "openspec-cn command" commands
       ;;
     args)
       case $words[1] in
@@ -300,7 +300,9 @@ compdef _openspec openspec-cn
   private escapeDescription(desc: string): string {
     return desc
       .replace(/\\/g, '\\\\')
-      .replace(/'/g, "\\'")
+      // Inside zsh single quotes, backslash-quote does NOT escape; the
+      // idiom is close-quote, literal quote, reopen: '\''
+      .replace(/'/g, "'\\''")
       .replace(/\[/g, '\\[')
       .replace(/]/g, '\\]')
       .replace(/:/g, '\\:');

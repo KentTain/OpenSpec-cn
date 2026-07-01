@@ -5,12 +5,15 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getVerifyChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-verify-change',
     description: '验证实现是否与变更产出物匹配。当用户想在归档前验证实现是否完整、正确且一致时使用。',
     instructions: `验证实现是否与变更产出物（规范、任务、设计）匹配。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -34,8 +37,6 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
    - \`schemaName\`：使用的工作流（如 "spec-driven"）
    - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径和范围上下文
    - 此变更存在哪些产出物
-
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明完整的工作区实现验证在当前版本中不支持并停止。不要推断仓库本地的实现归属或编辑链接的仓库。
 
 3. **获取规划上下文并加载产出物**
 
@@ -171,7 +172,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 - 具体、可操作的建议
 - 不要使用模糊的建议如"考虑审查"`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -183,6 +184,8 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
     category: 'Workflow',
     tags: ['workflow', 'verify', 'experimental'],
     content: `验证实现是否与变更产出物（规范、任务、设计）匹配。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选在 \`/opsx:verify\` 后指定变更名称（如 \`/opsx:verify add-auth\`）。如果省略，检查是否可以从对话上下文推断。如果模糊或不明确，你必须提示用户选择可用变更。
 
@@ -206,8 +209,6 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
    - \`schemaName\`：使用的工作流（如 "spec-driven"）
    - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径和范围上下文
    - 此变更存在哪些产出物
-
-   如果状态报告 \`actionContext.mode: "workspace-planning"\`，说明完整的工作区实现验证在当前版本中不支持并停止。不要推断仓库本地的实现归属或编辑链接的仓库。
 
 3. **获取规划上下文并加载产出物**
 

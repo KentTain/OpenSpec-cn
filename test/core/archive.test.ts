@@ -15,34 +15,44 @@ describe('ArchiveCommand', () => {
   let tempDir: string;
   let archiveCommand: ArchiveCommand;
   const originalConsoleLog = console.log;
+  const originalXdgDataHome = process.env.XDG_DATA_HOME;
 
   beforeEach(async () => {
     // Create temp directory
   tempDir = path.join(os.tmpdir(), `openspec-archive-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
-    
+
     // Change to temp directory
     process.chdir(tempDir);
-    
+
+    // Isolate root resolution from any real store registry on the
+    // host machine so no-root behavior stays the implicit-root path.
+    process.env.XDG_DATA_HOME = path.join(tempDir, 'xdg-data');
+
     // Create OpenSpec structure
   const openspecDir = path.join(tempDir, 'openspec');
   await fs.mkdir(path.join(openspecDir, 'changes'), { recursive: true });
   await fs.mkdir(path.join(openspecDir, 'specs'), { recursive: true });
   await fs.mkdir(path.join(openspecDir, 'changes', 'archive'), { recursive: true });
-    
     // Suppress console.log during tests
     console.log = vi.fn();
-    
+
     archiveCommand = new ArchiveCommand();
   });
 
   afterEach(async () => {
     // Restore console.log
     console.log = originalConsoleLog;
-    
+
+    if (originalXdgDataHome === undefined) {
+      delete process.env.XDG_DATA_HOME;
+    } else {
+      process.env.XDG_DATA_HOME = originalXdgDataHome;
+    }
+
     // Clear mocks
     vi.clearAllMocks();
-    
+
     // Clean up temp directory
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -257,7 +267,7 @@ New feature description.
     it('should throw error if change does not exist', async () => {
       await expect(
         archiveCommand.execute('non-existent-change', { yes: true })
-      ).rejects.toThrow("未找到更改 'non-existent-change'。");
+      ).rejects.toThrow("未找到变更 'non-existent-change'。");
     });
 
     it('should throw error if archive already exists', async () => {
@@ -778,7 +788,7 @@ E1 updated`);
       
       await expect(
         archiveCommand.execute('any-change', { yes: true })
-      ).rejects.toThrow("未找到OpenSpec更改目录。请先运行 'openspec-cn init'。");
+      ).rejects.toThrow("未找到OpenSpec变更目录。请先运行 'openspec-cn init'。");
     });
   });
 
@@ -801,7 +811,7 @@ E1 updated`);
       
       // Verify select was called with correct options (values matter, names may include progress)
       expect(mockSelect).toHaveBeenCalledWith(expect.objectContaining({
-        message: '选择要归档的更改',
+        message: '选择要归档的变更',
         choices: expect.arrayContaining([
           expect.objectContaining({ value: change1 }),
           expect.objectContaining({ value: change2 })

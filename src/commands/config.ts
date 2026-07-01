@@ -22,11 +22,7 @@ import {
 import { CORE_WORKFLOWS, ALL_WORKFLOWS, getProfileWorkflows } from '../core/profiles.js';
 import { OPENSPEC_DIR_NAME } from '../core/config.js';
 import { hasProjectConfigDrift } from '../core/profile-sync-drift.js';
-import {
-  findWorkspaceRoot,
-  hasWorkspaceSkillProfileDrift,
-  readOptionalWorkspaceViewState,
-} from '../core/workspace/index.js';
+import { isPromptCancellationError } from './shared-output.js';
 
 type ProfileAction = 'both' | 'delivery' | 'workflows' | 'keep';
 
@@ -44,11 +40,6 @@ interface ProfileStateDiff {
 interface WorkflowPromptMeta {
   name: string;
   description: string;
-}
-
-interface WorkspaceConfigProfileContext {
-  root: string;
-  commandCwd: string;
 }
 
 const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
@@ -98,12 +89,6 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   },
 };
 
-function isPromptCancellationError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    (error.name === 'ExitPromptError' || error.message.includes('force closed the prompt with SIGINT'))
-  );
-}
 
 /**
  * Resolve the effective current profile state from global config defaults.
@@ -196,20 +181,6 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
   };
 }
 
-async function resolveWorkspaceConfigProfileContext(
-  cwd = process.cwd()
-): Promise<WorkspaceConfigProfileContext | null> {
-  const workspaceRoot = await findWorkspaceRoot(cwd);
-  if (!workspaceRoot) {
-    return null;
-  }
-
-  return {
-    root: workspaceRoot,
-    commandCwd: cwd,
-  };
-}
-
 function maybeWarnProjectConfigDrift(
   projectDir: string,
   state: ProfileState,
@@ -225,39 +196,8 @@ function maybeWarnProjectConfigDrift(
   console.log(colorize('警告：全局配置未应用于此项目。请运行 `openspec-cn update` 来同步。'));
 }
 
-async function maybeWarnConfigDrift(
-  state: ProfileState,
-  colorize: (message: string) => string
-): Promise<void> {
-  const workspaceContext = await resolveWorkspaceConfigProfileContext();
-  if (workspaceContext) {
-    let viewState = null;
-    try {
-      viewState = await readOptionalWorkspaceViewState(workspaceContext.root);
-    } catch {
-      return;
-    }
-
-    if (hasWorkspaceSkillProfileDrift(viewState)) {
-      console.log(
-        colorize(
-          '警告：工作区本地代理技能与活跃的全局档案不同步。请运行 `openspec-cn workspace update` 来同步。'
-        )
-      );
-    }
-    return;
-  }
-
-  maybeWarnProjectConfigDrift(process.cwd(), state, colorize);
-}
-
-function printConfigProfileApplyGuidance(workspaceContext: WorkspaceConfigProfileContext | null): void {
-  if (workspaceContext) {
-    console.log('配置已更新。请运行 `openspec-cn workspace update` 以将其应用到工作区本地技能。');
-    return;
-  }
-
-  console.log('配置已更新。请在您的项目中运行 `openspec-cn update` 来应用。');
+function printConfigProfileApplyGuidance(): void {
+  console.log('配置已更新。请在项目中运行 `openspec-cn update` 以应用。');
 }
 
 /**
@@ -520,8 +460,7 @@ export function registerConfigCommand(program: Command): void {
         config.workflows = [...CORE_WORKFLOWS];
         // Preserve delivery setting
         saveGlobalConfig(config);
-        const workspaceContext = await resolveWorkspaceConfigProfileContext();
-        printConfigProfileApplyGuidance(workspaceContext);
+        printConfigProfileApplyGuidance();
         return;
       }
 
@@ -564,12 +503,12 @@ export function registerConfigCommand(program: Command): void {
             {
               value: 'delivery',
               name: '仅交付方式',
-              description: '更改工作流的安装位置',
+              description: '变更工作流的安装位置',
             },
             {
               value: 'workflows',
               name: '仅工作流',
-              description: '更改可用的工作流操作',
+              description: '变更可用的工作流操作',
             },
             {
               value: 'keep',
@@ -580,8 +519,8 @@ export function registerConfigCommand(program: Command): void {
         });
 
         if (action === 'keep') {
-          console.log('没有配置更改。');
-          await maybeWarnConfigDrift(currentState, chalk.yellow);
+          console.log('没有配置变更。');
+          maybeWarnProjectConfigDrift(process.cwd(), currentState, chalk.yellow);
           return;
         }
 
@@ -655,8 +594,8 @@ export function registerConfigCommand(program: Command): void {
 
         const diff = diffProfileState(currentState, nextState);
         if (!diff.hasChanges) {
-          console.log('没有配置更改。');
-          await maybeWarnConfigDrift(nextState, chalk.yellow);
+          console.log('没有配置变更。');
+          maybeWarnProjectConfigDrift(process.cwd(), nextState, chalk.yellow);
           return;
         }
 
@@ -671,37 +610,12 @@ export function registerConfigCommand(program: Command): void {
         config.workflows = nextState.workflows;
         saveGlobalConfig(config);
 
-        const workspaceContext = await resolveWorkspaceConfigProfileContext();
-        if (workspaceContext) {
-          const applyNow = await confirm({
-            message: '立即将更改应用到此工作区？',
-            default: true,
-          });
-
-          if (applyNow) {
-            try {
-              execSync('npx openspec-cn workspace update', {
-                stdio: 'inherit',
-                cwd: workspaceContext.commandCwd,
-              });
-              console.log('请在其他工作区中运行 `openspec-cn workspace update` 来应用。');
-            } catch {
-              console.error('`openspec-cn workspace update` 失败。请手动运行以应用档案变更。');
-              process.exitCode = 1;
-            }
-            return;
-          }
-
-          printConfigProfileApplyGuidance(workspaceContext);
-          return;
-        }
-
         // Check if inside an OpenSpec project
         const projectDir = process.cwd();
         const openspecDir = path.join(projectDir, OPENSPEC_DIR_NAME);
         if (fs.existsSync(openspecDir)) {
           const applyNow = await confirm({
-            message: '立即将更改应用到此项目？',
+            message: '立即将变更应用到此项目？',
             default: true,
           });
 
@@ -717,7 +631,7 @@ export function registerConfigCommand(program: Command): void {
           }
         }
 
-        printConfigProfileApplyGuidance(null);
+        printConfigProfileApplyGuidance();
       } catch (error) {
         if (isPromptCancellationError(error)) {
           console.log('档案配置已取消。');

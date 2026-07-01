@@ -35,11 +35,11 @@ _openspec_complete_items() {
   _describe "item" items
 }
 
-# Use openspec __complete to get available schemas
+# 使用 openspec-cn __complete 获取可用的 Schema
 _openspec_complete_schemas() {
   local -a schemas
   while IFS=$'\\t' read -r id desc; do
     schemas+=("$id:$desc")
-  done < <(openspec __complete schemas 2>/dev/null)
+  done < <(openspec-cn __complete schemas 2>/dev/null)
   _describe "schema" schemas
 }`;

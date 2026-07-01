@@ -5,12 +5,15 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getFfChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-ff-change',
     description: '快速创建实现所需的所有产出物。当用户想要快速创建实现所需的所有产出物，而不是逐个创建时使用。',
     instructions: `快速完成产出物创建 - 一次性生成开始实现所需的一切。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：用户的请求应包含变更名称（kebab-case）或对他们想要构建内容的描述。
 
@@ -114,6 +117,8 @@ export function getOpsxFfCommandTemplate(): CommandTemplate {
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
     content: `快速完成产出物创建 - 生成开始实现所需的一切。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：\`/opsx:ff\` 之后的参数是变更名称（kebab-case），或用户想要构建内容的描述。
 

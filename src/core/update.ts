@@ -293,7 +293,7 @@ export class UpdateCommand {
     }
 
     console.log();
-    console.log(chalk.dim('重启 IDE 以使更改生效。'));
+    console.log(chalk.dim('重启 IDE 以使变更生效。'));
   }
 
   /**
@@ -389,8 +389,8 @@ export class UpdateCommand {
       return;
     }
 
-    console.log(chalk.dim('Note: The core profile now includes sync. Your custom profile is preserving the old core workflow set.'));
-    console.log(chalk.dim('Run `openspec config profile core` and then `openspec update` to add sync.'));
+    console.log(chalk.dim('注意：核心配置文件现在包含 sync。你的自定义配置文件保留了旧的核心工作流配置。'));
+    console.log(chalk.dim('运行 `openspec-cn config profile core` 然后 `openspec-cn update` 以添加 sync。'));
   }
 
   /**

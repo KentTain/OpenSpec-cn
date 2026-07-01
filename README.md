@@ -55,13 +55,21 @@
 ## 看看效果
 
 ```text
-你：/opsx:propose add-dark-mode
-AI：已创建 openspec/changes/add-dark-mode/
-     ✓ proposal.md — 为什么要做这个，什么在变
-     ✓ specs/       — 需求和场景
-     ✓ design.md    — 技术方案
-     ✓ tasks.md     — 实现清单
-     准备好开始实现了！
+You: /opsx:explore
+AI:  What would you like to explore?
+You: I want dark mode but I'm not sure how to do it cleanly.
+AI:  Let me look at your styling setup...
+     Cleanest path here: CSS variables + a small theme context,
+     with system-preference detection. No new dependencies. Scope it?
+You: Yes, let's do it.
+
+You: /opsx:propose add-dark-mode
+AI:  Created openspec/changes/add-dark-mode/
+     ✓ proposal.md — why we're doing this, what's changing
+     ✓ specs/       — requirements and scenarios
+     ✓ design.md    — technical approach
+     ✓ tasks.md     — implementation checklist
+     Ready for implementation!
 
 你：/opsx:apply
 AI：开始实现任务...
@@ -103,9 +111,12 @@ openspec-cn init
 
 ```
 
-现在告诉你的 AI：`/opsx:propose <你想要构建的内容>`
+然后与你的 AI 助手对话：
 
-如果你想要扩展工作流（`/opsx:new`、`/opsx:continue`、`/opsx:ff`、`/opsx:verify`、`/opsx:sync`、`/opsx:bulk-archive`、`/opsx:onboard`），请通过 `openspec-cn config profile` 选择，然后运行 `openspec-cn update` 应用。
+- **还不确定要做什么？** 从 `/opsx:explore` 开始，它是一个零成本的思考伙伴，会阅读你的代码、权衡选项，并在动手之前帮你梳理出一份方案。（[Explore 指南](docs/explore.md)）
+- **已经想好要做什么了？** 直接运行 `/opsx:propose <你要构建的内容>` 即可。
+
+这两条命令都在默认 profile 中可用。如果你想要扩展工作流（`/opsx:new`、`/opsx:continue`、`/opsx:ff`、`/opsx:verify`、`/opsx:bulk-archive`、`/opsx:onboard`），请用 `openspec config profile` 选择该 profile，再用 `openspec update` 应用。
 
 > [!NOTE]
 > 不确定你的工具是否支持？[查看完整列表](docs/supported-tools.md) – 我们支持 25+ 种工具且持续增加。
@@ -114,14 +125,24 @@ openspec-cn init
 
 ## 文档
 
-→ **[快速入门](docs/getting-started.md)**：开始使用<br>
-→ **[工作流](docs/workflows.md)**：组合与模式<br>
+**从这里开始：** **[文档首页](docs/README.md)** 提供完整索引。第一次接触 OpenSpec？先读 [快速开始](docs/getting-started.md)，再看 [命令是如何工作的](docs/how-commands-work.md)（介绍在哪里输入 `/opsx:propose`）。
+
+→ **[快速开始](docs/getting-started.md)**：入门第一步<br>
+→ **[先做探索](docs/explore.md)**：动手前用 `/opsx:explore` 想清楚<br>
+→ **[命令是如何工作的](docs/how-commands-work.md)**：斜杠命令与 CLI 的运行边界<br>
+→ **[核心概念一览](docs/overview.md)**：一页纸讲清整体心智模型<br>
+→ **[示例与配方](docs/examples.md)**：从开始到结束的真实变更<br>
+→ **[工作流](docs/workflows.md)**：组合用法与模式<br>
+→ **[已有项目](docs/existing-projects.md)**：在已有代码库上引入 OpenSpec<br>
+→ **[编辑变更](docs/editing-changes.md)**：更新制品、回退、调和手动修改<br>
 → **[命令](docs/commands.md)**：斜杠命令与技能<br>
-→ **[CLI](docs/cli.md)**：终端参考手册<br>
+→ **[CLI](docs/cli.md)**：终端命令参考<br>
+→ **[Stores](docs/stores-beta/user-guide.md)**：在独立仓库中规划、与团队共享（beta）<br>
 → **[支持的工具](docs/supported-tools.md)**：工具集成与安装路径<br>
-→ **[概念](docs/concepts.md)**：整体如何运转<br>
+→ **[概念](docs/concepts.md)**：整体如何衔接<br>
 → **[多语言](docs/multi-language.md)**：多语言支持<br>
-→ **[自定义](docs/customization.md)**：打造你的版本
+→ **[自定义](docs/customization.md)**：打造你自己的 OpenSpec<br>
+→ **[常见问题](docs/faq.md)** · **[故障排查](docs/troubleshooting.md)** · **[术语表](docs/glossary.md)**：快速求助
 
 
 ## 社区 Schema

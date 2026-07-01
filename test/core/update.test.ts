@@ -581,7 +581,7 @@ Old instructions content
       await updateCommand.execute(testDir);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('重启 IDE 以使更改生效。')
+        expect.stringContaining('重启 IDE 以使变更生效。')
       );
 
       consoleSpy.mockRestore();
@@ -1443,10 +1443,10 @@ More user content after markers.
         call.map(arg => String(arg)).join(' ')
       );
       expect(calls.some(call =>
-        call.includes('The core profile now includes sync')
+        call.includes('核心配置文件现在包含 sync')
       )).toBe(true);
       expect(calls.some(call =>
-        call.includes('openspec config profile core') && call.includes('openspec update')
+        call.includes('openspec-cn config profile core') && call.includes('openspec-cn update')
       )).toBe(true);
 
       expect(await FileSystemUtils.fileExists(

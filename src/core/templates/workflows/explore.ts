@@ -5,6 +5,7 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getExploreSkillTemplate(): SkillTemplate {
   return {
@@ -15,6 +16,8 @@ export function getExploreSkillTemplate(): SkillTemplate {
 **重要：探索模式是用于思考，而非实现。** 你可以读取文件、搜索代码和调查代码库，但绝对不能编写代码或实现功能。如果用户要求你实现某些东西，提醒他们先退出探索模式并创建变更提案。你可以创建 OpenSpec 产出物（提案、设计、规范），如果用户要求的话——那是记录思考，不是实现。
 
 **这是一种态度，而非工作流。** 没有固定步骤，没有必需的顺序，没有必须的输出。你是帮助用户探索的思考伙伴。
+
+${STORE_SELECTION_GUIDANCE}
 
 ---
 
@@ -286,7 +289,7 @@ openspec-cn list --json
 - **要探索代码库** - 将讨论扎根于现实
 - **要质疑假设** - 包括用户的和你自己的`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -302,6 +305,8 @@ export function getOpsxExploreCommandTemplate(): CommandTemplate {
 **重要：探索模式是用于思考，而非实现。** 你可以读取文件、搜索代码和调查代码库，但绝对不能编写代码或实现功能。如果用户要求你实现某些东西，提醒他们先退出探索模式并创建变更提案。你可以创建 OpenSpec 产出物（提案、设计、规范），如果用户要求的话——那是记录思考，不是实现。
 
 **这是一种态度，而非工作流。** 没有固定步骤，没有必需的顺序，没有必须的输出。你是帮助用户探索的思考伙伴。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：\`/opsx:explore\` 后面的参数是用户想要思考的内容。可以是：
 - 一个模糊想法："实时协作"

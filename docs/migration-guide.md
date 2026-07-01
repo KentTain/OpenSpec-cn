@@ -590,5 +590,5 @@ project/
 ## 获取帮助
 
 - **Discord**：[discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC)
-- **GitHub Issues**：[github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues)
+- **GitHub Issues**：[github.com/studyzy/OpenSpec-cn/issues](https://github.com/studyzy/OpenSpec-cn/issues)
 - **文档**：[docs/opsx.md](opsx.md) 用于完整的 OPSX 参考

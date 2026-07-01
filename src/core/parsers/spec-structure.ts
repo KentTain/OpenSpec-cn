@@ -1,6 +1,6 @@
-const REQUIREMENTS_SECTION_HEADER = /^##\s+Requirements\s*$/i;
+const REQUIREMENTS_SECTION_HEADER = /^##\s+(?:Requirements|需求)\s*$/i;
 const TOP_LEVEL_SECTION_HEADER = /^##\s+/;
-const DELTA_HEADER = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$/i;
+const DELTA_HEADER = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED|新增|修改|移除|重命名)\s+(?:Requirements|需求)\s*$/i;
 const REQUIREMENT_HEADER = /^###\s+Requirement:\s*(.+)\s*$/i;
 
 export interface MainSpecStructureIssue {

@@ -5,6 +5,7 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getBulkArchiveChangeSkillTemplate(): SkillTemplate {
   return {
@@ -13,6 +14,8 @@ export function getBulkArchiveChangeSkillTemplate(): SkillTemplate {
     instructions: `一次性归档多个已完成的变更。
 
 此技能允许你批量归档变更，通过检查代码库确定实际实现情况来智能处理规范冲突。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：无需输入（会提示选择）
 
@@ -41,11 +44,9 @@ export function getBulkArchiveChangeSkillTemplate(): SkillTemplate {
       - 解析 \`schemaName\`、\`artifacts\`、\`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`
       - 记录哪些产出物是 \`done\` 和其他状态
 
-      如果任何选中的变更报告 \`actionContext.mode: "workspace-planning"\`，说明工作区批量归档在当前版本中不支持并停止，不要在同步规范或移动变更之前继续。不要回退到仓库本地路径或编辑链接的仓库。
-
    b. **任务完成情况** - 读取状态 JSON 中的 \`artifactPaths.tasks.existingOutputPaths\`
-      - 统计 \`- [ ]\`（未完成）和 \`- [x]\`（已完成）
-      - 如果没有任务文件，标记为"无任务"
+      - 统计 \`- [ ]\`（未完成）与 \`- [x]\`（已完成）的数量
+      - 如果不存在任务文件，标注为"无任务"
 
    c. **增量规范** - 检查状态 JSON 中的 \`artifactPaths.specs.existingOutputPaths\`
       - 列出存在哪些能力规范
@@ -248,7 +249,7 @@ export function getBulkArchiveChangeSkillTemplate(): SkillTemplate {
 - 归档目录目标使用当前日期：YYYY-MM-DD-<name>
 - 如果归档目标已存在，该变更失败但继续处理其他变更`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -262,6 +263,8 @@ export function getOpsxBulkArchiveCommandTemplate(): CommandTemplate {
     content: `一次性归档多个已完成的变更。
 
 此技能允许你批量归档变更，通过检查代码库确定实际实现情况来智能处理规范冲突。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：无需输入（会提示选择）
 
@@ -290,11 +293,9 @@ export function getOpsxBulkArchiveCommandTemplate(): CommandTemplate {
       - 解析 \`schemaName\`、\`artifacts\`、\`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`
       - 记录哪些产出物是 \`done\` 和其他状态
 
-      如果任何选中的变更报告 \`actionContext.mode: "workspace-planning"\`，说明工作区批量归档在当前版本中不支持并停止，不要在同步规范或移动变更之前继续。不要回退到仓库本地路径或编辑链接的仓库。
-
    b. **任务完成情况** - 读取状态 JSON 中的 \`artifactPaths.tasks.existingOutputPaths\`
-      - 统计 \`- [ ]\`（未完成）和 \`- [x]\`（已完成）
-      - 如果没有任务文件，标记为"无任务"
+      - 统计 \`- [ ]\`（未完成）与 \`- [x]\`（已完成）的数量
+      - 如果不存在任务文件，标注为"无任务"
 
    c. **增量规范** - 检查状态 JSON 中的 \`artifactPaths.specs.existingOutputPaths\`
       - 列出存在哪些能力规范

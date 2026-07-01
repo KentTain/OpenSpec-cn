@@ -6,7 +6,14 @@
 
 import ora from 'ora';
 import chalk from 'chalk';
-import { resolveCurrentPlanningHomeSync, getChangeDir } from '../../core/planning-home.js';
+import { getChangeDir } from '../../core/planning-home.js';
+import {
+  resolveRootForCommand,
+  toPlanningHome,
+  toRootOutput,
+  withStoreFlag,
+  isStoreSelectedRoot,
+} from '../../core/root-selection.js';
 import {
   loadChangeContext,
   formatChangeStatus,
@@ -27,6 +34,8 @@ import {
 export interface StatusOptions {
   change?: string;
   schema?: string;
+  store?: string;
+  storePath?: string;
   json?: boolean;
 }
 
@@ -35,23 +44,38 @@ export interface StatusOptions {
 // -----------------------------------------------------------------------------
 
 export async function statusCommand(options: StatusOptions): Promise<void> {
+  // The root resolves (and the store banner prints) before the spinner starts
+  // so the two do not fight over stderr.
+  const root = await resolveRootForCommand(options, { json: options.json });
+  if (!root) {
+    return;
+  }
+
   const spinner = options.json ? undefined : ora('正在加载变更状态...').start();
 
   try {
-    const planningHome = resolveCurrentPlanningHomeSync();
-    const projectRoot = planningHome.root;
+    const planningHome = toPlanningHome(root);
+    const projectRoot = root.path;
+    const rootOutput = toRootOutput(root);
+    const newChangeHint = withStoreFlag(root, 'openspec-cn new change <name>');
 
     // Handle no-changes case gracefully — status is informational,
     // so "no changes" is a valid state, not an error.
     if (!options.change) {
-      const available = await getAvailableChanges(projectRoot, planningHome.changesDir);
+      const available = await getAvailableChanges(projectRoot, root.changesDir);
       if (available.length === 0) {
         spinner?.stop();
         if (options.json) {
-          console.log(JSON.stringify({ changes: [], message: '没有活跃的变更。' }, null, 2));
+          console.log(
+            JSON.stringify(
+              { changes: [], message: '没有活跃的变更。', root: rootOutput },
+              null,
+              2
+            )
+          );
           return;
         }
-        console.log('没有活跃的变更。使用以下命令创建: openspec-cn new change <name>');
+        console.log(`没有活跃的变更。请使用以下命令创建一个：${newChangeHint}`);
         return;
       }
       // Changes exist but --change not provided
@@ -64,7 +88,8 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
     const changeName = await validateChangeExists(
       options.change,
       projectRoot,
-      planningHome.changesDir
+      root.changesDir,
+      { newChangeHint }
     );
 
     // Validate schema if explicitly provided
@@ -77,12 +102,15 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
       changeDir: getChangeDir(planningHome, changeName),
       planningHome,
     });
-    const status = formatChangeStatus(context);
+    const status = formatChangeStatus(
+      context,
+      isStoreSelectedRoot(root) ? { storeId: root.storeId } : {}
+    );
 
     spinner?.stop();
 
     if (options.json) {
-      console.log(JSON.stringify(status, null, 2));
+      console.log(JSON.stringify({ ...status, root: rootOutput }, null, 2));
       return;
     }
 
@@ -97,17 +125,10 @@ export function printStatusText(status: ChangeStatus): void {
   const doneCount = status.artifacts.filter((a) => a.status === 'done').length;
   const total = status.artifacts.length;
 
-  console.log(`变更: ${status.changeName}`);
-  console.log(`Schema: ${status.schemaName}`);
-  if (status.initiative) {
-    console.log(`Initiative: ${status.initiative.store}/${status.initiative.id}`);
-  }
-  if (status.planningHome) {
-    const label = status.planningHome.kind === 'workspace'
-      ? `工作区${status.planningHome.workspaceName ? ` (${status.planningHome.workspaceName})` : ''}`
-      : '仓库';
-    console.log(`规划主目录: ${label}`);
-    console.log(`变更根路径: ${status.changeRoot}`);
+  console.log(`变更：${status.changeName}`);
+  console.log(`Schema：${status.schemaName}`);
+  if (status.changeRoot) {
+    console.log(`变更根目录：${status.changeRoot}`);
   }
   console.log(`进度: ${doneCount}/${total} 个产出物已完成`);
   console.log();

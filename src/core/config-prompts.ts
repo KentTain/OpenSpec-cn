@@ -15,7 +15,7 @@ export function serializeConfig(config: Partial<ProjectConfig>): string {
 
   // Context section with comments
   lines.push('# 项目上下文（可选）');
-  lines.push('# 在创建工件时向 AI 显示此信息。');
+  lines.push('# 在创建产出物时向 AI 显示此信息。');
   lines.push('# 添加您的技术栈、约定、风格指南、领域知识等。');
   lines.push('# 示例：');
   lines.push('#   context: |');
@@ -25,8 +25,8 @@ export function serializeConfig(config: Partial<ProjectConfig>): string {
   lines.push('');
 
   // Rules section with comments
-  lines.push('# 每个工件的规则（可选）');
-  lines.push('# 为特定工件添加自定义规则。');
+  lines.push('# 每个产出物的规则（可选）');
+  lines.push('# 为特定产出物添加自定义规则。');
   lines.push('# 示例：');
   lines.push('#   rules:');
   lines.push('#     proposal:');

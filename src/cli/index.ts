@@ -1,14 +1,16 @@
-import { Command } from 'commander';
+import { asStatus } from '../commands/shared-output.js';
+import { Command, Option } from 'commander';
 import { createRequire } from 'module';
 import ora from 'ora';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promises as fs } from 'fs';
-import { AI_TOOLS, OPENSPEC_DIR_NAME } from '../core/config.js';
+import { AI_TOOLS } from '../core/config.js';
 import { UpdateCommand } from '../core/update.js';
 import { ListCommand } from '../core/list.js';
-import { ArchiveCommand } from '../core/archive.js';
+import { ArchiveCommand, type ArchiveOptions } from '../core/archive.js';
 import { ViewCommand } from '../core/view.js';
+import { resolveRootForCommand, toRootOutput } from '../core/root-selection.js';
 import { registerSpecCommand } from '../commands/spec.js';
 import { ChangeCommand } from '../commands/change.js';
 import { ValidateCommand } from '../commands/validate.js';
@@ -17,10 +19,10 @@ import { CompletionCommand } from '../commands/completion.js';
 import { FeedbackCommand } from '../commands/feedback.js';
 import { registerConfigCommand } from '../commands/config.js';
 import { registerSchemaCommand } from '../commands/schema.js';
-import { registerWorkspaceCommand } from '../commands/workspace.js';
-import { registerContextStoreCommand } from '../commands/context-store.js';
-import { registerInitiativeCommand } from '../commands/initiative.js';
-import { findWorkspaceRoot } from '../core/workspace/index.js';
+import { registerStoreCommand } from '../commands/store.js';
+import { registerDoctorCommand } from '../commands/doctor.js';
+import { registerContextCommand } from '../commands/context.js';
+import { registerWorksetCommand } from '../commands/workset.js';
 import {
   statusCommand,
   instructionsCommand,
@@ -28,16 +30,54 @@ import {
   templatesCommand,
   schemasCommand,
   newChangeCommand,
-  setChangeCommand,
   DEFAULT_SCHEMA,
   type StatusOptions,
   type InstructionsOptions,
   type TemplatesOptions,
   type SchemasOptions,
   type NewChangeOptions,
-  type SetChangeOptions,
 } from '../commands/workflow/index.js';
 import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
+import { COMMON_FLAGS } from '../core/completions/shared-flags.js';
+
+const STORE_OPTION_DESCRIPTION = COMMON_FLAGS.store.description;
+
+// Deliberate rejection path: --store-path stays registered (hidden) so the
+// resolver can explain that registering the path is the supported route,
+// instead of Commander emitting a generic unknown-option error (or, for
+// `show`, silently ignoring it via allowUnknownOption).
+function hiddenStorePathOption(): Option {
+  return new Option(
+    '--store-path <path>',
+    '不支持；请使用 "openspec-cn store register <path>" 注册路径，并使用 --store <id>'
+  ).hideHelp();
+}
+
+function failWithError(
+  error: unknown,
+  json?: { enabled: boolean | undefined; payload?: Record<string, unknown>; fallbackCode?: string }
+): void {
+  // The agent contract: every --json failure leaves exactly one JSON
+  // document on stdout (the command's null-shape plus a status array).
+  if (json?.enabled) {
+    console.log(
+      JSON.stringify(
+        { ...(json.payload ?? {}), status: [asStatus(error, json.fallbackCode ?? 'command_error')] },
+        null,
+        2
+      )
+    );
+    process.exitCode = 1;
+    return;
+  }
+  ora().fail(`错误：${(error as Error).message}`);
+  // Resolution and store errors carry a pasteable fix - never drop it.
+  const fix = (error as { diagnostic?: { fix?: string } }).diagnostic?.fix;
+  if (fix) {
+    console.error(`修复建议：${fix}`);
+  }
+  process.exitCode = process.exitCode ?? 1;
+}
 
 const program = new Command();
 const require = createRequire(import.meta.url);
@@ -47,7 +87,7 @@ const { version } = require('../../package.json');
  * Get the full command path for nested commands.
  * For example: 'change show' -> 'change:show'
  */
-function getCommandPath(command: Command): string {
+export function getCommandPath(command: Command): string {
   const names: string[] = [];
   let current: Command | null = command;
 
@@ -65,7 +105,7 @@ function getCommandPath(command: Command): string {
 
 program
   .name('openspec-cn')
-  .description('基于规范驱动开发的AI原生系统')
+  .description('面向规范驱动开发的 AI 原生框架')
   .version(version, '-V, --version', '输出版本号')
   .helpOption('-h, --help', '显示命令帮助')
   .addHelpCommand('help [command]', '显示命令帮助');
@@ -98,22 +138,6 @@ program.hook('postAction', async () => {
 
 const availableToolIds = AI_TOOLS.filter((tool) => tool.skillsDir).map((tool) => tool.value);
 const toolsOptionDescription = `非交互式配置AI工具。使用 "all"、"none" 或逗号分隔的列表：${availableToolIds.join(', ')}`;
-
-async function hasRepoLocalOpenSpecProject(projectPath: string): Promise<boolean> {
-  try {
-    const stats = await fs.stat(path.join(projectPath, OPENSPEC_DIR_NAME));
-    return stats.isDirectory();
-  } catch (error) {
-    const code =
-      typeof error === 'object' && error !== null && 'code' in error
-        ? (error as { code?: unknown }).code
-        : undefined;
-    if (code !== 'ENOENT' && code !== 'ENOTDIR') {
-      throw error;
-    }
-    return false;
-  }
-}
 
 program
   .command('init [path]')
@@ -150,8 +174,7 @@ program
       });
       await initCommand.execute(targetPath);
     } catch (error) {
-      console.log(); // Empty line for spacing
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -172,8 +195,7 @@ program
       });
       await initCommand.execute('.');
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -184,58 +206,59 @@ program
   .option('--force', '即使工具已是最新也强制更新')
   .action(async (targetPath = '.', options?: { force?: boolean }) => {
     try {
-      const resolvedPath = path.resolve(targetPath);
       const updateCommand = new UpdateCommand({ force: options?.force });
-      if (await hasRepoLocalOpenSpecProject(resolvedPath)) {
-        await updateCommand.execute(resolvedPath);
-        return;
-      }
-
-      const workspaceRoot = await findWorkspaceRoot(resolvedPath);
-      if (workspaceRoot) {
-        throw new Error(
-          'OpenSpec workspace detected. Run `openspec workspace update` to refresh workspace-local guidance and skills.'
-        );
-      }
-
-      await updateCommand.execute(resolvedPath);
+      await updateCommand.execute(targetPath);
     } catch (error) {
-      console.log(); // Empty line for spacing
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
 
 program
   .command('list')
-  .description('列出项目（默认显示更改）。使用 --specs 列出规范。')
-  .option('--specs', '列出规范而非更改')
-  .option('--changes', '明确列出更改（默认）')
+  .description('列出项目（默认显示变更）。使用 --specs 列出规范。')
+  .option('--specs', '列出规范而非变更')
+  .option('--changes', '明确列出变更（默认）')
   .option('--sort <order>', '排序方式："recent"（默认）或 "name"', 'recent')
   .option('--json', '以 JSON 格式输出（供程序使用）')
-  .action(async (options?: { specs?: boolean; changes?: boolean; sort?: string; json?: boolean }) => {
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
+  .action(async (options?: { specs?: boolean; changes?: boolean; sort?: string; json?: boolean; store?: string; storePath?: string }) => {
     try {
+      const root = await resolveRootForCommand(options ?? {}, {
+        json: options?.json,
+        failurePayload: options?.specs ? { specs: [], root: null } : { changes: [], root: null },
+      });
+      if (!root) {
+        return;
+      }
       const listCommand = new ListCommand();
       const mode: 'changes' | 'specs' = options?.specs ? 'specs' : 'changes';
       const sort = options?.sort === 'name' ? 'name' : 'recent';
-      await listCommand.execute('.', mode, { sort, json: options?.json });
+      await listCommand.execute(root.path, mode, {
+        sort,
+        json: options?.json,
+        ...(options?.json ? { root: toRootOutput(root) } : {}),
+      });
     } catch (error) {
-      console.log(); // Empty line for spacing
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error, {
+        enabled: options?.json,
+        payload: options?.specs ? { specs: [], root: null } : { changes: [], root: null },
+        fallbackCode: 'list_error',
+      });
       process.exit(1);
     }
   });
 
 program
   .command('view')
-  .description('显示规范和更改的交互式仪表板')
+  .description('显示规范和变更的交互式仪表板')
   .action(async () => {
     try {
       const viewCommand = new ViewCommand();
       await viewCommand.execute('.');
     } catch (error) {
-      console.log(); // Empty line for spacing
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -247,7 +270,7 @@ const changeCmd = program
 
 // Deprecation notice for noun-based commands
 changeCmd.hook('preAction', () => {
-  console.error('警告："openspec-cn change ..." 命令已弃用。请优先使用动词开头的命令（例如 "openspec-cn list", "openspec-cn validate --changes"）。');
+  console.error('警告："openspec-cn change ..." 命令已弃用。请改用动词优先的命令（例如 "openspec-cn list", "openspec-cn validate --changes"）。');
 });
 
 changeCmd
@@ -269,7 +292,7 @@ changeCmd
 
 changeCmd
   .command('list')
-  .description('列出所有活动更改（已弃用：请使用 "openspec-cn list"）')
+  .description('列出所有活动变更（已弃用：请使用 "openspec-cn list"）')
   .option('--json', '以JSON格式输出')
   .option('--long', '显示ID、标题和计数')
   .action(async (options?: { json?: boolean; long?: boolean }) => {
@@ -304,17 +327,19 @@ changeCmd
 
 program
   .command('archive [change-name]')
-  .description('归档已完成的更改并更新主规范')
+  .description('归档已完成的变更并更新主规范')
   .option('-y, --yes', '跳过确认提示')
-  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或仅文档更改）')
+  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或仅文档变更）')
   .option('--no-validate', '跳过验证（不推荐，需要确认）')
-  .action(async (changeName?: string, options?: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean }) => {
+  .option('--json', '以 JSON 格式输出（非交互式）')
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
+  .action(async (changeName?: string, options?: ArchiveOptions) => {
     try {
       const archiveCommand = new ArchiveCommand();
       await archiveCommand.execute(changeName, options);
     } catch (error) {
-      console.log(); // Empty line for spacing
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -322,29 +347,31 @@ program
 registerSpecCommand(program);
 registerConfigCommand(program);
 registerSchemaCommand(program);
-registerWorkspaceCommand(program);
-registerContextStoreCommand(program);
-registerInitiativeCommand(program);
+registerStoreCommand(program);
+registerDoctorCommand(program);
+registerContextCommand(program);
+registerWorksetCommand(program);
 
 // Top-level validate command
 program
   .command('validate [item-name]')
-  .description('验证更改和规范')
-  .option('--all', '验证所有更改和规范')
-  .option('--changes', '验证所有更改')
+  .description('验证变更和规范')
+  .option('--all', '验证所有变更和规范')
+  .option('--changes', '验证所有变更')
   .option('--specs', '验证所有规范')
   .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
   .option('--strict', '启用严格验证模式')
   .option('--json', '以JSON格式输出验证报告')
   .option('--concurrency <n>', '最大并发验证数 (默认为环境变量 OPENSPEC_CONCURRENCY 或 6)')
   .option('--no-interactive', '禁用交互式提示')
-  .action(async (itemName?: string, options?: { all?: boolean; changes?: boolean; specs?: boolean; type?: string; strict?: boolean; json?: boolean; noInteractive?: boolean; concurrency?: string }) => {
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
+  .action(async (itemName?: string, options?: { all?: boolean; changes?: boolean; specs?: boolean; type?: string; strict?: boolean; json?: boolean; noInteractive?: boolean; concurrency?: string; store?: string; storePath?: string }) => {
     try {
       const validateCommand = new ValidateCommand();
       await validateCommand.execute(itemName, options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error, { enabled: options?.json, fallbackCode: 'validate_error' });
       process.exit(1);
     }
   });
@@ -352,17 +379,21 @@ program
 // Top-level show command
 program
   .command('show [item-name]')
-  .description('显示更改或规范')
+  .description('显示变更或规范')
   .option('--json', '以JSON格式输出')
   .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
   .option('--no-interactive', '禁用交互式提示')
   // change-only flags
-  .option('--deltas-only', '仅显示增量 (仅JSON, 更改)')
-  .option('--requirements-only', 'deltas-only 的别名 (已弃用, 更改)')
+  .option('--deltas-only', '仅显示增量 (仅JSON, 变更)')
+  .option('--requirements-only', 'deltas-only 的别名 (已弃用, 变更)')
   // spec-only flags
   .option('--requirements', '仅JSON: 仅显示需求 (排除场景)')
   .option('--no-scenarios', '仅JSON: 排除场景内容')
   .option('-r, --requirement <id>', '仅JSON: 按ID显示特定需求 (从1开始)')
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  // Explicit registration required: allowUnknownOption would otherwise
+  // silently swallow --store-path instead of rejecting it deliberately.
+  .addOption(hiddenStorePathOption())
   // allow unknown options to pass-through to underlying command implementation
   .allowUnknownOption(true)
   .action(async (itemName?: string, options?: { json?: boolean; type?: string; noInteractive?: boolean; [k: string]: any }) => {
@@ -370,8 +401,7 @@ program
       const showCommand = new ShowCommand();
       await showCommand.execute(itemName, options ?? {});
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error, { enabled: options?.json, fallbackCode: 'show_error' });
       process.exit(1);
     }
   });
@@ -386,8 +416,7 @@ program
       const feedbackCommand = new FeedbackCommand();
       await feedbackCommand.execute(message, options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -405,8 +434,7 @@ completionCmd
       const completionCommand = new CompletionCommand();
       await completionCommand.generate({ shell });
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -420,8 +448,7 @@ completionCmd
       const completionCommand = new CompletionCommand();
       await completionCommand.install({ shell, verbose: options?.verbose });
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -435,8 +462,7 @@ completionCmd
       const completionCommand = new CompletionCommand();
       await completionCommand.uninstall({ shell, yes: options?.yes });
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -466,12 +492,13 @@ program
   .option('--change <id>', '要显示状态的变更名称')
   .option('--schema <name>', 'Schema 覆盖（从 config.yaml 自动检测）')
   .option('--json', '以 JSON 格式输出')
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
   .action(async (options: StatusOptions) => {
     try {
       await statusCommand(options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error, { enabled: options.json, fallbackCode: 'change_error' });
       process.exit(1);
     }
   });
@@ -483,6 +510,8 @@ program
   .option('--change <id>', '变更名称')
   .option('--schema <name>', 'Schema 覆盖（从 config.yaml 自动检测）')
   .option('--json', '以 JSON 格式输出')
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
   .action(async (artifactId: string | undefined, options: InstructionsOptions) => {
     try {
       // Special case: "apply" is not an artifact, but a command to get apply instructions
@@ -492,8 +521,7 @@ program
         await instructionsCommand(artifactId, options);
       }
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error, { enabled: options.json, fallbackCode: 'change_error' });
       process.exit(1);
     }
   });
@@ -508,8 +536,7 @@ program
     try {
       await templatesCommand(options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -523,8 +550,7 @@ program
     try {
       await schemasCommand(options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });
@@ -534,41 +560,22 @@ const newCmd = program.command('new').description('创建新项目');
 
 newCmd
   .command('change <name>')
-  .description('创建一个新的变更目录')
+  .description('创建新的变更目录')
   .option('--description <text>', '添加到 README.md 的描述')
-  .option('--goal <text>', '与变更一起存储的工作区产品目标')
-  .option('--areas <names>', '逗号分隔的受影响工作区链接名称')
-  .option('--initiative <id>', '将本地仓库变更关联到计划')
-  .option('--store <id>', '--initiative 的上下文存储 ID')
-  .option('--store-path <path>', '--initiative 的现有本地上下文存储根路径')
+  .option('--goal <text>', '变更的可选目标元数据')
   .option('--schema <name>', `要使用的工作流 Schema（默认：${DEFAULT_SCHEMA}）`)
   .option('--json', '以 JSON 格式输出')
+  .option('--store <id>', STORE_OPTION_DESCRIPTION)
+  .addOption(hiddenStorePathOption())
+  // Removed options kept registered (hidden) so users get a deliberate
+  // explanation instead of a generic unknown-option error.
+  .addOption(new Option('--initiative <id>', '已不再支持').hideHelp())
+  .addOption(new Option('--areas <names>', '已不再支持').hideHelp())
   .action(async (name: string, options: NewChangeOptions) => {
     try {
       await newChangeCommand(name, options);
     } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
-      process.exit(1);
-    }
-  });
-
-// Set command group
-const setCmd = program.command('set').description('设置已提交的 OpenSpec 元数据');
-
-setCmd
-  .command('change <name>')
-  .description('设置本地仓库变更元数据')
-  .option('--initiative <id>', '将本地仓库变更关联到计划')
-  .option('--store <id>', '--initiative 的上下文存储 ID')
-  .option('--store-path <path>', '--initiative 的现有本地上下文存储根路径')
-  .option('--json', '以 JSON 格式输出')
-  .action(async (name: string, options: SetChangeOptions) => {
-    try {
-      await setChangeCommand(name, options);
-    } catch (error) {
-      console.log();
-      ora().fail(`错误：${(error as Error).message}`);
+      failWithError(error);
       process.exit(1);
     }
   });

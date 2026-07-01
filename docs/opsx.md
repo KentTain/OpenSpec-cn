@@ -656,4 +656,4 @@ openspec-cn schema validate my-workflow
 
 这还比较粗糙。这是有意为之——我们正在学习什么有效。
 
-发现了错误？有想法？在 [Discord](https://discord.gg/YctCnvvshC) 上加入我们或在 [GitHub](https://github.com/Fission-AI/openspec/issues) 上提交问题。
+发现了错误？有想法？在 [Discord](https://discord.gg/YctCnvvshC) 上加入我们或在 [GitHub](https://github.com/studyzy/OpenSpec-cn/issues) 上提交问题。

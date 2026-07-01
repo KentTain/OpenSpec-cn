@@ -5,12 +5,15 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getApplyChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-apply-change',
     description: '实现 OpenSpec 变更中的任务。当用户想要开始实现、继续实现或处理任务时使用。',
     instructions: `实现 OpenSpec 变更中的任务。
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：可选指定变更名称。如果省略，检查是否可以从对话上下文中推断。如果模糊或不明确，你**必须**提示获取可用变更。
 
@@ -50,8 +53,6 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
    - 如果 \`state: "blocked"\`（缺少产出物）：显示消息，建议使用 \`openspec-continue-change\`
    - 如果 \`state: "all_done"\`：祝贺，建议归档
    - 否则：继续实现
-
-   **工作区保护：** 如果状态 JSON 报告 \`actionContext.mode: "workspace-planning"\` 且 \`allowedEditRoots\` 为空，说明完整的工作区应用在此切片中不受支持。将链接的仓库和文件夹视为只读上下文，要求用户通过显式实现工作流选择受影响区域，并在编辑文件之前停止。
 
 4. **阅读上下文文件**
 
@@ -172,6 +173,8 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
     tags: ['workflow', 'artifacts', 'experimental'],
     content: `实现 OpenSpec 变更中的任务。
 
+${STORE_SELECTION_GUIDANCE}
+
 **输入**：可选择指定变更名称（例如，\`/opsx:apply add-auth\`）。如果省略，检查是否可以从对话上下文中推断出来。如果模糊或不明确，你必须提示可用的变更。
 
 **步骤**
@@ -210,8 +213,6 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
    - 如果 \`state: "blocked"\`（缺少产出物）：显示消息，建议使用 \`/opsx:continue\`
    - 如果 \`state: "all_done"\`：祝贺，建议归档
    - 否则：继续实现
-
-   **工作区保护：** 如果状态 JSON 报告 \`actionContext.mode: "workspace-planning"\` 且 \`allowedEditRoots\` 为空，说明完整的工作区应用在此切片中不受支持。将链接的仓库和文件夹视为只读上下文，要求用户通过显式实现工作流选择受影响区域，并在编辑文件之前停止。
 
 4. **阅读上下文文件**
 

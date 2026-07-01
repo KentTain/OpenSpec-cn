@@ -414,7 +414,7 @@ openspec/
 - 每个需求至少需要一个 `#### 场景:` 块
 - 在需求文本中使用SHALL/MUST
 
-## How OpenSpec Compares（OpenSpec与其他方案对比）
+## OpenSpec 与其他方案对比
 
 ### 对比 spec-kit
 OpenSpec的双文件夹模型（`openspec/specs/` 用于当前真实状态，`openspec/changes/` 用于提案更新）将状态和差异分开。当您修改现有功能或涉及多个规范时，这种模型具有良好的扩展性。spec-kit在全新项目/0→1方面表现出色，但在跨规范更新和演进功能方面提供的结构较少。

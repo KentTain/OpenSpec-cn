@@ -5,6 +5,7 @@
  * templates file into workflow-focused modules.
  */
 import type { SkillTemplate, CommandTemplate } from '../types.js';
+import { STORE_SELECTION_GUIDANCE } from './store-selection.js';
 
 export function getOpsxProposeSkillTemplate(): SkillTemplate {
   return {
@@ -20,6 +21,8 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
 准备好实现后，运行 /opsx:apply
 
 ---
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：用户的请求应包含变更名称（kebab-case）或对他们想要构建内容的描述。
 
@@ -132,6 +135,8 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
 准备好实现后，运行 /opsx:apply
 
 ---
+
+${STORE_SELECTION_GUIDANCE}
 
 **输入**：\`/opsx:propose\` 之后的参数是变更名称（kebab-case），或用户想要构建内容的描述。
 
