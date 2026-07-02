@@ -244,7 +244,7 @@ describe('resolveOpenSpecRoot', () => {
     );
     expect(error.message).toContain('team-context');
     expect(error.message).toContain('--store <id>');
-    expect(error.message).toContain('openspec init');
+    expect(error.message).toContain('openspec-cn init');
     // No scaffolding happened.
     expect(fs.existsSync(path.join(appRepo, 'openspec'))).toBe(false);
   });
@@ -341,8 +341,8 @@ describe('resolveOpenSpecRoot', () => {
       }
 
       expect(warnings).toHaveLength(1);
-      expect(warnings[0]).toContain("declares store 'team-context'");
-      expect(warnings[0]).toContain('the declaration is ignored');
+      expect(warnings[0]).toContain("声明了 store 'team-context'");
+      expect(warnings[0]).toContain('该声明将被忽略');
     });
 
     it('keeps config-only directories without a pointer as plain roots', async () => {
@@ -379,7 +379,7 @@ describe('resolveOpenSpecRoot', () => {
       );
       // The unparseable case names the real problem, not a phantom key.
       expect(yamlError.message).toContain('could not be read as YAML');
-      expect(yamlError.diagnostic.fix).toContain('Fix the YAML syntax');
+      expect(yamlError.diagnostic.fix).toContain('修复');
 
       // A config that parses to a non-mapping scalar has no pointer at
       // all: plain root, no error (readProjectConfig owns that warning).
@@ -438,8 +438,8 @@ describe('resolveOpenSpecRoot', () => {
 
       for (const [code, origin, run] of cases) {
         const error = await expectRootSelectionError(run(), code);
-        expect(error.message).toContain(`Declared in ${origin}: `);
-        expect(error.diagnostic.fix).not.toContain('Declared in');
+        expect(error.message).toContain(`${origin} 中声明: `);
+        expect(error.diagnostic.fix).not.toContain('中声明');
       }
     });
 
@@ -450,7 +450,7 @@ describe('resolveOpenSpecRoot', () => {
         resolveOpenSpecRoot({ startPath: pointerDir, globalDataDir }),
         'no_registered_stores'
       );
-      expect(error.message).toContain('Declared in ');
+      expect(error.message).toContain('中声明: ');
     });
 
     it('resolves one hop only - a store with its own pointer is the destination', async () => {

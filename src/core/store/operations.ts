@@ -318,7 +318,7 @@ function resolveSetupRoot(id: string, inputPath: string | undefined): string {
       'store_setup_path_required',
       {
         target: 'store.root',
-        fix: `openspec store setup ${id} --path ~/openspec/${id}`,
+        fix: `openspec-cn store setup ${id} --path ~/openspec/${id}`,
       }
     );
   }
@@ -330,7 +330,7 @@ function resolveRegisterRoot(inputPath: string | undefined): string {
   if (inputPath === undefined || inputPath.trim().length === 0) {
     throw new StoreError('Pass a store path.', 'store_path_required', {
       target: 'store.root',
-      fix: 'openspec store register /path/to/store',
+      fix: 'openspec-cn store register /path/to/store',
     });
   }
 
@@ -563,7 +563,7 @@ export async function setupPreparedStore(
       'store_setup_path_changed',
       {
         target: 'store.root',
-        fix: 'Rerun openspec store setup to re-evaluate the directory.',
+        fix: 'Rerun openspec-cn store setup to re-evaluate the directory.',
       }
     );
   }
@@ -749,7 +749,7 @@ export async function registerExistingStore(
         target: 'openspec.root',
         fix: isEmptyCloneSuspect
           ? 'If this is a store clone: commit and push the origin store, pull it into this clone, then rerun register.'
-          : 'Run openspec store setup for a new store, or point register at a checkout whose openspec/ files are present.',
+          : 'Run openspec-cn store setup for a new store, or point register at a checkout whose openspec/ files are present.',
       }
     );
   }
@@ -771,7 +771,7 @@ export async function registerExistingStore(
       {
         target: 'store.id',
         fix: registeredElsewhere
-          ? `One checkout per store id is supported, and '${metadata.id}' is already registered. Run openspec store unregister ${metadata.id} first to register this checkout instead.`
+          ? `每个 store id 仅支持一个检出，'${metadata.id}' 已注册。请先运行 openspec-cn store unregister ${metadata.id} 再注册此检出。`
           : `Use --id ${metadata.id} or register a different folder.`,
       }
     );
@@ -884,7 +884,7 @@ async function assertSafeToDeleteStoreRoot(storeRoot: string, id: string): Promi
       'store_remove_path_not_directory',
       {
         target: 'store.root',
-        fix: 'Run "openspec store unregister <id>" if you only want to forget this local registry entry.',
+        fix: 'Run "openspec-cn store unregister <id>" if you only want to forget this local registry entry.',
       }
     );
   }
@@ -896,7 +896,7 @@ async function assertSafeToDeleteStoreRoot(storeRoot: string, id: string): Promi
       'store_remove_metadata_missing',
       {
         target: 'store.metadata',
-        fix: 'Run "openspec store unregister <id>" if you only want to forget this local registry entry.',
+        fix: 'Run "openspec-cn store unregister <id>" if you only want to forget this local registry entry.',
       }
     );
   }
@@ -1037,7 +1037,7 @@ async function inspectStore(entry: {
       'Store location does not exist.',
       {
         target: 'store.root',
-        fix: `Run openspec store register /path/to/${entry.id} --id ${entry.id}.`,
+        fix: `Run openspec-cn store register /path/to/${entry.id} --id ${entry.id}.`,
       }
     ));
   } else if (kind !== 'directory') {
@@ -1166,7 +1166,7 @@ export async function doctorStores(id?: string): Promise<StoreDoctorResult> {
     if (selectedId !== undefined) {
       throw new StoreError(`Unknown store '${selectedId}'.`, 'store_not_found', {
         target: 'store.id',
-        fix: 'Run openspec store list to see registered stores.',
+        fix: 'Run openspec-cn store list to see registered stores.',
       });
     }
 
@@ -1181,7 +1181,7 @@ export async function doctorStores(id?: string): Promise<StoreDoctorResult> {
   if (selectedId && selected.length === 0) {
     throw new StoreError(`Unknown store '${selectedId}'.`, 'store_not_found', {
       target: 'store.id',
-      fix: 'Run openspec store list to see registered stores.',
+      fix: 'Run openspec-cn store list to see registered stores.',
     });
   }
 

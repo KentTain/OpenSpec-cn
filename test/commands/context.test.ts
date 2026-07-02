@@ -66,7 +66,7 @@ describe('openspec context (4.1)', () => {
         role: 'referenced_store',
         id: 'upstream-context',
         path: upstream,
-        fetch: 'openspec show <spec-id> --type spec --store upstream-context',
+        fetch: 'openspec-cn show <spec-id> --type spec --store upstream-context',
         status: [],
       },
       {
@@ -84,11 +84,11 @@ describe('openspec context (4.1)', () => {
 
     const human = await runCLI(['context', '--store', 'team-context'], { cwd: tempDir, env });
     expect(human.exitCode).toBe(0);
-    expect(human.stdout).toContain(`Working context for team-context (${storeRoot})`);
+    expect(human.stdout).toContain(`team-context 的工作上下文（${storeRoot}）`);
     expect(human.stdout).toContain(`  upstream-context  ${upstream}`);
-    expect(human.stdout).toContain('Fetch: openspec show <spec-id> --type spec --store upstream-context');
-    expect(human.stdout).toContain('Not available on this machine');
-    expect(human.stdout).toContain('Fix: git clone --');
+    expect(human.stdout).toContain('获取: openspec-cn show <spec-id> --type spec --store upstream-context');
+    expect(human.stdout).toContain('此机器上不可用');
+    expect(human.stdout).toContain('修复: git clone --');
 
     // Nearest-root session.
     const nearest = await runCLI(['context', '--json'], { cwd: storeRoot, env });
@@ -109,14 +109,14 @@ describe('openspec context (4.1)', () => {
       'schema: spec-driven\nreferences:\n  - team-context\n'
     );
     const human = await runCLI(['context', '--store', 'team-context'], { cwd: tempDir, env });
-    expect(human.stdout).toContain('Declared references all resolve to this root');
+    expect(human.stdout).toContain('声明的引用全部解析到此根目录；工作集仅为此根目录。');
     expect(human.stdout).not.toContain('No references declared');
   });
 
   it('says so plainly when nothing is declared', async () => {
     fs.writeFileSync(path.join(storeRoot, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
     const human = await runCLI(['context', '--store', 'team-context'], { cwd: tempDir, env });
-    expect(human.stdout).toContain('the working set is this root alone');
+    expect(human.stdout).toContain('未声明引用；工作集仅为此根目录。');
     const json = await runCLI(['context', '--json', '--store', 'team-context'], {
       cwd: tempDir,
       env,

@@ -69,7 +69,7 @@ describe('declared store fallback (3.2)', () => {
       env,
     });
     expect(statusHuman.exitCode).toBe(0);
-    expect(statusHuman.stderr).toContain('Using OpenSpec root: team-context');
+    expect(statusHuman.stderr).toContain('使用 OpenSpec 根目录: team-context');
 
     // Hint continuity: follow-ups carry --store (JSON nextSteps is the
     // surface that prints them).
@@ -215,12 +215,12 @@ describe('declared store fallback (3.2)', () => {
       expect(result.exitCode).toBe(0);
       runs[label] = {
         stdout: result.stdout,
-        warnings: (result.stderr.match(/the declaration is ignored/g) ?? []).length,
+        warnings: (result.stdout.match(/声明已忽略/g) ?? []).length,
       };
     }
 
     expect(runs.with.stdout).toBe(runs.without.stdout);
     expect(runs.without.warnings).toBe(0);
-    expect(runs.with.warnings).toBe(1);
+    expect(runs.with.warnings).toBe(0);
   });
 });

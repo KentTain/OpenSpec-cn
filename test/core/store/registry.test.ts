@@ -129,7 +129,7 @@ describe('store registry facade', () => {
         localPath: newRoot,
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/already registered/u);
+    ).rejects.toThrow(/已.*注册/u);
 
     const stores = await listRegisteredStores({ globalDataDir: tempDir });
     expect(stores.map((store) => store.id)).toEqual(['acme-context', 'zeta-context']);
@@ -149,7 +149,7 @@ describe('store registry facade', () => {
         localPath: storeRoot,
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/does not match registered id/u);
+    ).rejects.toThrow(/不匹配/u);
 
     await expect(readStoreRegistryState({ globalDataDir: tempDir })).resolves.toBeNull();
   });
@@ -172,7 +172,7 @@ describe('store registry facade', () => {
         remote: '',
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/remote must not be empty/u);
+    ).rejects.toThrow(/不能为空/u);
 
     await expect(readStoreRegistryState({ globalDataDir: tempDir })).resolves.toBeNull();
   });
@@ -355,7 +355,7 @@ describe('store registry facade', () => {
   it('rejects missing registry entries and bad registered metadata', async () => {
     await expect(
       resolveRegisteredStore({ id: 'missing-context', globalDataDir: tempDir })
-    ).rejects.toThrow(/No store registry found/u);
+    ).rejects.toThrow(/未找到 store 注册表/u);
 
     // The no-registry fix must not point at --store-path, a flag this PR
     // deliberately rejects everywhere else.
@@ -394,7 +394,7 @@ describe('store registry facade', () => {
 
     await expect(
       resolveRegisteredStore({ id: 'unknown-context', globalDataDir: tempDir })
-    ).rejects.toThrow(/Unknown store/u);
+    ).rejects.toThrow(/未知的 store/u);
 
     await expect(
       resolveRegisteredStore({ id: 'missing-metadata', globalDataDir: tempDir })
@@ -402,7 +402,7 @@ describe('store registry facade', () => {
 
     await expect(
       resolveRegisteredStore({ id: 'mismatched', globalDataDir: tempDir })
-    ).rejects.toThrow(/does not match registered id/u);
+    ).rejects.toThrow(/不匹配/u);
   });
 
   it('refuses a prepared remove when the registry entry changes before deletion', async () => {
@@ -444,7 +444,7 @@ describe('store registry facade', () => {
       { globalDataDir: tempDir }
     );
 
-    await expect(removeStore(prepared)).rejects.toThrow(/changed before cleanup/u);
+    await expect(removeStore(prepared)).rejects.toThrow(/已变更/u);
     expect(fs.existsSync(firstRoot)).toBe(true);
     expect(fs.existsSync(secondRoot)).toBe(true);
     const registry = await readStoreRegistryState({ globalDataDir: tempDir });

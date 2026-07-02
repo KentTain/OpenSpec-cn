@@ -106,7 +106,7 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
   if (rootKind === 'missing') {
     inspection.diagnostics.push(missingDirectoryDiagnostic(
       'openspec_store_root_missing',
-      'Store root does not exist.',
+      'Store 根目录不存在。',
       'store.root'
     ));
     return inspection;
@@ -115,7 +115,7 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
   if (rootKind !== 'directory') {
     inspection.diagnostics.push(missingDirectoryDiagnostic(
       'openspec_store_root_not_directory',
-      'Store root is not a directory.',
+      'Store 根目录不是一个目录。',
       'store.root'
     ));
     return inspection;
@@ -128,7 +128,7 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
   if (openspecKind === 'missing') {
     inspection.diagnostics.push(missingDirectoryDiagnostic(
       'openspec_root_missing',
-      'Missing openspec/ directory.',
+      '缺少 openspec/ 目录。',
       'openspec.root'
     ));
     return inspection;
@@ -137,7 +137,7 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
   if (openspecKind !== 'directory') {
     inspection.diagnostics.push(missingDirectoryDiagnostic(
       'openspec_root_not_directory',
-      'openspec/ exists but is not a directory.',
+      'openspec/ 存在但不是目录。',
       'openspec.root'
     ));
     return inspection;
@@ -154,22 +154,22 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
     if (configYamlKind !== 'missing' || configYmlKind !== 'missing') {
       inspection.diagnostics.push(missingDirectoryDiagnostic(
         'openspec_config_not_file',
-        'OpenSpec config path exists but is not a file.',
+        'OpenSpec 配置文件路径存在但不是文件。',
         'openspec.config'
       ));
     } else {
       inspection.diagnostics.push(missingDirectoryDiagnostic(
         'openspec_config_missing',
-        'Missing openspec/config.yaml or openspec/config.yml.',
+        '缺少 openspec/config.yaml 或 openspec/config.yml。',
         'openspec.config'
       ));
     }
   }
 
   for (const [key, relativePath, code, message, target] of [
-    ['specs', OPENSPEC_SPECS_DIR, 'openspec_specs_missing', 'Missing openspec/specs/.', 'openspec.specs'],
-    ['changes', OPENSPEC_CHANGES_DIR, 'openspec_changes_missing', 'Missing openspec/changes/.', 'openspec.changes'],
-    ['archive', OPENSPEC_ARCHIVE_DIR, 'openspec_archive_missing', 'Missing openspec/changes/archive/.', 'openspec.archive'],
+    ['specs', OPENSPEC_SPECS_DIR, 'openspec_specs_missing', '缺少 openspec/specs/。', 'openspec.specs'],
+    ['changes', OPENSPEC_CHANGES_DIR, 'openspec_changes_missing', '缺少 openspec/changes/。', 'openspec.changes'],
+    ['archive', OPENSPEC_ARCHIVE_DIR, 'openspec_archive_missing', '缺少 openspec/changes/archive/。', 'openspec.archive'],
   ] as const) {
     const kind = await pathKind(path.join(storeRoot, relativePath));
     inspection[key] = { present: kind === 'directory' };
@@ -177,7 +177,7 @@ export async function inspectOpenSpecRoot(storeRoot: string): Promise<OpenSpecRo
 
     inspection.diagnostics.push(missingDirectoryDiagnostic(
       kind === 'missing' ? code : code.replace('_missing', '_not_directory'),
-      kind === 'missing' ? message : `${relativePath}/ exists but is not a directory.`,
+      kind === 'missing' ? message : `${relativePath}/ 存在但不是目录。`,
       target
     ));
   }
@@ -202,7 +202,7 @@ async function ensureDirectory(
 
   if (kind === 'directory') return;
   if (kind !== 'missing') {
-    throw new Error(`${relativePath}/ exists but is not a directory.`);
+    throw new Error(`${relativePath}/ 存在但不是目录。`);
   }
 
   await fs.mkdir(absolutePath, { recursive: true });
@@ -224,7 +224,7 @@ async function ensureDefaultConfig(
 
   if (yamlKind === 'file' || ymlKind === 'file') return;
   if (yamlKind !== 'missing' || ymlKind !== 'missing') {
-    throw new Error('OpenSpec config path exists but is not a file.');
+    throw new Error('OpenSpec 配置文件路径存在但不是文件。');
   }
 
   await FileSystemUtils.writeFile(
@@ -270,7 +270,7 @@ export async function ensureOpenSpecRoot(
   if (rootKind === 'missing') {
     await fs.mkdir(storeRoot, { recursive: true });
   } else if (rootKind !== 'directory') {
-    throw new Error('Store root is not a directory.');
+    throw new Error('Store 根目录不是一个目录。');
   }
 
   await ensureDirectory(storeRoot, OPENSPEC_ROOT_DIR, ledger);

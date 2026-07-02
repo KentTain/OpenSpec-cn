@@ -118,7 +118,7 @@ describe('store git lifecycle', () => {
     const storeRoot = path.join(tempDir, 'interactive-context');
     const { input, confirm } = await getPromptMocks();
     input.mockImplementation(async (options: { message: string }) => {
-      if (options.message === 'Where should this store live?') return storeRoot;
+      if (options.message === '此 store 应存放在哪里？') return storeRoot;
       throw new Error(`Unexpected prompt: ${options.message}`);
     });
     confirm.mockResolvedValue(true);
@@ -128,12 +128,12 @@ describe('store git lifecycle', () => {
     // No Git prompt: Git is the default, and the summary reflects it.
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(confirm).toHaveBeenNthCalledWith(1, {
-      message: 'Create this store?',
+      message: '创建此 store？',
       default: true,
     });
-    expect(consoleLogSpy).toHaveBeenCalledWith('  Git: initialized');
+    expect(consoleLogSpy).toHaveBeenCalledWith('  Git: 已初始化');
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Share this store by committing and pushing it like any Git repo.'
+      '像普通 Git 仓库一样提交并推送此 store 来分享。'
     );
     expect(fs.existsSync(path.join(storeRoot, '.git'))).toBe(true);
     const committed = execFileSync('git', ['log', '--format=%s'], { cwd: storeRoot })

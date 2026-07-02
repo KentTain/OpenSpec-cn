@@ -67,7 +67,7 @@ describe('capstone persona journeys (6.1)', () => {
         role: 'referenced_store',
         id: 'product-requirements',
         path: storeRoot,
-        fetch: 'openspec show <spec-id> --type spec --store product-requirements',
+        fetch: 'openspec-cn show <spec-id> --type spec --store product-requirements',
       })
     );
 

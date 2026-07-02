@@ -66,7 +66,7 @@ describe('top-level validate command', () => {
   it('prints a helpful hint when no args in non-interactive mode', async () => {
     const result = await runCLI(['validate'], { cwd: testDir });
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain('没有要验证的内容');
+    expect(result.stderr).toContain('没有可验证的内容');
   });
 
   it('validates all with --all and outputs JSON summary', async () => {

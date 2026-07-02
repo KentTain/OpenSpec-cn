@@ -71,9 +71,9 @@ function registerFix(id: string, remote?: string): string {
     // get single quotes; cmd/PowerShell treat single quotes as literal
     // characters, so win32 gets double quotes (valid everywhere).
     const quoted = process.platform === 'win32' ? `"${checkout}"` : `'${checkout}'`;
-    return `git clone -- ${remote} ${quoted} && openspec store register ${quoted} --id ${id}`;
+    return `git clone -- ${remote} ${quoted} && openspec-cn store register ${quoted} --id ${id}`;
   }
-  return `Get a checkout from a teammate and run: openspec store register <path> --id ${id}`;
+  return `Get a checkout from a teammate and run: openspec-cn store register <path> --id ${id}`;
 }
 
 /**
@@ -141,7 +141,7 @@ async function collectSpecEntries(referencedRoot: string): Promise<ReferenceSpec
 }
 
 export function fetchRecipe(storeId: string): string {
-  return `openspec show <spec-id> --type spec --store ${storeId}`;
+  return `openspec-cn show <spec-id> --type spec --store ${storeId}`;
 }
 
 function specLine(spec: ReferenceSpecEntry): string {
@@ -192,7 +192,6 @@ export function renderReferencedStoresSection(entries: ReferenceIndexEntry[]): s
  * let hostile content forge instruction lines (slice 6.1 hardening).
  */
 export function sanitizeInline(value: string, maxLength = 300): string {
-  // eslint-disable-next-line no-control-regex
   const flattened = value.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
   return flattened.length > maxLength ? `${flattened.slice(0, maxLength)}…` : flattened;
 }
@@ -313,7 +312,7 @@ export async function assembleReferenceIndex(
           warning(
             'reference_registry_unreadable',
             `Referenced store '${id}' cannot be checked: the store registry is unreadable.`,
-            'Run: openspec store doctor'
+            'Run: openspec-cn store doctor'
           ),
         ],
       });
@@ -350,7 +349,7 @@ export async function assembleReferenceIndex(
           warning(
             'reference_root_unhealthy',
             `Referenced store '${id}' is registered but not usable (${inspection.kind.replace(/_/g, ' ')}).`,
-            `Run: openspec store doctor ${id}`
+            `Run: openspec-cn store doctor ${id}`
           ),
         ],
       });
@@ -397,7 +396,7 @@ export async function assembleReferenceIndex(
         warning(
           'reference_index_truncated',
           `Referenced store '${id}' index truncated at the 50KB budget (${low} of ${specs.length} specs listed).`,
-          `List the rest directly: openspec list --specs --store ${id}`
+          `List the rest directly: openspec-cn list --specs --store ${id}`
         )
       );
     }

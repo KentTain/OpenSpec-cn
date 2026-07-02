@@ -88,13 +88,13 @@ describe('worksets core', () => {
 
     it('rejects empty lists, duplicate labels, and relative paths', () => {
       expect(memberListProblem([memberA(), memberB()])).toBeNull();
-      expect(memberListProblem([])).toMatch(/must not be empty/);
+      expect(memberListProblem([])).toMatch(/成员不能为空/);
       expect(
         memberListProblem([memberA(), { ...memberB(), name: 'team-context' }])
-      ).toMatch(/duplicate member name 'team-context'/);
+      ).toMatch(/重复的成员名称 'team-context'/);
       expect(
         memberListProblem([{ name: 'web', path: 'relative/web' }])
-      ).toMatch(/must be absolute/);
+      ).toMatch(/必须为绝对路径/);
     });
   });
 
@@ -120,7 +120,7 @@ describe('worksets core', () => {
     it('fails the hand-edit contract violations as invalid_workset_file', () => {
       const file = getWorksetsFilePath(options());
       const cases: Array<{ content: string; problem: RegExp }> = [
-        { content: '{not yaml', problem: /Invalid worksets file/ },
+        { content: '{not yaml', problem: /无效的工作集文件/ },
         {
           content: 'version: 2\nworksets: {}\n',
           problem: /version/,
@@ -131,16 +131,16 @@ describe('worksets core', () => {
         },
         {
           content: 'version: 1\nworksets:\n  empty:\n    members: []\n',
-          problem: /members must not be empty/,
+          problem: /成员不能为空/,
         },
         {
           content:
             'version: 1\nworksets:\n  rel:\n    members:\n      - name: a\n        path: relative/path\n',
-          problem: /must be absolute/,
+          problem: /必须为绝对路径/,
         },
         {
           content: `version: 1\nworksets:\n  dup:\n    members:\n      - name: a\n        path: ${tempDir}\n      - name: a\n        path: ${globalDataDir}\n`,
-          problem: /duplicate member name/,
+          problem: /重复的成员名称/,
         },
         {
           content: `version: 1\nworksets:\n  extra:\n    unknown: true\n    members:\n      - name: a\n        path: ${tempDir}\n`,
@@ -158,7 +158,7 @@ describe('worksets core', () => {
           ).diagnostic;
           expect(diagnostic.code).toBe('invalid_workset_file');
           expect(diagnostic.message).toMatch(candidate.problem);
-          expect(diagnostic.fix).toBe(`Repair or remove ${file}.`);
+          expect(diagnostic.fix).toBe(`修复或删除 ${file}。`);
         }
       }
     });
@@ -206,7 +206,7 @@ describe('worksets core', () => {
         ).diagnostic;
         expect(diagnostic.code).toBe('workset_exists');
         expect(diagnostic.fix).toBe(
-          'Choose another name, or remove it first: openspec workset remove platform'
+          '选择其他名称，或先删除：openspec-cn workset remove platform'
         );
       }
     });
@@ -226,7 +226,7 @@ describe('worksets core', () => {
         ).diagnostic;
         expect(diagnostic.code).toBe('workset_not_found');
         expect(diagnostic.fix).toBe(
-          'Saved worksets: platform. See them with: openspec workset list'
+          '已保存的 worksets：platform。使用以下命令查看：openspec-cn workset list'
         );
       }
 
@@ -238,7 +238,7 @@ describe('worksets core', () => {
           error as { diagnostic: { fix?: string } }
         ).diagnostic;
         expect(diagnostic.fix).toBe(
-          'Create it first: openspec workset create absent'
+          '先创建：openspec-cn workset create absent'
         );
       }
     });

@@ -38,14 +38,14 @@ export async function composeInteractively(
 ): Promise<Workset> {
   const prompts = await import('@inquirer/prompts');
 
-  console.log('[1/3] Name the workset');
+  console.log('[1/3] 命名 workset');
   let name: string;
   if (givenName !== undefined) {
     name = validateWorksetName(givenName);
-    console.log(`  Workset name: ${name}`);
+    console.log(`  Workset 名称: ${name}`);
   } else {
     name = await prompts.input({
-      message: 'Workset name:',
+      message: 'Workset 名称:',
       required: true,
       validate(value: string) {
         try {
@@ -72,17 +72,17 @@ export async function composeInteractively(
   if (members.length > 0) {
     finalizeWorkset(name, members, input.tool, table);
     for (const member of members) {
-      console.log(`  Added '${member.name}' (${member.path})`);
+      console.log(`  已添加 '${member.name}' (${member.path})`);
     }
   }
 
   while (true) {
     if (members.length > 0) {
       const next = await prompts.select({
-        message: 'Add another folder or finish:',
+        message: '添加另一个文件夹或完成:',
         choices: [
           { name: 'Finish', value: 'finish' },
-          { name: 'Add another folder', value: 'add' },
+          { name: '添加另一个文件夹', value: 'add' },
         ],
         default: 'finish',
       });
@@ -92,7 +92,7 @@ export async function composeInteractively(
     }
 
     const rawPath = await prompts.input({
-      message: 'Folder path:',
+      message: '文件夹路径:',
       ...(members.length === 0 ? { default: '.', prefill: 'editable' } : {}),
       required: true,
       async validate(value: string) {
@@ -109,7 +109,7 @@ export async function composeInteractively(
     const collision = members.some((member) => member.name === label);
     if (memberLabelProblem(label) !== null || collision) {
       label = await prompts.input({
-        message: 'Name this member (the folder label):',
+        message: '为此成员命名（文件夹标签）:',
         required: true,
         validate(value: string) {
           const problem = memberLabelProblem(value);
@@ -154,7 +154,7 @@ export async function promptToolFromChoices(
 ): Promise<string> {
   const { select } = await import('@inquirer/prompts');
   return select({
-    message: 'Open with:',
+    message: '打开方式:',
     choices: available.map((choice) => ({
       name: choice.opener.label,
       value: choice.opener.id,
@@ -165,7 +165,7 @@ export async function promptToolFromChoices(
 export async function promptOpenNow(label: string): Promise<boolean> {
   const { confirm } = await import('@inquirer/prompts');
   return confirm({
-    message: `Open it now in ${label}?`,
+    message: `现在在 ${label} 中打开？`,
     default: true,
   });
 }
@@ -182,7 +182,7 @@ export async function confirmRemoveInteractively(
   }
 
   return confirm({
-    message: `Remove workset '${workset.name}'? (member folders are never touched)`,
+    message: `删除 workset '${workset.name}'？（成员文件夹不会被触及）`,
     default: false,
   });
 }

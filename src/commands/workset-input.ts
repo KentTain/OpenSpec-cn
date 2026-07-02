@@ -24,11 +24,11 @@ import {
 
 function memberInvalidError(problem: string): StoreError {
   return new StoreError(
-    `Invalid workset member: ${problem}.`,
+    `无效的 workset 成员：${problem}。`,
     'workset_member_invalid',
     {
       target: 'workset.member',
-      fix: 'Pass --member <path> with an existing folder, or --member <name>=<path> to label it.',
+      fix: '使用 --member <path> 指定已有文件夹，或使用 --member <name>=<path> 为其添加标签。',
     }
   );
 }
@@ -122,9 +122,9 @@ export function toolUnknownError(
     .filter((opener) => isOpenerEnabled(opener))
     .map((opener) => opener.id)
     .join(', ');
-  return new StoreError(`Unknown tool '${toolId}'.`, 'workset_tool_unknown', {
+  return new StoreError(`未知的工具 '${toolId}'。`, 'workset_tool_unknown', {
     target: 'workset.tool',
-    fix: `Known tools: ${knownIds}. Add new tools under "openers" in ${getGlobalConfigPath()}.`,
+    fix: `已知工具: ${knownIds}。在 ${getGlobalConfigPath()} 的 "openers" 下添加新工具。`,
   });
 }
 
@@ -153,14 +153,14 @@ export function toolUnavailableError(
   const alternative = firstInstalledAlternative(table, opener.id, scan);
 
   return new StoreError(
-    `${opener.label} ('${opener.command}') is not on PATH.`,
+    `${opener.label}（'${opener.command}'）不在 PATH 中。`,
     'workset_tool_unavailable',
     {
       target: 'workset.tool',
       fix:
         alternative !== null
-          ? `Install '${opener.command}' or run: openspec workset open ${worksetName} --tool ${alternative}`
-          : `Install '${opener.command}', then rerun: openspec workset open ${worksetName}`,
+          ? `安装 '${opener.command}' 或运行：openspec-cn workset open ${worksetName} --tool ${alternative}`
+          : `安装 '${opener.command}'，然后重新运行：openspec-cn workset open ${worksetName}`,
     }
   );
 }
@@ -175,11 +175,11 @@ export function noToolInstalledError(
     .map((opener) => opener.command)
     .join(', ');
   return new StoreError(
-    'None of the known tools is on PATH.',
+    '已知的工具均不在 PATH 中。',
     'workset_tool_unavailable',
     {
       target: 'workset.tool',
-      fix: `Install one of: ${commands}. Then rerun: openspec workset open ${worksetName}`,
+      fix: `安装以下工具之一：${commands}。然后重新运行：openspec-cn workset open ${worksetName}`,
     }
   );
 }

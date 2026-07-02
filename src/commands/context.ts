@@ -61,9 +61,9 @@ function memberLine(member: WorkingSetMember): string {
 
 function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: number): void {
   const rootLabel = workingSet.root.store_id ?? path.basename(workingSet.root.path);
-  console.log(`Working context for ${rootLabel} (${workingSet.root.path})`);
+  console.log(`${rootLabel} 的工作上下文（${workingSet.root.path}）`);
   console.log('');
-  console.log('OpenSpec root');
+  console.log('OpenSpec 根目录');
   console.log(`  ${rootLabel}  ${workingSet.root.path}`);
 
   const availableStores = workingSet.members.filter(
@@ -73,11 +73,11 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
 
   if (availableStores.length > 0) {
     console.log('');
-    console.log('Referenced stores');
+    console.log('引用的 stores');
     for (const member of availableStores) {
       console.log(memberLine(member));
       if (member.fetch) {
-        console.log(`    Fetch: ${member.fetch}`);
+        console.log(`  获取: ${member.fetch}`);
       }
     }
   }
@@ -88,14 +88,14 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
     // emptied-by-omission set must not claim nothing was declared.
     console.log(
       declaredReferenceCount > 0
-        ? 'Declared references all resolve to this root; the working set is this root alone.'
-        : 'No references declared; the working set is this root alone.'
+        ? '声明的引用全部解析到此根目录；工作集仅为此根目录。'
+        : '未声明引用；工作集仅为此根目录。'
     );
   }
 
   if (unavailable.length > 0 || workingSet.status.length > 0) {
     console.log('');
-    console.log('Not available on this machine');
+    console.log('此机器上不可用');
     for (const member of unavailable) {
       if (member.status.length === 0) {
         console.log(`  - ${member.id}`);
@@ -104,12 +104,12 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
       for (const diagnostic of member.status) {
         console.log(`  - ${member.id}: ${diagnostic.message}`);
         if (diagnostic.fix) {
-          console.log(`    Fix: ${diagnostic.fix}`);
+          console.log(`    修复: ${diagnostic.fix}`);
         }
       }
     }
     for (const diagnostic of workingSet.status) {
-      console.log(`  Note: ${diagnostic.message}`);
+      console.log(`  备注: ${diagnostic.message}`);
       if (diagnostic.fix) {
         console.log(`  Fix: ${diagnostic.fix}`);
       }
@@ -169,9 +169,9 @@ export function registerContextCommand(program: Command): void {
     .addOption(
       new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
     )
-    .option('--json', 'Output the agent brief as JSON')
-    .option('--code-workspace <path>', 'Also write a VS Code workspace file for the set')
-    .option('--force', 'Overwrite an existing --code-workspace file')
+    .option('--json', '以 JSON 格式输出代理简报')
+    .option('--code-workspace <path>', '同时为此集合写入 VS Code 工作区文件')
+    .option('--force', '覆盖已有的 --code-workspace 文件')
     .action(
       async (options: {
         store?: string;

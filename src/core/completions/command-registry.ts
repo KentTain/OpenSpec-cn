@@ -250,7 +250,7 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
   {
     name: 'store',
     description:
-      'Create and manage stores - standalone OpenSpec repos you register on this machine',
+      '创建和管理 stores - 您在本机上注册的独立 OpenSpec 仓库',
     flags: [],
     subcommands: [
       {

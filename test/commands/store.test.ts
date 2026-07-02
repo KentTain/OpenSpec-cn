@@ -202,8 +202,8 @@ describe('store command', () => {
     const storeRoot = path.join(tempDir, 'guided-context');
     const { input, confirm } = await getPromptMocks();
     input.mockImplementation(async (options: { message: string; default?: string }) => {
-      if (options.message === 'Store name') return 'guided-context';
-      if (options.message === 'Where should this store live?') return storeRoot;
+      if (options.message === 'Store 名称') return 'guided-context';
+      if (options.message === '此 store 应存放在哪里？') return storeRoot;
       return options.default;
     });
     confirm.mockResolvedValueOnce(true);
@@ -211,16 +211,16 @@ describe('store command', () => {
     await runStoreCommand(['setup', '--no-init-git']);
 
     expect(input).toHaveBeenCalledWith(expect.objectContaining({
-      message: 'Store name',
+      message: 'Store 名称',
     }));
     // The suggested location is a visible user path, never the XDG data dir.
     expect(input).toHaveBeenCalledWith(expect.objectContaining({
-      message: 'Where should this store live?',
+      message: '此 store 应存放在哪里？',
       default: '~/openspec/guided-context',
     }));
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(confirm).toHaveBeenNthCalledWith(1, {
-      message: 'Create this store?',
+      message: '创建此 store？',
       default: true,
     });
     expect(fs.existsSync(getStoreMetadataPath(storeRoot))).toBe(true);
@@ -1036,9 +1036,9 @@ describe('store command', () => {
     expect(conflict.exitCode).toBe(1);
     const conflictStatus = parseJson(conflict).status[0];
     expect(conflictStatus.code).toBe('store_id_conflict');
-    expect(conflictStatus.message).toContain('One checkout per store id');
+    expect(conflictStatus.message).toContain('每个 store id 仅支持一个检出');
     expect(conflictStatus.message).toContain(expectedExistingPath(original));
-    expect(conflictStatus.fix).toContain('openspec store unregister team-context');
+    expect(conflictStatus.fix).toContain('openspec-cn store unregister team-context');
     expect(conflictStatus.fix).not.toContain('different store id');
 
     // Mismatched --id when the metadata id is already registered elsewhere:
@@ -1051,8 +1051,8 @@ describe('store command', () => {
     expect(mismatchRegistered.exitCode).toBe(1);
     const mismatchRegisteredStatus = parseJson(mismatchRegistered).status[0];
     expect(mismatchRegisteredStatus.code).toBe('store_metadata_id_mismatch');
-    expect(mismatchRegisteredStatus.fix).toContain('One checkout per store id');
-    expect(mismatchRegisteredStatus.fix).toContain('unregister team-context');
+    expect(mismatchRegisteredStatus.fix).toContain('每个 store id 仅支持一个检出');
+    expect(mismatchRegisteredStatus.fix).toContain('openspec-cn store unregister team-context');
     expect(mismatchRegisteredStatus.fix).not.toContain('Use --id team-context or');
 
     // Mismatched --id when the metadata id is free: the plain fix applies.
@@ -1145,11 +1145,11 @@ describe('store command', () => {
       });
 
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain("unknown command 'new' for 'openspec store'");
+      expect(result.stderr).toContain("错误: 'openspec-cn store' 的未知命令 'new'。");
       expect(result.stderr).toContain(
         'setup, register, unregister, remove, list (ls), doctor'
       );
-      expect(result.stderr).toContain('openspec new change billing-rework --store <id>');
+      expect(result.stderr).toContain('openspec-cn new change billing-rework --store <id>');
     });
 
     it('never suggests an invalid command for partial new invocations', async () => {
@@ -1157,8 +1157,8 @@ describe('store command', () => {
 
       expect(result.exitCode).toBe(1);
       // 'new my-change' would be invalid; the hint falls back to the full form.
-      expect(result.stderr).toContain('openspec new change <change-id> --store <id>');
-      expect(result.stderr).not.toContain('openspec new my-change');
+      expect(result.stderr).toContain('openspec-cn new change <change-id> --store <id>');
+      expect(result.stderr).not.toContain('openspec-cn new my-change');
     });
 
     it('falls back to the generic example when flags interleave operands', async () => {
@@ -1168,7 +1168,7 @@ describe('store command', () => {
       );
 
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('openspec new change <change-id> --store <id>');
+      expect(result.stderr).toContain('openspec-cn new change <change-id> --store <id>');
       expect(result.stderr).not.toContain('core');
     });
 
@@ -1209,7 +1209,7 @@ describe('store command', () => {
       const result = await runCLI(['--help'], { cwd: tempDir, env });
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Create and manage stores - standalone');
+      expect(result.stdout).toContain('创建和管理 stores');
       expect(result.stdout).not.toContain(RETIRED_GROUP);
     });
   });

@@ -86,7 +86,7 @@ export class UpdateCommand {
 
     // 1. Check openspec directory exists
     if (!await FileSystemUtils.directoryExists(openspecPath)) {
-      throw new Error(`No OpenSpec directory found. Run 'openspec init' first.`);
+      throw new Error(`未找到OpenSpec目录。请先运行 'openspec-cn init'。`);
     }
 
     // 2. Perform one-time migration if needed before any legacy upgrade generation.

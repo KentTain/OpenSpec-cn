@@ -336,18 +336,18 @@ local_path: /repos/acme
     it('rejects missing paths and empty optional Git config values', async () => {
       await expect(
         resolveGitStoreBackendConfig({ localPath: '' }, tempDir)
-      ).rejects.toThrow(/must not be empty/u);
+      ).rejects.toThrow(/不能为空/u);
 
       await expect(
         resolveGitStoreBackendConfig({ localPath: 'missing' }, tempDir)
-      ).rejects.toThrow(/does not exist/u);
+      ).rejects.toThrow(/不存在/u);
 
       const localPath = path.join(tempDir, 'acme-context');
       fs.mkdirSync(localPath, { recursive: true });
 
       await expect(
         resolveGitStoreBackendConfig({ localPath, remote: '' }, tempDir)
-      ).rejects.toThrow(/remote must not be empty/u);
+      ).rejects.toThrow(/不能为空/u);
 
       await expect(
         resolveGitStoreBackendConfig({ localPath, branch: '' }, tempDir)

@@ -63,8 +63,8 @@ export function inspectRelationships(input: InspectRelationshipsInput): Relation
     status.push(
       warning(
         'relationship_registry_unreadable',
-        'The store registry is unreadable; reference health cannot be checked.',
-        'Run: openspec store doctor'
+        'Store 注册表不可读；无法检查引用健康状况。',
+        '运行: openspec-cn store doctor'
       )
     );
   }
@@ -73,8 +73,8 @@ export function inspectRelationships(input: InspectRelationshipsInput): Relation
     status.push(
       warning(
         'root_pointer_ignored',
-        `${input.bothShapesPointer.filePath} declares store '${input.bothShapesPointer.value}', but this directory is a real OpenSpec root; the declaration is ignored.`,
-        `Remove the store: line from ${input.bothShapesPointer.filePath}, or move the planning files into the store.`
+        `${input.bothShapesPointer.filePath} 声明了 store '${input.bothShapesPointer.value}'，但此目录是真正的 OpenSpec 根目录；声明已忽略。`,
+        `从 ${input.bothShapesPointer.filePath} 移除 store: 行，或将规划文件移动到 store 中。`
       )
     );
   }

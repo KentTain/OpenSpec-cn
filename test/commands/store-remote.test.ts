@@ -162,7 +162,7 @@ describe('store canonical remote (3.3)', () => {
         { cwd: tempDir, env }
       );
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain(`Share it: teammates clone ${TEST_NET_URL}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${TEST_NET_URL} 然后运行 openspec-cn store register <path>。`);
     });
   });
 
@@ -248,7 +248,7 @@ describe('store canonical remote (3.3)', () => {
       const storeRoot = makeUnregisteredStore('origin-only-context', { origin: TEST_NET_URL });
       const result = await runCLI(['store', 'register', storeRoot], { cwd: tempDir, env });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain(`Share it: teammates clone ${TEST_NET_URL}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${TEST_NET_URL} 然后运行 openspec-cn store register <path>。`);
     });
 
     it('prefers the canonical remote over the origin in sharing guidance', async () => {
@@ -258,7 +258,7 @@ describe('store canonical remote (3.3)', () => {
         metadataRemote: canonical,
       });
       const result = await runCLI(['store', 'register', storeRoot], { cwd: tempDir, env });
-      expect(result.stdout).toContain(`Share it: teammates clone ${canonical}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${canonical} 然后运行 openspec-cn store register <path>。`);
     });
   });
 
@@ -396,7 +396,7 @@ describe('store canonical remote (3.3)', () => {
       // win32 double quotes (cmd/PowerShell treat ' as literal).
       const q = process.platform === 'win32' ? '"' : "'";
       expect(fix).toBe(
-        `git clone -- ${originRemote} ${q}${expectedCheckout}${q} && openspec store register ${q}${expectedCheckout}${q} --id team-context`
+        `git clone -- ${originRemote} ${q}${expectedCheckout}${q} && openspec-cn store register ${q}${expectedCheckout}${q} --id team-context`
       );
 
       // Execute the fix's two commands with the values the shape pin
@@ -452,7 +452,7 @@ describe('store canonical remote (3.3)', () => {
       expect(store.status).toEqual([]);
 
       const human = await runCLI(['store', 'doctor', 'doc-context'], { cwd: tempDir, env });
-      expect(human.stdout).toContain(`  Remote: ${canonical}`);
+      expect(human.stdout).toContain(`  远程: ${canonical}`);
       expect(human.stdout).not.toContain(TEST_NET_URL);
 
       // The remote-bearing store.yaml resolves normally with --store.

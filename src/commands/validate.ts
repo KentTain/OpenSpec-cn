@@ -108,11 +108,11 @@ export class ValidateCommand {
   }
 
   private printNonInteractiveHint(root: ResolvedOpenSpecRoot): void {
-    console.error('没有要验证的内容。请尝试以下之一：');
-    console.error(`  ${withStoreFlag(root, 'openspec validate --all')}`);
-    console.error(`  ${withStoreFlag(root, 'openspec validate --changes')}`);
-    console.error(`  ${withStoreFlag(root, 'openspec validate --specs')}`);
-    console.error(`  ${withStoreFlag(root, 'openspec validate <item-name>')}`);
+    console.error('没有可验证的内容。请尝试以下之一：');
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --all')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --changes')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate --specs')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate <item-name>')}`);
     console.error('或在交互式终端中运行。');
   }
 

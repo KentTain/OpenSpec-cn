@@ -53,7 +53,7 @@ export function emitFailure(
   // Ctrl-C in a prompt is the user's choice, not an error: every
   // command group gets the Cancelled./130 convention through here.
   if (!json && isPromptCancellationError(error)) {
-    console.error('Cancelled.');
+    console.error('已取消。');
     process.exitCode = 130;
     return;
   }
