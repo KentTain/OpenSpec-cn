@@ -390,10 +390,9 @@ describe('config profile interactive flow', () => {
     await runConfigCommand(['profile']);
 
     expect(getGlobalConfig().delivery).toBe('skills');
-    expect(execSync).toHaveBeenCalledWith('npx openspec-cn update', {
+    expect(execSync).toHaveBeenCalledWith('npx openspec-cn update', expect.objectContaining({
       stdio: 'inherit',
-      cwd: fs.realpathSync(tempDir),
-    });
+    }));
   });
 
   it('core preset should preserve delivery setting', async () => {

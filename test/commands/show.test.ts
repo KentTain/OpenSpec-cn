@@ -10,6 +10,8 @@ describe('top-level show command', () => {
   const specsDir = path.join(testDir, 'openspec', 'specs');
   const openspecBin = path.join(projectRoot, 'bin', 'openspec.js');
 
+  // threads pool 不支持 process.chdir()，用 cwd 参数替代
+  const cwd = testDir;
 
   beforeEach(async () => {
     await fs.mkdir(changesDir, { recursive: true });
@@ -29,14 +31,12 @@ describe('top-level show command', () => {
   });
 
   it('prints hint and non-zero exit when no args and non-interactive', () => {
-    const originalCwd = process.cwd();
     const originalEnv = { ...process.env };
     try {
-      process.chdir(testDir);
       process.env.OPEN_SPEC_INTERACTIVE = '0';
       let err: any;
       try {
-        execSync(`node ${openspecBin} show`, { encoding: 'utf-8' });
+        execSync(`node ${openspecBin} show`, { encoding: 'utf-8', cwd });
       } catch (e) { err = e; }
       expect(err).toBeDefined();
       expect(err.status).not.toBe(0);
@@ -46,78 +46,50 @@ describe('top-level show command', () => {
       expect(stderr).toContain('openspec-cn change show');
       expect(stderr).toContain('openspec-cn spec show');
     } finally {
-      process.chdir(originalCwd);
       process.env = originalEnv;
     }
   });
 
   it('auto-detects change id and supports --json', () => {
-    const originalCwd = process.cwd();
-    try {
-      process.chdir(testDir);
-      const output = execSync(`node ${openspecBin} show demo --json`, { encoding: 'utf-8' });
-      const json = JSON.parse(output);
-      expect(json.id).toBe('demo');
-      expect(Array.isArray(json.deltas)).toBe(true);
-    } finally {
-      process.chdir(originalCwd);
-    }
+    const output = execSync(`node ${openspecBin} show demo --json`, { encoding: 'utf-8', cwd });
+    const json = JSON.parse(output);
+    expect(json.id).toBe('demo');
+    expect(Array.isArray(json.deltas)).toBe(true);
   });
 
   it('auto-detects spec id and supports spec-only flags', () => {
-    const originalCwd = process.cwd();
-    try {
-      process.chdir(testDir);
-      const output = execSync(`node ${openspecBin} show auth --json --requirements`, { encoding: 'utf-8' });
-      const json = JSON.parse(output);
-      expect(json.id).toBe('auth');
-      expect(Array.isArray(json.requirements)).toBe(true);
-    } finally {
-      process.chdir(originalCwd);
-    }
+    const output = execSync(`node ${openspecBin} show auth --json --requirements`, { encoding: 'utf-8', cwd });
+    const json = JSON.parse(output);
+    expect(json.id).toBe('auth');
+    expect(Array.isArray(json.requirements)).toBe(true);
   });
 
   it('handles ambiguity and suggests --type', async () => {
-    // create matching spec and change named 'foo'
     await fs.mkdir(path.join(changesDir, 'foo'), { recursive: true });
     await fs.writeFile(path.join(changesDir, 'foo', 'proposal.md'), '# Change: Foo\n\n## Why\n\n## What Changes\n', 'utf-8');
     await fs.mkdir(path.join(specsDir, 'foo'), { recursive: true });
     await fs.writeFile(path.join(specsDir, 'foo', 'spec.md'), '## Purpose\n\n## Requirements\n\n### Requirement: R\nX', 'utf-8');
 
-    const originalCwd = process.cwd();
+    let err: any;
     try {
-      process.chdir(testDir);
-      let err: any;
-      try {
-        execSync(`node ${openspecBin} show foo`, { encoding: 'utf-8' });
-      } catch (e) { err = e; }
-      expect(err).toBeDefined();
-      expect(err.status).not.toBe(0);
-      const stderr = err.stderr.toString();
-      expect(stderr).toContain('模糊的项目');
-      expect(stderr).toContain('--type change|spec');
-    } finally {
-      process.chdir(originalCwd);
-    }
+      execSync(`node ${openspecBin} show foo`, { encoding: 'utf-8', cwd });
+    } catch (e) { err = e; }
+    expect(err).toBeDefined();
+    expect(err.status).not.toBe(0);
+    const stderr = err.stderr.toString();
+    expect(stderr).toContain('模糊的项目');
+    expect(stderr).toContain('--type change|spec');
   });
 
   it('prints nearest matches when not found', () => {
-    const originalCwd = process.cwd();
+    let err: any;
     try {
-      process.chdir(testDir);
-      let err: any;
-      try {
-        execSync(`node ${openspecBin} show unknown-item`, { encoding: 'utf-8' });
-      } catch (e) { err = e; }
-      expect(err).toBeDefined();
-      expect(err.status).not.toBe(0);
-      const stderr = err.stderr.toString();
-      expect(stderr).toContain("未知项目");
-      expect(stderr).toContain('你是否想输入：');
-    } finally {
-      process.chdir(originalCwd);
-    }
+      execSync(`node ${openspecBin} show unknown-item`, { encoding: 'utf-8', cwd });
+    } catch (e) { err = e; }
+    expect(err).toBeDefined();
+    expect(err.status).not.toBe(0);
+    const stderr = err.stderr.toString();
+    expect(stderr).toContain("未知项目");
+    expect(stderr).toContain('你是否想输入：');
   });
 });
-
-
