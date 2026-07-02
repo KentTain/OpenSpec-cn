@@ -172,7 +172,7 @@ ${STORE_SELECTION_GUIDANCE}
 - 具体、可操作的建议
 - 不要模糊建议如"考虑审查"`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }

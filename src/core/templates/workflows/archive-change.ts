@@ -103,7 +103,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from \`planningHome.changesDir\`/YYYY-MM-DD-<name>/
+**归档到：** 从 \`planningHome.changesDir\`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** ✓ 已同步到主 specs（或 "无 delta specs" 或 "跳过同步"）
 
 所有产出物完成。所有任务完成。
@@ -118,7 +118,7 @@ ${STORE_SELECTION_GUIDANCE}
 - 若请求同步，使用 openspec-sync-specs 方式（代理驱动）
 - 若存在 delta specs，始终运行同步评估并在提示前展示合并汇总`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -221,7 +221,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from \`planningHome.changesDir\`/YYYY-MM-DD-<name>/
+**归档到：** 从 \`planningHome.changesDir\`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** ✓ 已同步到主 specs
 
 所有产出物完成。所有任务完成。
@@ -234,7 +234,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from \`planningHome.changesDir\`/YYYY-MM-DD-<name>/
+**归档到：** 从 \`planningHome.changesDir\`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** 无 delta specs
 
 所有产出物完成。所有任务完成。
@@ -247,7 +247,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from \`planningHome.changesDir\`/YYYY-MM-DD-<name>/
+**归档到：** 从 \`planningHome.changesDir\`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** 跳过同步（用户选择跳过）
 
 **警告：**
@@ -264,7 +264,7 @@ ${STORE_SELECTION_GUIDANCE}
 ## 归档失败
 
 **变更：** <change-name>
-**目标：** the archive path derived from \`planningHome.changesDir\`/YYYY-MM-DD-<name>/
+**目标：** 从 \`planningHome.changesDir\`/YYYY-MM-DD-<name>/ 派生的归档路径
 
 目标归档目录已存在。
 

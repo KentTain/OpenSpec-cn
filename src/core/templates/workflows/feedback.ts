@@ -9,107 +9,106 @@ import type { SkillTemplate } from '../types.js';
 export function getFeedbackSkillTemplate(): SkillTemplate {
   return {
     name: 'feedback',
-    description: 'Collect and submit user feedback about OpenSpec with context enrichment and anonymization.',
-    instructions: `Help the user submit feedback about OpenSpec.
+    description: '收集并提交关于 OpenSpec 的用户反馈，包含上下文丰富和匿名化处理。',
+    instructions: `帮助用户提交关于 OpenSpec 的反馈。
 
-**Goal**: Guide the user through collecting, enriching, and submitting feedback while ensuring privacy through anonymization.
+**目标**：引导用户完成反馈的收集、丰富和提交，同时通过匿名化确保隐私。
 
-**Process**
+**流程**
 
-1. **Gather context from the conversation**
-   - Review recent conversation history for context
-   - Identify what task was being performed
-   - Note what worked well or poorly
-   - Capture specific friction points or praise
+1. **从对话中收集上下文**
+   - 回顾最近的对话历史以获取上下文
+   - 识别正在执行什么任务
+   - 注意哪些方面做得好或不好
+   - 捕获具体的摩擦点或赞扬
 
-2. **Draft enriched feedback**
-   - Create a clear, descriptive title (single sentence, no "Feedback:" prefix needed)
-   - Write a body that includes:
-     - What the user was trying to do
-     - What happened (good or bad)
-     - Relevant context from the conversation
-     - Any specific suggestions or requests
+2. **起草丰富的反馈**
+   - 创建清晰、描述性的标题（单句，无需 "Feedback:" 前缀）
+   - 编写正文，包括：
+     - 用户想做什么
+     - 发生了什么（好或坏）
+     - 对话中的相关上下文
+     - 任何具体建议或请求
 
-3. **Anonymize sensitive information**
-   - Replace file paths with \`<path>\` or generic descriptions
-   - Replace API keys, tokens, secrets with \`<redacted>\`
-   - Replace company/organization names with \`<company>\`
-   - Replace personal names with \`<user>\`
-   - Replace specific URLs with \`<url>\` unless public/relevant
-   - Keep technical details that help understand the issue
+3. **匿名化敏感信息**
+   - 将文件路径替换为 \`<path>\` 或通用描述
+   - 将 API 密钥、令牌、机密替换为 \`<redacted>\`
+   - 将公司/组织名替换为 \`<company>\`
+   - 将个人姓名替换为 \`<user>\`
+   - 将具体 URL 替换为 \`<url>\`，除非是公开/相关的
+   - 保留有助于理解问题的技术细节
 
-4. **Present draft for approval**
-   - Show the complete draft to the user
-   - Display both title and body clearly
-   - Ask for explicit approval before submitting
-   - Allow the user to request modifications
+4. **展示草稿以获批准**
+   - 向用户展示完整草稿
+   - 清晰显示标题和正文
+   - 提交前请求明确批准
+   - 允许用户请求修改
 
-5. **Submit on confirmation**
-   - Use the \`openspec feedback\` command to submit
-   - Format: \`openspec feedback "title" --body "body content"\`
-   - The command will automatically add metadata (version, platform, timestamp)
+5. **确认后提交**
+   - 使用 \`openspec-cn feedback\` 命令提交
+   - 格式：\`openspec-cn feedback "title" --body "body content"\`
+   - 命令会自动添加元数据（版本、平台、时间戳）
 
-**Example Draft**
+**草稿示例**
 
 \`\`\`
-Title: Error handling in artifact workflow needs improvement
+标题：产出物工作流中的错误处理需要改进
 
-Body:
-I was working on creating a new change and encountered an issue with
-the artifact workflow. When I tried to continue after creating the
-proposal, the system didn't clearly indicate that I needed to complete
-the specs first.
+正文：
+我正在创建新变更时遇到了产出物工作流的问题。当我创建
+proposal 后尝试继续时，系统没有明确指示我需要先完成
+specs。
 
-Suggestion: Add clearer error messages that explain dependency chains
-in the artifact workflow. Something like "Cannot create design.md
-because specs are not complete (0/2 done)."
+建议：添加更清晰的错误消息，解释产出物工作流中的
+依赖链。例如 "无法创建 design.md，因为 specs 未完成
+（0/2 完成）。"
 
-Context: Using the spec-driven schema with <path>/my-project
+上下文：在 spec-driven schema 中使用 <path>/my-project
 \`\`\`
 
-**Anonymization Examples**
+**匿名化示例**
 
-Before:
+之前：
 \`\`\`
-Working on /Users/john/mycompany/auth-service/src/oauth.ts
-Failed with API key: sk_live_abc123xyz
-Working at Acme Corp
-\`\`\`
-
-After:
-\`\`\`
-Working on <path>/oauth.ts
-Failed with API key: <redacted>
-Working at <company>
+处理 /Users/john/mycompany/auth-service/src/oauth.ts
+失败，API 密钥：sk_live_abc123xyz
+在 Acme Corp 工作
 \`\`\`
 
-**Guardrails**
-
-- MUST show complete draft before submitting
-- MUST ask for explicit approval
-- MUST anonymize sensitive information
-- ALLOW user to modify draft before submitting
-- DO NOT submit without user confirmation
-- DO include relevant technical context
-- DO keep conversation-specific insights
-
-**User Confirmation Required**
-
-Always ask:
+之后：
 \`\`\`
-Here's the feedback I've drafted:
+处理 <path>/oauth.ts
+失败，API 密钥：<redacted>
+在 <company> 工作
+\`\`\`
 
-Title: [title]
+**护栏**
 
-Body:
+- 必须在提交前展示完整草稿
+- 必须请求明确批准
+- 必须匿名化敏感信息
+- 允许用户在提交前修改草稿
+- 不要在用户未确认的情况下提交
+- 要包含相关技术上下文
+- 要保留对话特定的洞察
+
+**需要用户确认**
+
+始终询问：
+\`\`\`
+这是我起草的反馈：
+
+标题：[title]
+
+正文：
 [body]
 
-Does this look good? I can modify it if you'd like, or submit it as-is.
+这样看起来可以吗？我可以修改，或者直接提交。
 \`\`\`
 
-Only proceed with submission after user confirms.`,
+仅在用户确认后继续提交。`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
