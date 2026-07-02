@@ -46,7 +46,7 @@ describe('ListCommand', () => {
       const listCommand = new ListCommand();
       await listCommand.execute(tempDir, 'changes');
 
-      expect(logOutput).toEqual(['No active changes found.']);
+      expect(logOutput).toEqual(['未找到活跃的变更。']);
     });
 
     it('should exclude archive directory', async () => {

@@ -116,7 +116,7 @@ export async function instructionsCommand(
       options.change,
       projectRoot,
       root.changesDir,
-      { newChangeHint: withStoreFlag(root, 'openspec new change <name>') }
+      { newChangeHint: withStoreFlag(root, 'openspec-cn new change <name>') }
     );
 
     // Validate schema if explicitly provided
@@ -193,15 +193,15 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   if (isBlocked) {
     const missing = dependencies.filter((d) => !d.done).map((d) => d.id);
     console.log('<warning>');
-    console.log('This artifact has unmet dependencies. Complete them first or proceed with caution.');
-    console.log(`Missing: ${missing.join(', ')}`);
+    console.log('此产出物有未满足的依赖。请先完成它们，或谨慎继续。');
+    console.log(`缺失：${missing.join(', ')}`);
     console.log('</warning>');
     console.log();
   }
 
   // Task directive
   console.log('<task>');
-  console.log(`Create the ${artifactId} artifact for change "${changeName}".`);
+  console.log(`为变更 "${changeName}" 创建 ${artifactId} 产出物。`);
   console.log(description);
   console.log('</task>');
   console.log();
@@ -251,7 +251,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 
   // Output location
   console.log('<output>');
-  console.log(`Write to: ${resolvedOutputPath}`);
+  console.log(`写入：${resolvedOutputPath}`);
   console.log('</output>');
   console.log();
 
@@ -279,7 +279,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Unlocks
   if (unlocks.length > 0) {
     console.log('<unlocks>');
-    console.log(`Completing this artifact enables: ${unlocks.join(', ')}`);
+    console.log(`完成此产出物后将启用：${unlocks.join(', ')}`);
     console.log('</unlocks>');
     console.log();
   }
@@ -412,7 +412,7 @@ export async function generateApplyInstructions(
   } else if (!tracksFile) {
     // No tracking file configured in schema - ready to apply
     state = 'ready';
-    instruction = schemaInstruction?.trim() ?? 'All required artifacts complete. Proceed with implementation.';
+    instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。可以开始实现。';
   } else {
     state = 'ready';
     instruction = schemaInstruction?.trim() ?? 'Read context files, work through pending tasks, mark complete as you go.\nPause if you hit blockers or need clarification.';
@@ -448,7 +448,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
       options.change,
       projectRoot,
       root.changesDir,
-      { newChangeHint: withStoreFlag(root, 'openspec new change <name>') }
+      { newChangeHint: withStoreFlag(root, 'openspec-cn new change <name>') }
     );
 
     // Validate schema if explicitly provided
@@ -481,7 +481,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   const { changeName, schemaName, contextFiles, progress, tasks, state, missingArtifacts, instruction } = instructions;
 
   console.log(`## Apply: ${changeName}`);
-  console.log(`Schema: ${schemaName}`);
+  console.log(`Schema：${schemaName}`);
   console.log();
 
   if (instructions.references && instructions.references.length > 0) {
@@ -491,17 +491,17 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Warning for blocked state
   if (state === 'blocked' && missingArtifacts) {
-    console.log('### ⚠️ Blocked');
+    console.log('### ⚠️ 已阻塞');
     console.log();
-    console.log(`Missing artifacts: ${missingArtifacts.join(', ')}`);
-    console.log('Use the openspec-continue-change skill to create these first.');
+    console.log(`缺失的产出物：${missingArtifacts.join(', ')}`);
+    console.log('使用 openspec-continue-change 技能先创建这些产出物。');
     console.log();
   }
 
   // Context files (dynamically from schema)
   const contextFileEntries = Object.entries(contextFiles);
   if (contextFileEntries.length > 0) {
-    console.log('### Context Files');
+    console.log('### 上下文文件');
     for (const [artifactId, filePaths] of contextFileEntries) {
       for (const filePath of filePaths) {
         console.log(`- ${artifactId}: ${filePath}`);
@@ -512,7 +512,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Progress (only show if we have tracking)
   if (progress.total > 0 || tasks.length > 0) {
-    console.log('### Progress');
+    console.log('### 进度');
     if (state === 'all_done') {
       console.log(`${progress.complete}/${progress.total} complete ✓`);
     } else {
@@ -523,7 +523,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Tasks
   if (tasks.length > 0) {
-    console.log('### Tasks');
+    console.log('### 任务');
     for (const task of tasks) {
       const checkbox = task.done ? '[x]' : '[ ]';
       console.log(`- ${checkbox} ${task.description}`);
@@ -532,6 +532,6 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   }
 
   // Instruction
-  console.log('### Instruction');
+  console.log('### 指令');
   console.log(instruction);
 }

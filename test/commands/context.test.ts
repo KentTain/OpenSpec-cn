@@ -146,7 +146,7 @@ describe('openspec context (4.1)', () => {
       { cwd: tempDir, env }
     );
     expect(refused.exitCode).toBe(1);
-    expect(refused.stderr).toContain(`Refusing to overwrite ${outPath}`);
+    expect(refused.stderr).toContain(`拒绝覆盖 ${outPath}`);
     expect(refused.stderr).toContain('--force');
 
     // With --force: overwrites.
@@ -163,7 +163,7 @@ describe('openspec context (4.1)', () => {
       { cwd: tempDir, env }
     );
     expect(badDir.exitCode).toBe(1);
-    expect(badDir.stderr).toContain('Output directory does not exist');
+    expect(badDir.stderr).toContain('输出目录不存在');
     expect(fs.existsSync(path.dirname(nested))).toBe(false);
 
     // JSON mode: stdout stays the pure brief; confirmation on stderr.

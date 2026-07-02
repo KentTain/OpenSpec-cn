@@ -426,7 +426,7 @@ describe('InitCommand', () => {
       );
 
       const initCommand = new InitCommand({ tools: 'claude', force: true });
-      await expect(initCommand.execute(readOnlyDir)).rejects.toThrow(/Insufficient permissions/);
+      await expect(initCommand.execute(readOnlyDir)).rejects.toThrow(/权限不足/);
     });
 
     it('should throw error in non-interactive mode without --tools flag and no detected tools', async () => {
@@ -544,7 +544,7 @@ describe('InitCommand - profile and detection features', () => {
     });
 
     await expect(initCommand.execute(testDir)).rejects.toThrow(
-      /Invalid profile "invalid-profile"/
+      /无效的 profile "invalid-profile"/
     );
   });
 

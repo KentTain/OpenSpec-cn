@@ -295,7 +295,7 @@ async function assertSetupPathIsNotNestedInGitRepo(
     'store_setup_inside_git_repo',
     {
       target: 'store.root',
-      fix: 'Choose a path outside that Git repository.',
+      fix: '选择该 Git 仓库之外的路径。',
     }
   );
 }
@@ -432,7 +432,7 @@ async function prepareSetupPlan(
   if (input.remote !== undefined && input.remote.length === 0) {
     throw new StoreError('Store remote must not be empty when provided.', 'store_remote_empty', {
       target: 'store.metadata',
-      fix: 'Pass a clone URL: --remote <url>.',
+      fix: '提供克隆 URL：--remote <url>。',
     });
   }
   const storeRoot = resolveSetupRoot(id, input.path);
@@ -444,7 +444,7 @@ async function prepareSetupPlan(
       'store_setup_path_not_directory',
       {
         target: 'store.root',
-        fix: 'Choose an empty directory or an existing healthy OpenSpec root.',
+        fix: '选择一个空目录或一个已有的健康 OpenSpec 根目录。',
       }
     );
   }
@@ -486,7 +486,7 @@ async function prepareSetupPlan(
           'store_setup_non_empty_directory',
           {
             target: 'store.root',
-            fix: 'Choose an empty folder, a Git-only folder, or an existing healthy OpenSpec root.',
+            fix: '选择一个空文件夹、仅有 Git 的文件夹，或一个已有的健康 OpenSpec 根目录。',
           }
         );
       }
@@ -563,7 +563,7 @@ export async function setupPreparedStore(
       'store_setup_path_changed',
       {
         target: 'store.root',
-        fix: 'Rerun openspec-cn store setup to re-evaluate the directory.',
+        fix: '重新运行 openspec-cn store setup 以重新评估目录。',
       }
     );
   }
@@ -714,7 +714,7 @@ export async function registerExistingStore(
       'store_path_missing',
       {
         target: 'store.root',
-        fix: 'Clone or create the store folder before registering it.',
+        fix: '注册前先克隆或创建 store 文件夹。',
       }
     );
   }
@@ -725,7 +725,7 @@ export async function registerExistingStore(
       'store_path_not_directory',
       {
         target: 'store.root',
-        fix: 'Pass an existing store directory.',
+        fix: '提供一个已存在的 store 目录。',
       }
     );
   }
@@ -884,7 +884,7 @@ async function assertSafeToDeleteStoreRoot(storeRoot: string, id: string): Promi
       'store_remove_path_not_directory',
       {
         target: 'store.root',
-        fix: 'Run "openspec-cn store unregister <id>" if you only want to forget this local registry entry.',
+        fix: '如果只想遗忘此本地注册记录，运行 "openspec-cn store unregister <id>"。',
       }
     );
   }
@@ -896,7 +896,7 @@ async function assertSafeToDeleteStoreRoot(storeRoot: string, id: string): Promi
       'store_remove_metadata_missing',
       {
         target: 'store.metadata',
-        fix: 'Run "openspec-cn store unregister <id>" if you only want to forget this local registry entry.',
+        fix: '如果只想遗忘此本地注册记录，运行 "openspec-cn store unregister <id>"。',
       }
     );
   }
@@ -907,7 +907,7 @@ async function assertSafeToDeleteStoreRoot(storeRoot: string, id: string): Promi
       'store_metadata_id_mismatch',
       {
         target: 'store.metadata',
-        fix: 'Repair the registry or run store unregister instead of deleting this folder.',
+        fix: '修复注册表或运行 store unregister，而不是删除此文件夹。',
       }
     );
   }
@@ -1047,7 +1047,7 @@ async function inspectStore(entry: {
       'Store location is not a directory.',
       {
         target: 'store.root',
-        fix: 'Register a directory path for this store.',
+        fix: '为此 store 注册一个目录路径。',
       }
     ));
   } else {
@@ -1075,7 +1075,7 @@ async function inspectStore(entry: {
           `Store metadata id '${parsed.id}' does not match registry id '${entry.id}'.`,
           {
             target: 'store.metadata',
-            fix: 'Repair the local registry or store metadata so the ids match.',
+            fix: '修复本地注册表或 store 元数据，使 id 一致。',
           }
         ));
       } else {
@@ -1119,7 +1119,7 @@ async function inspectStore(entry: {
           'Git repository has no commits yet; clones of this store will be empty until an initial commit exists.',
           {
             target: 'store.git',
-            fix: 'Commit the store files, then push to share them.',
+            fix: '提交 store 文件，然后推送以分享。',
           }
         ));
       } else if (git.hasCommits === true) {
@@ -1164,9 +1164,9 @@ export async function doctorStores(id?: string): Promise<StoreDoctorResult> {
 
   if (!registry) {
     if (selectedId !== undefined) {
-      throw new StoreError(`Unknown store '${selectedId}'.`, 'store_not_found', {
+      throw new StoreError(`未知的 store '${selectedId}'。`, 'store_not_found', {
         target: 'store.id',
-        fix: 'Run openspec-cn store list to see registered stores.',
+        fix: '运行 openspec-cn store list 查看已注册的 stores。',
       });
     }
 

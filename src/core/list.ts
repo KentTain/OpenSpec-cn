@@ -100,7 +100,7 @@ export class ListCommand {
         if (json) {
           console.log(JSON.stringify({ changes: [], ...(root ? { root } : {}) }, null, 2));
         } else {
-          console.log('No active changes found.');
+          console.log('未找到活跃的变更。');
         }
         return;
       }

@@ -80,9 +80,9 @@ function printCreatedChangeHuman(
     !isStoreSelectedRoot(root) && root.path === process.cwd()
       ? formatChangeLocation(toPlanningHome(root), payload.change.id)
       : payload.change.path;
-  console.log(`Created change '${payload.change.id}' at ${location}/`);
-  console.log(`Schema: ${payload.change.schema}`);
-  console.log(`Next: ${withStoreFlag(root, `openspec status --change ${payload.change.id}`)}`);
+  console.log(`已创建变更 '${payload.change.id}'，位置 ${location}/`);
+  console.log(`Schema：${payload.change.schema}`);
+  console.log(`下一步：${withStoreFlag(root, `openspec-cn status --change ${payload.change.id}`)}`);
 }
 
 export async function newChangeCommand(name: string | undefined, options: NewChangeOptions): Promise<void> {
@@ -90,7 +90,7 @@ export async function newChangeCommand(name: string | undefined, options: NewCha
 
   try {
     if (!name) {
-      throw new Error('Missing required argument <name>');
+      throw new Error('缺少必需参数 <name>');
     }
 
     const validation = validateChangeName(name);
@@ -117,7 +117,7 @@ export async function newChangeCommand(name: string | undefined, options: NewCha
 
     const resolvedSchema = options.schema ?? root.defaultSchema;
     if (spinner) {
-      spinner.start(`Creating change '${name}' with schema '${resolvedSchema}'...`);
+      spinner.start(`正在创建变更 '${name}'（schema '${resolvedSchema}'）...`);
     }
 
     const result = await createChange(projectRoot, name, {

@@ -125,7 +125,7 @@ function writeCodeWorkspace(
   const resolved = path.resolve(outputPath);
   if (fs.existsSync(resolved) && !force) {
     throw new StoreError(
-      `Refusing to overwrite ${resolved}.`,
+      `拒绝覆盖 ${resolved}。`,
       'context_file_exists',
       {
         target: 'context.output',
@@ -136,9 +136,9 @@ function writeCodeWorkspace(
   const parent = path.dirname(resolved);
   if (!fs.existsSync(parent)) {
     throw new StoreError(
-      `Output directory does not exist: ${parent}.`,
+      `输出目录不存在：${parent}。`,
       'context_output_dir_missing',
-      { target: 'context.output', fix: 'Create the directory first, or choose another path.' }
+      { target: 'context.output', fix: '先创建目录，或选择其他路径。' }
     );
   }
 
@@ -160,7 +160,7 @@ function writeCodeWorkspace(
 export function registerContextCommand(program: Command): void {
   const description =
     COMMAND_REGISTRY.find((entry) => entry.name === 'context')?.description ??
-    'Print the working context for the resolved OpenSpec root';
+    '打印已解析 OpenSpec 根目录的工作上下文';
 
   program
     .command('context')

@@ -1180,7 +1180,7 @@ describe('store command', () => {
       expect(payload.status[0]).toEqual(
         expect.objectContaining({
           code: 'unknown_store_subcommand',
-          message: expect.stringContaining("Unknown command 'bogus'"),
+          message: expect.stringContaining("未知命令 'bogus'"),
         })
       );
     });
@@ -1193,7 +1193,7 @@ describe('store command', () => {
       expect(payload.status[0]).toEqual(
         expect.objectContaining({
           code: 'unknown_store_subcommand',
-          message: expect.stringContaining('Missing subcommand'),
+          message: expect.stringContaining('缺少子命令'),
         })
       );
     });

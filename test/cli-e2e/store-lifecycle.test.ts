@@ -421,7 +421,7 @@ describe('standalone store lifecycle journey', () => {
       { env: machineB, cwd: base }
     );
     expect(status.exitCode).toBe(0);
-    expect(status.stdout).toContain('All artifacts complete!');
+    expect(status.stdout).toContain('所有产出物已完成！');
 
     const validated = await runCLI(
       ['validate', changeId, '--store', STORE_ID],
@@ -449,7 +449,7 @@ describe('standalone store lifecycle journey', () => {
     );
     expect(failedApply.exitCode).not.toBe(0);
     expect(failedApply.stderr).toContain(`使用 OpenSpec 根目录: ${STORE_ID}`);
-    expect(failedApply.stderr).toContain(`openspec new change <name> --store ${STORE_ID}`);
+    expect(failedApply.stderr).toContain(`openspec-cn new change <name> --store ${STORE_ID}`);
   });
 
   it('end state is just normal OpenSpec files in both checkouts', async () => {

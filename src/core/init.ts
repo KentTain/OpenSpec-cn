@@ -195,7 +195,7 @@ export class InitCommand {
 
     // Check write permissions
     if (!(await FileSystemUtils.ensureWritePermissions(projectPath))) {
-      throw new Error(`Insufficient permissions to write to ${projectPath}`);
+      throw new Error(`权限不足，无法写入 ${projectPath}`);
     }
     return extendMode;
   }
@@ -215,7 +215,7 @@ export class InitCommand {
       return this.profileOverride;
     }
 
-    throw new Error(`Invalid profile "${this.profileOverride}". Available profiles: core, custom`);
+    throw new Error(`无效的 profile "${this.profileOverride}"。可用的 profiles：core, custom`);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -248,7 +248,7 @@ export class InitCommand {
     // Interactive mode: prompt for confirmation
     const { confirm } = await import('@inquirer/prompts');
     const shouldCleanup = await confirm({
-      message: 'Upgrade and clean up legacy files?',
+      message: '是否升级并清理旧版文件？',
       default: true,
     });
 
@@ -352,7 +352,7 @@ export class InitCommand {
       .map((toolId) => AI_TOOLS.find((t) => t.value === toolId)?.name || toolId);
 
     if (configuredNames.length > 0) {
-      console.log(`OpenSpec configured: ${configuredNames.join(', ')} (pre-selected)`);
+      console.log(`已配置 OpenSpec：${configuredNames.join(', ')}（已预选）`);
     }
 
     const detectedOnlyNames = detectedTools
@@ -363,7 +363,7 @@ export class InitCommand {
       const detectionLabel = shouldPreselectDetected
         ? 'pre-selected for first-time setup'
         : 'not pre-selected';
-      console.log(`Detected tool directories: ${detectedOnlyNames.join(', ')} (${detectionLabel})`);
+      console.log(`检测到的工具目录：${detectedOnlyNames.join(', ')}（${detectionLabel}）`);
     }
 
     const selectedTools = await searchableMultiSelect({
@@ -667,10 +667,10 @@ export class InitCommand {
 
     // Show created vs refreshed tools
     if (results.createdTools.length > 0) {
-      console.log(`Created: ${results.createdTools.map((t) => t.name).join(', ')}`);
+      console.log(`已创建：${results.createdTools.map((t) => t.name).join(', ')}`);
     }
     if (results.refreshedTools.length > 0) {
-      console.log(`Refreshed: ${results.refreshedTools.map((t) => t.name).join(', ')}`);
+      console.log(`已刷新：${results.refreshedTools.map((t) => t.name).join(', ')}`);
     }
 
     // Show counts (respecting profile filter)
@@ -710,13 +710,13 @@ export class InitCommand {
 
     // Config status
     if (configStatus === 'created') {
-      console.log(`Config: openspec/config.yaml (schema: ${DEFAULT_SCHEMA})`);
+      console.log(`配置：openspec/config.yaml（schema：${DEFAULT_SCHEMA}）`);
     } else if (configStatus === 'exists') {
       // Show actual filename (config.yaml or config.yml)
       const configYaml = path.join(projectPath, OPENSPEC_DIR_NAME, 'config.yaml');
       const configYml = path.join(projectPath, OPENSPEC_DIR_NAME, 'config.yml');
       const configName = fs.existsSync(configYaml) ? 'config.yaml' : fs.existsSync(configYml) ? 'config.yml' : 'config.yaml';
-      console.log(`Config: openspec/${configName} (exists)`);
+      console.log(`配置：openspec/${configName}（已存在）`);
     } else {
       console.log(chalk.dim(`Config: skipped (non-interactive mode)`));
     }
@@ -738,8 +738,8 @@ export class InitCommand {
 
     // Links
     console.log();
-    console.log(`Learn more: ${chalk.cyan('https://github.com/Fission-AI/OpenSpec')}`);
-    console.log(`Feedback:   ${chalk.cyan('https://github.com/Fission-AI/OpenSpec/issues')}`);
+    console.log(`了解更多：${chalk.cyan('https://github.com/Fission-AI/OpenSpec')}`);
+    console.log(`反馈：      ${chalk.cyan('https://github.com/Fission-AI/OpenSpec/issues')}`);
 
     // Restart instruction if any tools were configured
     if (results.createdTools.length > 0 || results.refreshedTools.length > 0) {

@@ -51,13 +51,13 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
     return;
   }
 
-  const spinner = options.json ? undefined : ora('Loading change status...').start();
+  const spinner = options.json ? undefined : ora('正在加载变更状态...').start();
 
   try {
     const planningHome = toPlanningHome(root);
     const projectRoot = root.path;
     const rootOutput = toRootOutput(root);
-    const newChangeHint = withStoreFlag(root, 'openspec new change <name>');
+    const newChangeHint = withStoreFlag(root, 'openspec-cn new change <name>');
 
     // Handle no-changes case gracefully — status is informational,
     // so "no changes" is a valid state, not an error.
@@ -68,20 +68,20 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
         if (options.json) {
           console.log(
             JSON.stringify(
-              { changes: [], message: 'No active changes.', root: rootOutput },
+              { changes: [], message: '没有活跃的变更。', root: rootOutput },
               null,
               2
             )
           );
           return;
         }
-        console.log(`No active changes. Create one with: ${newChangeHint}`);
+        console.log(`没有活跃的变更。使用以下命令创建：${newChangeHint}`);
         return;
       }
       // Changes exist but --change not provided
       spinner?.stop();
       throw new Error(
-        `Missing required option --change. Available changes:\n  ${available.join('\n  ')}`
+        `缺少必需选项 --change。可用的变更：\n  ${available.join('\n  ')}`
       );
     }
 
@@ -125,12 +125,12 @@ export function printStatusText(status: ChangeStatus): void {
   const doneCount = status.artifacts.filter((a) => a.status === 'done').length;
   const total = status.artifacts.length;
 
-  console.log(`Change: ${status.changeName}`);
-  console.log(`Schema: ${status.schemaName}`);
+  console.log(`变更：${status.changeName}`);
+  console.log(`Schema：${status.schemaName}`);
   if (status.changeRoot) {
-    console.log(`Change root: ${status.changeRoot}`);
+    console.log(`变更根目录：${status.changeRoot}`);
   }
-  console.log(`Progress: ${doneCount}/${total} artifacts complete`);
+  console.log(`进度：${doneCount}/${total} 个产出物已完成`);
   console.log();
 
   for (const artifact of status.artifacts) {
@@ -139,7 +139,7 @@ export function printStatusText(status: ChangeStatus): void {
     let line = `${indicator} ${artifact.id}`;
 
     if (artifact.status === 'blocked' && artifact.missingDeps && artifact.missingDeps.length > 0) {
-      line += color(` (blocked by: ${artifact.missingDeps.join(', ')})`);
+      line += color(`（被阻塞：${artifact.missingDeps.join(', ')}）`);
     }
 
     console.log(line);
@@ -147,6 +147,6 @@ export function printStatusText(status: ChangeStatus): void {
 
   if (status.isComplete) {
     console.log();
-    console.log(chalk.green('All artifacts complete!'));
+    console.log(chalk.green('所有产出物已完成！'));
   }
 }

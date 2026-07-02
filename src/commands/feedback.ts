@@ -143,7 +143,7 @@ function submitViaGhCli(title: string, body: string): void {
 
     const issueUrl = result.trim();
     console.log(`\n✓ 反馈提交成功！`);
-    console.log(`Issue 链接: ${issueUrl}\n`);
+    console.log(`Issue 链接：${issueUrl}\n`);
   } catch (error: any) {
     // Display the error output from gh CLI
     if (error.stderr) {

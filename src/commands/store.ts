@@ -447,7 +447,7 @@ function printListHuman(payload: StoreListOutput): void {
     return;
   }
 
-  console.log(`OpenSpec stores (${payload.stores.length})`);
+  console.log(`OpenSpec stores（共 ${payload.stores.length} 个）`);
   console.log('');
   console.log(`${'ID'.padEnd(16)}位置`);
   for (const store of payload.stores) {
@@ -758,15 +758,15 @@ export function registerStoreCommand(program: Command): void {
     if (operands.includes('--json')) {
       const message =
         attempted.length > 0
-          ? `Unknown command '${attempted[0]}' for 'openspec-cn store'. Store subcommands: ${storeSubcommandsLine}.`
-          : `Missing subcommand for 'openspec-cn store'. Store subcommands: ${storeSubcommandsLine}.`;
+          ? `未知命令 '${attempted[0]}'（属于 'openspec-cn store'）。store 子命令：${storeSubcommandsLine}。`
+          : `缺少子命令（'openspec-cn store'）。store 子命令：${storeSubcommandsLine}。`;
       printJson({
         status: [
           {
             severity: 'error',
             code: 'unknown_store_subcommand',
             message,
-            fix: 'Run a store subcommand, or use the lifecycle command with --store <id>.',
+            fix: '运行某个 store 子命令，或使用带 --store <id> 的生命周期命令。',
           },
         ],
       });

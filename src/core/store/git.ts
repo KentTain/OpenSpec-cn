@@ -46,7 +46,7 @@ export async function initGitRepository(storeRoot: string): Promise<boolean> {
       'store_git_init_failed',
       {
         target: 'store.git',
-        fix: 'Install Git or rerun setup with --no-init-git.',
+        fix: '安装 Git 或使用 --no-init-git 重新运行 setup。',
       }
     );
   }
@@ -69,7 +69,7 @@ export async function assertGitCommitIdentity(probeCwd: string): Promise<void> {
           'store_git_init_failed',
           {
             target: 'store.git',
-            fix: 'Install Git or rerun setup with --no-init-git.',
+            fix: '安装 Git 或使用 --no-init-git 重新运行 setup。',
           }
         );
       }
@@ -79,7 +79,7 @@ export async function assertGitCommitIdentity(probeCwd: string): Promise<void> {
         'store_git_identity_missing',
         {
           target: 'store.git',
-          fix: 'Run git config --global user.name "Your Name" and git config --global user.email "you@example.com", or rerun setup with --no-init-git.',
+          fix: '运行 git config --global user.name "Your Name" 和 git config --global user.email "you@example.com"，或使用 --no-init-git 重新运行 setup。',
         }
       );
     }
@@ -119,7 +119,7 @@ export async function commitStoreFiles(
       'store_git_commit_failed',
       {
         target: 'store.git',
-        fix: 'Commit the created files manually, or rerun setup with --no-init-git.',
+        fix: '手动提交已创建的文件，或使用 --no-init-git 重新运行 setup。',
       }
     );
   }

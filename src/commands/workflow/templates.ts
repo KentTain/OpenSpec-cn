@@ -34,7 +34,7 @@ export interface TemplateInfo {
 // -----------------------------------------------------------------------------
 
 export async function templatesCommand(options: TemplatesOptions): Promise<void> {
-  const spinner = options.json ? undefined : ora('Loading templates...').start();
+  const spinner = options.json ? undefined : ora('正在加载模板...').start();
 
   try {
     const projectRoot = process.cwd();
@@ -86,8 +86,8 @@ export async function templatesCommand(options: TemplatesOptions): Promise<void>
       return;
     }
 
-    console.log(`Schema: ${schemaName}`);
-    console.log(`Source: ${source}`);
+    console.log(`Schema：${schemaName}`);
+    console.log(`来源：${source}`);
     console.log();
 
     for (const t of templates) {

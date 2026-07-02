@@ -101,7 +101,7 @@ describe('ArchiveCommand', () => {
       
       // Verify warning was logged
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Warning: 2 incomplete task(s) found')
+        expect.stringContaining('警告：发现 2 个未完成的任务')
       );
     });
 
@@ -268,7 +268,7 @@ New feature description.
     it('should throw error if change does not exist', async () => {
       await expect(
         archiveCommand.execute('non-existent-change', { yes: true })
-      ).rejects.toThrow("Change 'non-existent-change' not found.");
+      ).rejects.toThrow("未找到变更 'non-existent-change'。");
     });
 
     it('should throw error if archive already exists', async () => {
@@ -297,7 +297,7 @@ New feature description.
       
       // Should complete without warnings
       expect(console.log).not.toHaveBeenCalledWith(
-        expect.stringContaining('incomplete task(s)')
+        expect.stringContaining('未完成的任务')
       );
       
       // Verify change was archived
@@ -316,7 +316,7 @@ New feature description.
       
       // Should complete without spec updates
       expect(console.log).not.toHaveBeenCalledWith(
-        expect.stringContaining('Specs to update')
+        expect.stringContaining('要更新的 specs')
       );
       
       // Verify change was archived
@@ -340,7 +340,7 @@ New feature description.
       
       // Verify skip message was logged
       expect(console.log).toHaveBeenCalledWith(
-        'Skipping spec updates (--skip-specs flag provided).'
+        '跳过 spec 更新（提供了 --skip-specs 标志）。'
       );
       
       // Verify spec was NOT copied to main specs
@@ -427,13 +427,13 @@ Then expected result happens`;
       
       // Verify user was prompted about specs
       expect(mockConfirm).toHaveBeenCalledWith({
-        message: 'Proceed with spec updates?',
+        message: '是否继续更新 specs？',
         default: true
       });
       
       // Verify skip message was logged
       expect(console.log).toHaveBeenCalledWith(
-        'Skipping spec updates. Proceeding with archive.'
+        '跳过 spec 更新。继续归档。'
       );
       
       // Verify spec was NOT copied to main specs
@@ -812,7 +812,7 @@ E1 updated`);
       
       // Verify select was called with correct options (values matter, names may include progress)
       expect(mockSelect).toHaveBeenCalledWith(expect.objectContaining({
-        message: 'Select a change to archive',
+        message: '选择要归档的变更',
         choices: expect.arrayContaining([
           expect.objectContaining({ value: change1 }),
           expect.objectContaining({ value: change2 })
@@ -845,7 +845,7 @@ E1 updated`);
       
       // Verify confirm was called
       expect(mockConfirm).toHaveBeenCalledWith({
-        message: 'Warning: 1 incomplete task(s) found. Continue?',
+        message: '警告：发现 1 个未完成的任务。是否继续？',
         default: false
       });
     });
@@ -871,7 +871,7 @@ E1 updated`);
       await archiveCommand.execute(changeName, { noValidate: true });
       
       // Verify archive was cancelled
-      expect(console.log).toHaveBeenCalledWith('Archive cancelled.');
+      expect(console.log).toHaveBeenCalledWith('归档已取消。');
       
       // Verify change was not archived
       await expect(fs.access(changeDir)).resolves.not.toThrow();

@@ -171,7 +171,7 @@ function storeStateDiagnostic(label: string): {
     return {
       code: 'invalid_store_metadata',
       target: 'store.metadata',
-      fix: 'Repair .openspec-store/store.yaml.',
+      fix: '修复 .openspec-store/store.yaml。',
     };
   }
 

@@ -146,22 +146,22 @@ export async function validateChangeExists(
 ): Promise<string> {
   // Hints must stay pasteable: callers with a selected store pass a
   // store-carrying hint so following it lands in the same root.
-  const newChangeHint = hints.newChangeHint ?? 'openspec new change <name>';
+  const newChangeHint = hints.newChangeHint ?? 'openspec-cn new change <name>';
 
   if (!changeName) {
     const available = await getAvailableChanges(projectRoot, changesDir);
     if (available.length === 0) {
-      throw new Error(`No changes found. Create one with: ${newChangeHint}`);
+      throw new Error(`未找到变更。使用以下命令创建：${newChangeHint}`);
     }
     throw new Error(
-      `Missing required option --change. Available changes:\n  ${available.join('\n  ')}`
+      `缺少必需选项 --change。可用的变更：\n  ${available.join('\n  ')}`
     );
   }
 
   // Validate change name format to prevent path traversal
   const nameValidation = validateChangeName(changeName);
   if (!nameValidation.valid) {
-    throw new Error(`Invalid change name '${changeName}': ${nameValidation.error}`);
+    throw new Error(`无效的变更名称 '${changeName}'：${nameValidation.error}`);
   }
 
   // Check directory existence directly
@@ -172,11 +172,11 @@ export async function validateChangeExists(
     const available = await getAvailableChanges(projectRoot, changesDir);
     if (available.length === 0) {
       throw new Error(
-        `Change '${changeName}' not found. No changes exist. Create one with: ${newChangeHint}`
+        `未找到变更 '${changeName}'。不存在任何变更。使用以下命令创建：${newChangeHint}`
       );
     }
     throw new Error(
-      `Change '${changeName}' not found. Available changes:\n  ${available.join('\n  ')}`
+      `未找到变更 '${changeName}'。可用的变更：\n  ${available.join('\n  ')}`
     );
   }
 
@@ -194,7 +194,7 @@ export function validateSchemaExists(schemaName: string, projectRoot?: string): 
   if (!schemaDir) {
     const availableSchemas = listSchemas(projectRoot);
     throw new Error(
-      `Schema '${schemaName}' not found. Available schemas:\n  ${availableSchemas.join('\n  ')}`
+      `未找到 Schema '${schemaName}'。可用的 schemas：\n  ${availableSchemas.join('\n  ')}`
     );
   }
   return schemaName;

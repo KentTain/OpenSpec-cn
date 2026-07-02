@@ -130,7 +130,7 @@ describe('store root selection for normal commands', () => {
       });
       expect(result.exitCode).toBe(0);
       expect(result.stderr).toContain(`使用 OpenSpec 根目录: team-context (${storeRoot})`);
-      expect(result.stdout).toContain("Created change 'add-billing'");
+      expect(result.stdout).toContain("已创建变更 'add-billing'");
       expect(result.stdout).toContain(
         path.join(storeRoot, 'openspec', 'changes', 'add-billing')
       );
@@ -324,7 +324,7 @@ describe('store root selection for normal commands', () => {
       );
       expect(result.exitCode).toBe(0);
       expect(result.stderr).toContain(`使用 OpenSpec 根目录: team-context (${storeRoot})`);
-      expect(result.stdout).toContain('Change: store-change');
+      expect(result.stdout).toContain('变更：store-change');
       expect(result.stdout).not.toContain('使用 OpenSpec 根目录');
     });
   });

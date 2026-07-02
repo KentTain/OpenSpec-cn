@@ -123,7 +123,7 @@ export class ChangeCommand {
             } catch (error) {
               // Tasks file may not exist, which is okay
               if (process.env.DEBUG) {
-                console.error(`Failed to read tasks file at ${tasksPath}:`, error);
+                console.error(`读取任务文件失败 ${tasksPath}：`, error);
               }
             }
             
