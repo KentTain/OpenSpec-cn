@@ -37,13 +37,13 @@ describe('validateChangeName', () => {
     it('should reject name with uppercase letters', () => {
       const result = validateChangeName('Add-Auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('lowercase');
+      expect(result.error).toContain('小写');
     });
 
     it('should reject fully uppercase name', () => {
       const result = validateChangeName('ADD-AUTH');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('lowercase');
+      expect(result.error).toContain('小写');
     });
   });
 
@@ -51,7 +51,7 @@ describe('validateChangeName', () => {
     it('should reject name with spaces', () => {
       const result = validateChangeName('add auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('spaces');
+      expect(result.error).toContain('空格');
     });
   });
 
@@ -59,7 +59,7 @@ describe('validateChangeName', () => {
     it('should reject name with underscores', () => {
       const result = validateChangeName('add_auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('underscores');
+      expect(result.error).toContain('下划线');
     });
   });
 
@@ -81,13 +81,13 @@ describe('validateChangeName', () => {
     it('should reject name with leading hyphen', () => {
       const result = validateChangeName('-add-auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('start with a hyphen');
+      expect(result.error).toContain('以连字符开头');
     });
 
     it('should reject name with trailing hyphen', () => {
       const result = validateChangeName('add-auth-');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('end with a hyphen');
+      expect(result.error).toContain('以连字符结尾');
     });
   });
 
@@ -95,7 +95,7 @@ describe('validateChangeName', () => {
     it('should reject name with double hyphens', () => {
       const result = validateChangeName('add--auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('consecutive hyphens');
+      expect(result.error).toContain('连续连字符');
     });
   });
 
@@ -103,7 +103,7 @@ describe('validateChangeName', () => {
     it('should reject empty string', () => {
       const result = validateChangeName('');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('empty');
+      expect(result.error).toContain('为空');
     });
   });
 });
@@ -168,19 +168,19 @@ describe('createChange', () => {
   describe('invalid name throws validation error', () => {
     it('should throw error for uppercase name', async () => {
       await expect(createChange(testDir, 'Add-Auth')).rejects.toThrow(
-        /lowercase/
+        /小写/
       );
     });
 
     it('should throw error for name with spaces', async () => {
       await expect(createChange(testDir, 'add auth')).rejects.toThrow(
-        /spaces/
+        /空格/
       );
     });
 
     it('should throw error for empty name', async () => {
       await expect(createChange(testDir, '')).rejects.toThrow(
-        /empty/
+        /为空/
       );
     });
   });

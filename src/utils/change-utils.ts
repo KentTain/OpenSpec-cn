@@ -60,37 +60,37 @@ export function validateChangeName(name: string): ValidationResult {
   const kebabCasePattern = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
   if (!name) {
-    return { valid: false, error: 'Change name cannot be empty' };
+    return { valid: false, error: '变更名称不能为空' };
   }
 
   if (!kebabCasePattern.test(name)) {
     // Provide specific error messages for common mistakes
     if (/[A-Z]/.test(name)) {
-      return { valid: false, error: 'Change name must be lowercase (use kebab-case)' };
+      return { valid: false, error: '变更名称必须为小写（使用 kebab-case）' };
     }
     if (/\s/.test(name)) {
-      return { valid: false, error: 'Change name cannot contain spaces (use hyphens instead)' };
+      return { valid: false, error: '变更名称不能包含空格（改用连字符）' };
     }
     if (/_/.test(name)) {
-      return { valid: false, error: 'Change name cannot contain underscores (use hyphens instead)' };
+      return { valid: false, error: '变更名称不能包含下划线（改用连字符）' };
     }
     if (name.startsWith('-')) {
-      return { valid: false, error: 'Change name cannot start with a hyphen' };
+      return { valid: false, error: '变更名称不能以连字符开头' };
     }
     if (name.endsWith('-')) {
-      return { valid: false, error: 'Change name cannot end with a hyphen' };
+      return { valid: false, error: '变更名称不能以连字符结尾' };
     }
     if (/--/.test(name)) {
-      return { valid: false, error: 'Change name cannot contain consecutive hyphens' };
+      return { valid: false, error: '变更名称不能包含连续连字符' };
     }
     if (/[^a-z0-9-]/.test(name)) {
-      return { valid: false, error: 'Change name can only contain lowercase letters, numbers, and hyphens' };
+      return { valid: false, error: '变更名称只能包含小写字母、数字和连字符' };
     }
     if (/^[0-9]/.test(name)) {
-      return { valid: false, error: 'Change name must start with a letter' };
+      return { valid: false, error: '变更名称必须以字母开头' };
     }
 
-    return { valid: false, error: 'Change name must follow kebab-case convention (e.g., add-auth, refactor-db)' };
+    return { valid: false, error: '变更名称必须遵循 kebab-case 约定（例如 add-auth、refactor-db）' };
   }
 
   return { valid: true };

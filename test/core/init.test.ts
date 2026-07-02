@@ -344,8 +344,8 @@ describe('InitCommand', () => {
       const skillFile = path.join(testDir, '.claude', 'skills', 'openspec-explore', 'SKILL.md');
       const content = await fs.readFile(skillFile, 'utf-8');
 
-      expect(content).toContain('Enter explore mode');
-      expect(content).toContain('thinking partner');
+      expect(content).toContain('进入探索模式');
+      expect(content).toContain('思考伙伴');
     });
 
     it('should include propose skill instructions', async () => {
