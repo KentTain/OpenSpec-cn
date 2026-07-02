@@ -40,10 +40,10 @@ export class ShowCommand {
       if (interactive) {
         const { select } = await import('@inquirer/prompts');
         const type = await select<ItemType>({
-          message: 'What would you like to show?',
+          message: '您想要显示什么？',
           choices: [
-            { name: 'Change', value: 'change' as const },
-            { name: 'Spec', value: 'spec' as const },
+            { name: '变更', value: 'change' as const },
+            { name: '规范', value: 'spec' as const },
           ],
         });
         await this.runInteractiveByType(type, options, root);
@@ -80,11 +80,11 @@ export class ShowCommand {
     if (type === 'change') {
       const changes = await getActiveChangeIds(root.path);
       if (changes.length === 0) {
-        console.error('No changes found.');
+        console.error('未找到变更。');
         process.exitCode = 1;
         return;
       }
-      const picked = await select<string>({ message: 'Pick a change', choices: changes.map(id => ({ name: id, value: id })) });
+      const picked = await select<string>({ message: '选择一个变更', choices: changes.map(id => ({ name: id, value: id })) });
       const cmd = new ChangeCommand(root.path);
       await cmd.show(picked, this.delegateOptions(root, options) as any);
       return;
@@ -92,11 +92,11 @@ export class ShowCommand {
 
     const specs = await getSpecIds(root.path);
     if (specs.length === 0) {
-      console.error('No specs found.');
-      process.exitCode = 1;
-      return;
-    }
-    const picked = await select<string>({ message: 'Pick a spec', choices: specs.map(id => ({ name: id, value: id })) });
+        console.error('未找到规范。');
+        process.exitCode = 1;
+        return;
+      }
+      const picked = await select<string>({ message: '选择一个规范', choices: specs.map(id => ({ name: id, value: id })) });
     const cmd = new SpecCommand(root.path);
     await cmd.show(picked, this.delegateOptions(root, options) as any);
   }
@@ -128,8 +128,8 @@ export class ShowCommand {
     if (!resolvedType) {
       const suggestions = nearestMatches(itemName, [...changes, ...specs]);
       const message = suggestions.length
-        ? `Unknown item '${itemName}'. Did you mean: ${suggestions.join(', ')}?`
-        : `Unknown item '${itemName}'.`;
+        ? `未知项目 '${itemName}'。您是否想要：${suggestions.join(', ')}?`
+        : `未知项目 '${itemName}'。`;
       if (params.options.json) {
         console.log(
           JSON.stringify(
@@ -154,8 +154,8 @@ export class ShowCommand {
                 {
                   severity: 'error',
                   code: 'ambiguous_item',
-                  message: `Ambiguous item '${itemName}' matches both a change and a spec.`,
-                  fix: 'Pass --type change|spec.',
+                  message: `模糊的项目 '${itemName}' 同时匹配变更和规范。`,
+                  fix: '传递 --type change|spec。',
                 },
               ],
             },
@@ -166,12 +166,12 @@ export class ShowCommand {
         process.exitCode = 1;
         return;
       }
-      console.error(`Ambiguous item '${itemName}' matches both a change and a spec.`);
+      console.error(`模糊的项目 '${itemName}' 同时匹配变更和规范。`);
       // The noun-form commands are cwd-based and cannot reach a selected store.
       if (isStoreSelectedRoot(root)) {
-        console.error('Pass --type change|spec.');
+        console.error('传递 --type change|spec。');
       } else {
-        console.error('Pass --type change|spec, or use: openspec change show / openspec spec show');
+        console.error('传递 --type change|spec，或使用：openspec-cn change show / openspec-cn spec show');
       }
       process.exitCode = 1;
       return;
@@ -188,7 +188,7 @@ export class ShowCommand {
   }
 
   private printNonInteractiveHint(root: ResolvedOpenSpecRoot): void {
-    console.error('Nothing to show. Try one of:');
+    console.error('没有可显示的内容。请尝试以下方式之一：');
     console.error(`  ${withStoreFlag(root, 'openspec show <item>')}`);
     if (isStoreSelectedRoot(root)) {
       // The noun-form commands are cwd-based and cannot reach a selected store.
@@ -198,7 +198,7 @@ export class ShowCommand {
       console.error('  openspec change show');
       console.error('  openspec spec show');
     }
-    console.error('Or run in an interactive terminal.');
+    console.error('或在交互式终端中运行。');
   }
 
   private warnIrrelevantFlags(type: ItemType, options: { [k: string]: any }): boolean {
@@ -209,7 +209,7 @@ export class ShowCommand {
       for (const k of CHANGE_FLAG_KEYS) if (k in options) irrelevant.push(k);
     }
     if (irrelevant.length > 0) {
-      console.error(`Warning: Ignoring flags not applicable to ${type}: ${irrelevant.join(', ')}`);
+      console.error(`警告：忽略不适用于 ${type} 的标志：${irrelevant.join(', ')}`);
       return true;
     }
     return false;

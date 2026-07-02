@@ -680,25 +680,25 @@ artifacts:
     it('status command help shows description', async () => {
       const result = await runCLI(['status', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Display artifact completion status');
+      expect(result.stdout).toContain('显示变更的产出物完成状态');
     });
 
     it('instructions command help shows description', async () => {
       const result = await runCLI(['instructions', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Output enriched instructions');
+      expect(result.stdout).toContain('输出用于创建产出物或应用任务的丰富指令');
     });
 
     it('templates command help shows description', async () => {
       const result = await runCLI(['templates', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Show resolved template paths');
+      expect(result.stdout).toContain('显示 Schema 中所有产出物的已解析模板路径');
     });
 
     it('new command help shows description', async () => {
       const result = await runCLI(['new', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Create new items');
+      expect(result.stdout).toContain('创建新项目');
     });
   });
 
@@ -707,7 +707,7 @@ artifacts:
       const result = await runCLI(['experimental', '--tool', 'claude'], { cwd: tempDir });
       // May succeed or fail depending on setup, but should show deprecation notice
       const output = getOutput(result);
-      expect(output).toContain('deprecated');
+      expect(output).toContain('已弃用');
     });
 
     it('errors for unknown tool', async () => {

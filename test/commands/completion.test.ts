@@ -14,16 +14,16 @@ vi.mock('../../src/core/completions/installers/zsh-installer.js', () => ({
       success: true,
       installedPath: '/home/user/.oh-my-zsh/completions/_openspec',
       isOhMyZsh: true,
-      message: 'Completion script installed successfully for Oh My Zsh',
+      message: '补全脚本已成功安装至 Oh My Zsh',
       instructions: [
-        'Completion script installed to Oh My Zsh completions directory.',
-        'Restart your shell or run: exec zsh',
-        'Completions should activate automatically.',
+        '补全脚本已安装至 Oh My Zsh 补全目录。',
+        '请重启 Shell 或运行：exec zsh',
+        '补全脚本应会自动生效。',
       ],
     }),
     uninstall: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Completion script removed from /home/user/.oh-my-zsh/completions/_openspec',
+      message: '已从 /home/user/.oh-my-zsh/completions/_openspec 移除补全脚本',
     }),
   })),
 }));
@@ -72,7 +72,7 @@ describe('CompletionCommand', () => {
       await command.generate({});
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error: Could not auto-detect shell. Please specify shell explicitly.'
+        '错误：无法自动检测 Shell。请明确指定 Shell。'
       );
       expect(process.exitCode).toBe(1);
     });
@@ -81,7 +81,7 @@ describe('CompletionCommand', () => {
       await command.generate({ shell: 'tcsh' });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error: Shell 'tcsh' is not supported yet. Currently supported: zsh, bash, fish, powershell"
+        "错误：Shell 'tcsh' 暂不支持。当前支持的 Shell 有：zsh, bash, fish, powershell"
       );
       expect(process.exitCode).toBe(1);
     });
@@ -100,7 +100,7 @@ describe('CompletionCommand', () => {
       await command.install({ shell: 'zsh' });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completion script installed successfully')
+        expect.stringContaining('补全脚本已成功安装')
       );
       expect(process.exitCode).toBe(0);
     });
@@ -109,7 +109,7 @@ describe('CompletionCommand', () => {
       await command.install({ shell: 'zsh', verbose: true });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Installed to:')
+        expect.stringContaining('安装至：')
       );
     });
 
@@ -119,7 +119,7 @@ describe('CompletionCommand', () => {
       await command.install({});
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completion script installed successfully')
+        expect.stringContaining('补全脚本已成功安装')
       );
     });
 
@@ -129,7 +129,7 @@ describe('CompletionCommand', () => {
       await command.install({});
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error: Could not auto-detect shell. Please specify shell explicitly.'
+        '错误：无法自动检测 Shell。请明确指定 Shell。'
       );
       expect(process.exitCode).toBe(1);
     });
@@ -138,7 +138,7 @@ describe('CompletionCommand', () => {
       await command.install({ shell: 'tcsh' });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error: Shell 'tcsh' is not supported yet. Currently supported: zsh, bash, fish, powershell"
+        "错误：Shell 'tcsh' 暂不支持。当前支持的 Shell 有：zsh, bash, fish, powershell"
       );
       expect(process.exitCode).toBe(1);
     });
@@ -147,7 +147,7 @@ describe('CompletionCommand', () => {
       await command.install({ shell: 'zsh' });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Restart your shell or run: exec zsh')
+        expect.stringContaining('请重启 Shell 或运行：exec zsh')
       );
     });
   });
@@ -157,7 +157,7 @@ describe('CompletionCommand', () => {
       await command.uninstall({ shell: 'zsh', yes: true });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completion script removed')
+        expect.stringContaining('移除补全脚本')
       );
       expect(process.exitCode).toBe(0);
     });
@@ -168,7 +168,7 @@ describe('CompletionCommand', () => {
       await command.uninstall({ yes: true });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completion script removed')
+        expect.stringContaining('移除补全脚本')
       );
     });
 
@@ -178,7 +178,7 @@ describe('CompletionCommand', () => {
       await command.uninstall({ yes: true });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error: Could not auto-detect shell. Please specify shell explicitly.'
+        '错误：无法自动检测 Shell。请明确指定 Shell。'
       );
       expect(process.exitCode).toBe(1);
     });
@@ -187,7 +187,7 @@ describe('CompletionCommand', () => {
       await command.uninstall({ shell: 'tcsh', yes: true });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error: Shell 'tcsh' is not supported yet. Currently supported: zsh, bash, fish, powershell"
+        "错误：Shell 'tcsh' 暂不支持。当前支持的 Shell 有：zsh, bash, fish, powershell"
       );
       expect(process.exitCode).toBe(1);
     });
@@ -200,7 +200,7 @@ describe('CompletionCommand', () => {
         install: vi.fn().mockResolvedValue({
           success: false,
           isOhMyZsh: false,
-          message: 'Permission denied',
+          message: '权限不足',
         }),
         uninstall: vi.fn(),
         isInstalled: vi.fn(),
@@ -214,7 +214,7 @@ describe('CompletionCommand', () => {
       await cmd.install({ shell: 'zsh' });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Permission denied')
+        expect.stringContaining('权限不足')
       );
       expect(process.exitCode).toBe(1);
     });
@@ -225,7 +225,7 @@ describe('CompletionCommand', () => {
         install: vi.fn(),
         uninstall: vi.fn().mockResolvedValue({
           success: false,
-          message: 'Completion script is not installed',
+          message: '补全脚本未安装',
         }),
         isInstalled: vi.fn(),
         getInstallationInfo: vi.fn(),
@@ -238,7 +238,7 @@ describe('CompletionCommand', () => {
       await cmd.uninstall({ shell: 'zsh', yes: true });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completion script is not installed')
+        expect.stringContaining('补全脚本未安装')
       );
       expect(process.exitCode).toBe(1);
     });
@@ -260,7 +260,7 @@ describe('CompletionCommand', () => {
       await command.generate({});
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error: Shell 'tcsh' is not supported yet. Currently supported: zsh, bash, fish, powershell"
+        "错误：Shell 'tcsh' 暂不支持。当前支持的 Shell 有：zsh, bash, fish, powershell"
       );
       expect(process.exitCode).toBe(1);
     });

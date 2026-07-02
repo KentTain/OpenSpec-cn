@@ -1,18 +1,20 @@
 {
-  "name": "@fission-ai/openspec",
+  "name": "@studyzy/openspec-cn",
   "version": "1.5.0",
-  "description": "AI-native system for spec-driven development",
+  "description": "面向AI编程助手的规范驱动开发框架OpenSpec的简体中文汉化版本",
   "keywords": [
     "openspec",
+    "openspec-cn",
     "specs",
+    "sdd",
     "cli",
     "ai",
     "development"
   ],
-  "homepage": "https://github.com/Fission-AI/OpenSpec",
+  "homepage": "https://github.com/studyzy/OpenSpec-cn",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Fission-AI/OpenSpec"
+    "url": "https://github.com/studyzy/OpenSpec-cn"
   },
   "license": "MIT",
   "author": "OpenSpec Contributors",
@@ -27,7 +29,7 @@
     }
   },
   "bin": {
-    "openspec": "./bin/openspec.js"
+    "openspec-cn": "./bin/openspec.js"
   },
   "files": [
     "dist",

@@ -113,7 +113,7 @@ describe('config command integration', () => {
 
     expect(config.workflows).toEqual(['new', 'ff', 'apply', 'archive']);
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Set workflows = new,ff,apply,archive'
+      '已设置 workflows = new,ff,apply,archive'
     );
   });
 });
