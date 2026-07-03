@@ -160,7 +160,7 @@ describe('createChange', () => {
       await createChange(testDir, 'add-auth');
 
       await expect(createChange(testDir, 'add-auth')).rejects.toThrow(
-        /已存在
+        /已存在/
       );
     });
   });
