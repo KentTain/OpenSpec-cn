@@ -76,14 +76,14 @@ Upgrade the package, then refresh each project's generated files:
 
 ```bash
 npm install -g @fission-ai/openspec@latest   # or pnpm/yarn/bun equivalent
-openspec update                              # run inside each project
+openspec-cn update                              # run inside each project
 ```
 
-`openspec update` regenerates the skill and command files for the tools you've configured, so your slash commands stay current with the installed version.
+`openspec-cn update` regenerates the skill and command files for the tools you've configured, so your slash commands stay current with the installed version.
 
 ## Uninstalling
 
-There's no `openspec uninstall` command, because OpenSpec is just a global package plus some files in your project. Removing it is a few manual steps, and nothing here touches your source code.
+There's no `openspec-cn uninstall` command, because OpenSpec is just a global package plus some files in your project. Removing it is a few manual steps, and nothing here touches your source code.
 
 **1. Remove the global package:**
 
@@ -109,7 +109,7 @@ After installing, initialize OpenSpec in your project:
 
 ```bash
 cd your-project
-openspec init
+openspec-cn init
 ```
 
 See [Getting Started](getting-started.md) for a full walkthrough.

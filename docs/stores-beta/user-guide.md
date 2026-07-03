@@ -55,7 +55,7 @@ Two rules keep this simple:
 Two commands take you from nothing to a working, store-scoped change:
 
 ```bash
-openspec store setup team-plans --path ~/openspec/team-plans
+openspec-cn store setup team-plans --path ~/openspec/team-plans
 ```
 
 ```
@@ -65,19 +65,19 @@ OpenSpec root: ready
 Registry: registered
 
 Next: run normal OpenSpec commands against this store, for example:
-  openspec new change <change-id> --store team-plans
+  openspec-cn new change <change-id> --store team-plans
 Share this store by committing and pushing it like any Git repo.
 ```
 
 ```bash
-openspec new change add-login --store team-plans
+openspec-cn new change add-login --store team-plans
 ```
 
 ```
 Using OpenSpec root: team-plans (/Users/you/openspec/team-plans)
 Created change 'add-login' at /Users/you/openspec/team-plans/openspec/changes/add-login/
 Schema: spec-driven
-Next: openspec status --change add-login --store team-plans
+Next: openspec-cn status --change add-login --store team-plans
 ```
 
 That's the whole model. From here the lifecycle is exactly what you know —
@@ -93,7 +93,7 @@ them across code repos.
 **Day one (whoever sets it up):**
 
 ```bash
-openspec store setup team-plans --path ~/openspec/team-plans \
+openspec-cn store setup team-plans --path ~/openspec/team-plans \
   --remote git@github.com:acme/team-plans.git
 git -C ~/openspec/team-plans push -u origin main
 ```
@@ -108,14 +108,14 @@ it yet.
 
 ```bash
 git clone git@github.com:acme/team-plans.git ~/openspec/team-plans
-openspec store register ~/openspec/team-plans
+openspec-cn store register ~/openspec/team-plans
 ```
 
 From then on, everyone works in the same planning repo by name:
 
 ```bash
-openspec status --store team-plans --change add-login
-openspec show add-login --store team-plans
+openspec-cn status --store team-plans --change add-login
+openspec-cn show add-login --store team-plans
 ```
 
 **Sharing work is git, on purpose.** A change you create exists only in
@@ -136,7 +136,7 @@ no flags at all:
 
 ```bash
 cd ~/src/web-app
-openspec status --change add-login
+openspec-cn status --change add-login
 ```
 
 ```
@@ -178,9 +178,9 @@ references:
 ```
 
 References are read-only context. The repo keeps its own `openspec/` root;
-work stays there. What changes: `openspec instructions` in that repo now
+work stays there. What changes: `openspec-cn instructions` in that repo now
 includes an index of the referenced store's specs — each with a one-line
-summary and the exact fetch command (`openspec show <spec-id> --type spec
+summary and the exact fetch command (`openspec-cn show <spec-id> --type spec
 --store platform-reqs`). An agent working in `api-server` can find the
 upstream payment requirements, cite them, and write its low-level design in
 the repo's own root — without anyone pasting context around.
@@ -199,7 +199,7 @@ with on their machine. Nothing about those local checkout paths is
 committed to the shared planning repo.
 
 ```bash
-openspec workset create platform \
+openspec-cn workset create platform \
   --member ~/openspec/platform-reqs \
   --member ~/src/api-server \
   --member ~/src/web-app
@@ -207,7 +207,7 @@ openspec workset create platform \
 
 ## Two questions you can always ask
 
-**"Is my setup healthy?"** — `openspec doctor` checks the current root and
+**"Is my setup healthy?"** — `openspec-cn doctor` checks the current root and
 its referenced stores, read-only, with a pasteable fix per finding:
 
 ```
@@ -220,11 +220,11 @@ Root
 References
   - platform-reqs: ok (/Users/you/openspec/platform-reqs)
   - design-system: Referenced store 'design-system' is not registered on this machine.
-    Fix: git clone -- git@github.com:acme/design-system.git '/Users/you/openspec/design-system' && openspec store register '/Users/you/openspec/design-system' --id design-system
+    Fix: git clone -- git@github.com:acme/design-system.git '/Users/you/openspec/design-system' && openspec-cn store register '/Users/you/openspec/design-system' --id design-system
 
 ```
 
-**"What am I working with?"** — `openspec context` assembles the working
+**"What am I working with?"** — `openspec-cn context` assembles the working
 set from OpenSpec declarations: the root and the stores it references.
 
 ```
@@ -235,10 +235,10 @@ OpenSpec root
 
 Referenced stores
   platform-reqs  /Users/you/openspec/platform-reqs
-    Fetch: openspec show <spec-id> --type spec --store platform-reqs
+    Fetch: openspec-cn show <spec-id> --type spec --store platform-reqs
 ```
 
-Both support `--json` for agents. `openspec context --code-workspace
+Both support `--json` for agents. `openspec-cn context --code-workspace
 <path>` additionally writes a VS Code workspace file containing the whole
 set — the only write this command performs.
 
@@ -250,17 +250,17 @@ A **workset** is a personal, named view of exactly that, reopened with one
 command in your tool of choice.
 
 ```
-  workset "platform"                 openspec workset open platform
+  workset "platform"                 openspec-cn workset open platform
   ├── team-plans   ~/openspec/team-plans         │
   ├── api-server   ~/src/api-server              ▼
   └── web-app      ~/src/web-app       all three open in your tool
 ```
 
 ```bash
-openspec workset create platform \
+openspec-cn workset create platform \
   --member ~/openspec/team-plans --member ~/src/api-server \
   --tool code
-openspec workset list
+openspec-cn workset list
 ```
 
 ```
@@ -269,7 +269,7 @@ platform  (opens in VS Code)
   api-server  /Users/you/src/api-server
 ```
 
-`openspec workset open platform` then launches the saved tool: editors
+`openspec-cn workset open platform` then launches the saved tool: editors
 (VS Code, Cursor) open one window with every member and return. The first
 member is the primary. Override the tool any time with `--tool <id>`.
 
@@ -278,7 +278,7 @@ are never committed, and make no claims about the work — they only record
 what you like open together. Removing one never touches the member
 folders. New tools are configuration, not code: anything launched via a
 workspace file or per-folder attach flags can be added under the `openers`
-key in the global config (`openspec config edit`).
+key in the global config (`openspec-cn config edit`).
 
 ## How commands decide where to act
 
@@ -309,7 +309,7 @@ tells you which case you're in.
   A stale checkout shows stale specs until *you* pull; references are
   indexed live from whatever is on disk.
 - **Some commands stay where they are.** `view`, `templates`, `schemas`,
-  and the deprecated noun forms (`openspec change show`, ...) act on the
+  and the deprecated noun forms (`openspec-cn change show`, ...) act on the
   current directory only — no `--store`.
 - **Per-machine state is per-machine.** The store registry and worksets
   are local settings. Nothing about your machine's layout is

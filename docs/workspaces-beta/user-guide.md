@@ -6,7 +6,7 @@ manages the OpenSpec work.
 ## 1. Create The Shared Place
 
 ```bash
-openspec context-store setup
+openspec-cn context-store setup
 ```
 
 OpenSpec asks for the context store name, where to put it, and whether to
@@ -21,7 +21,7 @@ want the store somewhere specific.
 ## 3. Open Your Local Workbench
 
 ```bash
-openspec workspace open
+openspec-cn workspace open
 ```
 
 Select the initiative from the picker. OpenSpec creates a local workspace view
@@ -32,7 +32,7 @@ The opened editor view shows linked repos and folders first, initiative context
 when attached, and a small `OpenSpec workspace` folder last with `AGENTS.md`,
 `.openspec-workspace/view.yaml`, and the generated `.code-workspace` file.
 
-Use `openspec workspace open --initiative team-context/billing-launch --editor`
+Use `openspec-cn workspace open --initiative team-context/billing-launch --editor`
 when you want to skip the picker. Use `--agent codex-cli`, `--agent claude`, or
 `--agent github-copilot` instead of `--editor` when you want to open an agent
 directly.

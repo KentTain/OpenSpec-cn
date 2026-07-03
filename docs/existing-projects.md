@@ -10,7 +10,7 @@ This guide shows how to start on day one without boiling the ocean.
 
 ```bash
 $ cd your-existing-project
-$ openspec init          # adds openspec/ and your AI tool's commands
+$ openspec-cn init          # adds openspec/ and your AI tool's commands
 ```
 
 Then, in your AI chat:
@@ -71,8 +71,8 @@ If you'd rather watch the whole loop happen on your own code with narration, the
 Turn on the expanded commands first:
 
 ```bash
-$ openspec config profile      # select the expanded workflows
-$ openspec update              # apply them to this project
+$ openspec-cn config profile      # select the expanded workflows
+$ openspec-cn update              # apply them to this project
 ```
 
 Then in chat:

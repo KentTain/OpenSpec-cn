@@ -2,7 +2,7 @@
 name: openspec-archive-change
 description: 在实验性工作流中归档已完成的变更。当用户想在实现完成后定稿并归档变更时使用。
 license: MIT
-compatibility: Requires openspec CLI.
+compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"
@@ -101,7 +101,7 @@ metadata:
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from `planningHome.changesDir`/YYYY-MM-DD-<name>/
+**归档到：** 从 `planningHome.changesDir`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** ✓ 已同步到主 specs（或 "无 delta specs" 或 "跳过同步"）
 
 所有产出物完成。所有任务完成。

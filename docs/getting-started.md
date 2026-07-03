@@ -4,7 +4,7 @@ This guide explains how OpenSpec works after you've installed and initialized it
 
 > **Where do I type these commands?** Two places, and mixing them up is the most common early stumble.
 >
-> - `openspec ...` commands (like `openspec init`) run in your **terminal**.
+> - `openspec ...` commands (like `openspec-cn init`) run in your **terminal**.
 > - `/opsx:...` commands (like `/opsx:propose`) run in your **AI assistant's chat**, the same box where you'd ask it to write code.
 >
 > There's no separate "interactive mode" to start. You just type the slash command in chat and your assistant takes it from there. Full explanation: [How Commands Work](how-commands-work.md).
@@ -15,7 +15,7 @@ The whole loop, with each step labeled by where it happens:
 
 ```text
 TERMINAL   $ npm install -g @fission-ai/openspec@latest
-TERMINAL   $ cd your-project && openspec init
+TERMINAL   $ cd your-project && openspec-cn init
 AI CHAT      /opsx:explore                    (optional: think it through first)
 AI CHAT      /opsx:propose add-dark-mode      (AI drafts the plan; you review it)
 AI CHAT      /opsx:apply                      (AI builds it)
@@ -45,11 +45,11 @@ Start with `/opsx:explore` when you're figuring out what to do, or jump straight
 /opsx:new ──► /opsx:ff or /opsx:continue ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
 ```
 
-The default global profile is `core`, which includes `propose`, `explore`, `apply`, `sync`, and `archive`. You can enable the expanded workflow commands with `openspec config profile` and then `openspec update`.
+The default global profile is `core`, which includes `propose`, `explore`, `apply`, `sync`, and `archive`. You can enable the expanded workflow commands with `openspec-cn config profile` and then `openspec-cn update`.
 
 ## What OpenSpec Creates
 
-After running `openspec init`, your project has this structure:
+After running `openspec-cn init`, your project has this structure:
 
 ```
 openspec/
@@ -260,16 +260,16 @@ Use the CLI to check on your changes:
 
 ```bash
 # List active changes
-openspec list
+openspec-cn list
 
 # View change details
-openspec show add-dark-mode
+openspec-cn show add-dark-mode
 
 # Validate spec formatting
-openspec validate add-dark-mode
+openspec-cn validate add-dark-mode
 
 # Interactive dashboard
-openspec view
+openspec-cn view
 ```
 
 ## Next Steps

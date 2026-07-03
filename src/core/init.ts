@@ -127,7 +127,7 @@ export class InitCommand {
           throw new Error(
             `${pointer.filePath} 中的 store 声明无效（` +
               storePointerProblem(pointer.malformed) +
-              `）。请先修复或移除 store: 行，再运行 openspec init。`
+              `）。请先修复或移除 store: 行，再运行 openspec-cn init。`
           );
         }
         if (pointer.value !== undefined) {
@@ -733,7 +733,7 @@ export class InitCommand {
       console.log(chalk.bold('入门指引：'));
       console.log('  开始你的第一个变更：/opsx:new "你的想法"');
     } else {
-      console.log("完成。运行 'openspec config profile' 配置你的工作流。");
+      console.log("完成。运行 'openspec-cn config profile' 配置你的工作流。");
     }
 
     // Links

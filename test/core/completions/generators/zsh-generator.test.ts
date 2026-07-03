@@ -395,7 +395,7 @@ describe('ZshGenerator', () => {
 
       const script = generator.generate(commands);
 
-      expect(script.trim().endsWith('compdef _openspec openspec')).toBe(true);
+      expect(script.trim().endsWith('compdef _openspec openspec-cn')).toBe(true);
     });
 
     it('should handle empty command list', () => {

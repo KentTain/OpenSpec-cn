@@ -96,7 +96,7 @@ argument-hint: "[command arguments]"
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from `planningHome.changesDir`/YYYY-MM-DD-<name>/
+**归档到：** 从 `planningHome.changesDir`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** ✓ 已同步到主 specs
 
 所有产出物完成。所有任务完成。
@@ -109,7 +109,7 @@ argument-hint: "[command arguments]"
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from `planningHome.changesDir`/YYYY-MM-DD-<name>/
+**归档到：** 从 `planningHome.changesDir`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** 无 delta specs
 
 所有产出物完成。所有任务完成。
@@ -122,7 +122,7 @@ argument-hint: "[command arguments]"
 
 **变更：** <change-name>
 **Schema：** <schema-name>
-**归档到：** the archive path derived from `planningHome.changesDir`/YYYY-MM-DD-<name>/
+**归档到：** 从 `planningHome.changesDir`/YYYY-MM-DD-<name>/ 派生的归档路径
 **Specs：** 跳过同步（用户选择跳过）
 
 **警告：**
@@ -139,7 +139,7 @@ argument-hint: "[command arguments]"
 ## 归档失败
 
 **变更：** <change-name>
-**目标：** the archive path derived from `planningHome.changesDir`/YYYY-MM-DD-<name>/
+**目标：** 从 `planningHome.changesDir`/YYYY-MM-DD-<name>/ 派生的归档路径
 
 目标归档目录已存在。
 

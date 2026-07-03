@@ -32,11 +32,11 @@ In your AI assistant's chat, not your terminal. This is the single most common p
 
 ### How do I "start interactive mode"?
 
-There isn't a separate mode to start. You open your AI assistant like normal and type a slash command into its chat. The slash command is how you "enter" OpenSpec. (The one genuinely interactive terminal feature is `openspec view`, a dashboard for browsing specs and changes.) Full explanation in [How Commands Work](how-commands-work.md).
+There isn't a separate mode to start. You open your AI assistant like normal and type a slash command into its chat. The slash command is how you "enter" OpenSpec. (The one genuinely interactive terminal feature is `openspec-cn view`, a dashboard for browsing specs and changes.) Full explanation in [How Commands Work](how-commands-work.md).
 
 ### I typed a slash command and nothing happened. Why?
 
-Most likely you typed it in the terminal instead of your AI chat, or the commands aren't installed yet. Run `openspec update` in your project, restart your assistant, then try typing `/opsx` in chat and watch for autocomplete. [Troubleshooting](troubleshooting.md#commands-dont-show-up) has the full checklist.
+Most likely you typed it in the terminal instead of your AI chat, or the commands aren't installed yet. Run `openspec-cn update` in your project, restart your assistant, then try typing `/opsx` in chat and watch for autocomplete. [Troubleshooting](troubleshooting.md#commands-dont-show-up) has the full checklist.
 
 ### Why is the syntax `/opsx:propose` in one tool and `/opsx-propose` in another?
 
@@ -66,7 +66,7 @@ Explore to think it through, propose to draft the plan, apply to build it, archi
 
 ### What are `core` and expanded profiles?
 
-A profile decides which slash commands get installed. **Core** (the default) gives you `propose`, `explore`, `apply`, `sync`, `archive`. The **expanded** set adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, and `onboard` for finer control. Switch with `openspec config profile`, then apply with `openspec update`.
+A profile decides which slash commands get installed. **Core** (the default) gives you `propose`, `explore`, `apply`, `sync`, `archive`. The **expanded** set adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, and `onboard` for finer control. Switch with `openspec-cn config profile`, then apply with `openspec-cn update`.
 
 ### Do I need to run `/opsx:sync`?
 
@@ -122,7 +122,7 @@ Yes. Add a language instruction to your config's `context:`. [Multi-Language](mu
 
 ### Can I change the workflow itself?
 
-Yes, with custom schemas. A schema defines which artifacts exist and how they depend on each other. Fork the default with `openspec schema fork spec-driven my-workflow`, then edit it. See [Customization](customization.md#custom-schemas).
+Yes, with custom schemas. A schema defines which artifacts exist and how they depend on each other. Fork the default with `openspec-cn schema fork spec-driven my-workflow`, then edit it. See [Customization](customization.md#custom-schemas).
 
 ## Models, privacy, and upgrades
 
@@ -136,7 +136,7 @@ It collects anonymous usage stats: command names and version only. No arguments,
 
 ### How do I upgrade?
 
-Two steps. Upgrade the package (`npm install -g @fission-ai/openspec@latest`), then run `openspec update` inside each project to refresh the generated skills and commands.
+Two steps. Upgrade the package (`npm install -g @fission-ai/openspec@latest`), then run `openspec-cn update` inside each project to refresh the generated skills and commands.
 
 ### How do I uninstall OpenSpec?
 
@@ -148,7 +148,7 @@ There's no uninstall command, because it's just a global package plus files in y
 
 - **Discord:** [discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC)
 - **GitHub Issues:** [github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues)
-- **From your terminal:** `openspec feedback "your message"` opens a GitHub issue for you.
+- **From your terminal:** `openspec-cn feedback "your message"` opens a GitHub issue for you.
 
 ### These docs are wrong or confusing. What do I do?
 

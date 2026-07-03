@@ -21,7 +21,7 @@ That second one matters more than it looks. OpenSpec has two halves: a command l
 
 **I have a big existing codebase.** You don't document all of it. [Using OpenSpec in an Existing Project](existing-projects.md) shows how to start on real, brownfield code without boiling the ocean.
 
-**I just want to get it working.** [Install](installation.md), run `openspec init`, then read [How Commands Work](how-commands-work.md) so your first slash command lands in the right place.
+**I just want to get it working.** [Install](installation.md), run `openspec-cn init`, then read [How Commands Work](how-commands-work.md) so your first slash command lands in the right place.
 
 **I learn by example.** The [Examples & Recipes](examples.md) page walks through real changes start to finish: a small feature, a bug fix, a refactor, an exploration.
 
@@ -89,7 +89,7 @@ That second one matters more than it looks. OpenSpec has two halves: a command l
 
 ```text
 1. Install        npm install -g @fission-ai/openspec@latest
-2. Initialize     cd your-project && openspec init
+2. Initialize     cd your-project && openspec-cn init
 3. Explore        (in your AI chat)  /opsx:explore           ← optional, but a great habit
 4. Propose        (in your AI chat)  /opsx:propose add-dark-mode
 5. Build          (in your AI chat)  /opsx:apply
@@ -102,6 +102,6 @@ Steps 1 and 2 happen in your terminal. The rest happen in your AI assistant's ch
 
 - **Discord:** [discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC) for questions, ideas, and help.
 - **GitHub Issues:** [github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues) for bugs and feature requests.
-- **`openspec feedback "your message"`** sends feedback straight from your terminal (it opens a GitHub issue).
+- **`openspec-cn feedback "your message"`** sends feedback straight from your terminal (it opens a GitHub issue).
 
 Found something in these docs that's wrong, stale, or confusing? That's a bug. Open an issue or a PR. Documentation improvements are some of the most valuable contributions you can make.

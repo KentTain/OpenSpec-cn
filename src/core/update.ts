@@ -117,7 +117,7 @@ export class UpdateCommand {
 
     if (configuredTools.length === 0 && newlyConfiguredTools.length === 0) {
       console.log(chalk.yellow('未找到已配置的工具。'));
-      console.log(chalk.dim('运行 "openspec init" 设置工具。'));
+      console.log(chalk.dim('运行 "openspec-cn init" 设置工具。'));
       return;
     }
 
@@ -349,7 +349,7 @@ export class UpdateCommand {
       console.log();
       console.log(
         chalk.yellow(
-          `检测到新的${toolNoun}：${newToolNames.join(', ')}。运行 'openspec init' 添加${pronoun}。`
+          `检测到新的${toolNoun}：${newToolNames.join(', ')}。运行 'openspec-cn init' 添加${pronoun}。`
         )
       );
     }
@@ -368,7 +368,7 @@ export class UpdateCommand {
     const extraWorkflows = installedWorkflows.filter((w) => !profileSet.has(w));
 
     if (extraWorkflows.length > 0) {
-      console.log(chalk.dim(`注意：${extraWorkflows.length} 个额外工作流不在 profile 中（使用 \`openspec config profile\` 管理）`));
+      console.log(chalk.dim(`注意：${extraWorkflows.length} 个额外工作流不在 profile 中（使用 \`openspec-cn config profile\` 管理）`));
     }
   }
 
@@ -391,7 +391,7 @@ export class UpdateCommand {
     }
 
     console.log(chalk.dim('注意：core profile 现在包含 sync。你的 custom profile 保留了旧的 core 工作流集合。'));
-    console.log(chalk.dim('运行 `openspec config profile core` 然后 `openspec update` 以添加 sync。'));
+    console.log(chalk.dim('运行 `openspec-cn config profile core` 然后 `openspec-cn update` 以添加 sync。'));
   }
 
   /**

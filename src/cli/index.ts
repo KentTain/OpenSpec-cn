@@ -49,7 +49,7 @@ const STORE_OPTION_DESCRIPTION = COMMON_FLAGS.store.description;
 function hiddenStorePathOption(): Option {
   return new Option(
     '--store-path <path>',
-    '不支持；请使用 "openspec store register <path>" 注册路径，并使用 --store <id>'
+    '不支持；请使用 "openspec-cn store register <path>" 注册路径，并使用 --store <id>'
   ).hideHelp();
 }
 

@@ -564,7 +564,7 @@ export function registerWorksetCommand(program: Command): void {
     COMMAND_REGISTRY.find((entry) => entry.name === 'workset')?.description ??
     '组合、保存和打开个人工作视图（纯本地）';
   const workset = program.command('workset').description(groupDescription);
-  // Parsed at the group level so `openspec workset --json` keeps the
+  // Parsed at the group level so `openspec-cn workset --json` keeps the
   // one-JSON-document contract instead of a raw Commander error. The
   // parent option matches anywhere; actions read optsWithGlobals().
   workset.addOption(new Option('--json', '以 JSON 格式输出').hideHelp());

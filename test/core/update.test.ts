@@ -1449,7 +1449,7 @@ More user content after markers.
         call.includes('core profile 现在包含 sync')
       )).toBe(true);
       expect(calls.some(call =>
-        call.includes('openspec config profile core') && call.includes('openspec update')
+        call.includes('openspec-cn config profile core') && call.includes('openspec-cn update')
       )).toBe(true);
 
       expect(await FileSystemUtils.fileExists(
@@ -1666,7 +1666,7 @@ content
         call.map(arg => String(arg)).join(' ')
       );
       const hasNewToolMessage = calls.some(call =>
-        call.includes("检测到新的工具：Cursor。运行 'openspec init' 添加它。")
+        call.includes("检测到新的工具：Cursor。运行 'openspec-cn init' 添加它。")
       );
       expect(hasNewToolMessage).toBe(true);
 
@@ -1698,7 +1698,7 @@ content
       expect(consolidatedCalls).toHaveLength(1);
       expect(consolidatedCalls[0]).toContain('GitHub Copilot');
       expect(consolidatedCalls[0]).toContain('Windsurf');
-      expect(consolidatedCalls[0]).toContain("运行 'openspec init' 添加它们。");
+      expect(consolidatedCalls[0]).toContain("运行 'openspec-cn init' 添加它们。");
 
       const repeatedSingularCalls = calls.filter(call =>
         call.includes('检测到新的工具：') && call.includes('添加它。') && !call.includes('添加它们。')

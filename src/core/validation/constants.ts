@@ -38,7 +38,7 @@ export const VALIDATION_MESSAGES = {
 
   // Guidance snippets (appended to primary messages for remediation)
   GUIDE_NO_DELTAS:
-    '未找到 delta。确保你的 change 有 specs/ 目录，其中包含能力文件夹（例如 specs/http-server/spec.md），其中的 .md 文件使用 delta 标题（## ADDED/MODIFIED/REMOVED/RENAMED Requirements），且每个需求至少包含一个 "#### Scenario:" 块。提示：运行 "openspec change show <change-id> --json --deltas-only" 查看解析后的 delta。',
+    '未找到 delta。确保你的 change 有 specs/ 目录，其中包含能力文件夹（例如 specs/http-server/spec.md），其中的 .md 文件使用 delta 标题（## ADDED/MODIFIED/REMOVED/RENAMED Requirements），且每个需求至少包含一个 "#### Scenario:" 块。提示：运行 "openspec-cn change show <change-id> --json --deltas-only" 查看解析后的 delta。',
   GUIDE_MISSING_SPEC_SECTIONS:
     '缺少必要章节。期望标题："## Purpose" 和 "## Requirements"。示例：\n## Purpose\n[简短用途]\n\n## Requirements\n### Requirement: 清晰的需求陈述\nUsers SHALL ...\n\n#### Scenario: 描述性名称\n- **WHEN** ...\n- **THEN** ...',
   GUIDE_MISSING_CHANGE_SECTIONS:

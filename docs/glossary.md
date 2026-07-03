@@ -54,9 +54,9 @@ Terms are grouped by topic, then alphabetized within each group.
 
 **Command file.** A per-tool slash command file (`.../commands/opsx-*`). The older delivery mechanism, still supported alongside skills. You rarely touch these directly.
 
-**Profile.** The set of slash commands installed in your project. **Core** (the default) is `propose`, `explore`, `apply`, `sync`, `archive`. The **expanded** set adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, `onboard`. Change it with `openspec config profile`.
+**Profile.** The set of slash commands installed in your project. **Core** (the default) is `propose`, `explore`, `apply`, `sync`, `archive`. The **expanded** set adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, `onboard`. Change it with `openspec-cn config profile`.
 
-**Delivery.** Whether OpenSpec installs skills, command files, or both for your tools. Configured globally and applied with `openspec update`.
+**Delivery.** Whether OpenSpec installs skills, command files, or both for your tools. Configured globally and applied with `openspec-cn update`.
 
 ## Customization
 
@@ -78,11 +78,11 @@ These terms apply only if your planning spans more than one repo. They're in bet
 
 **Store.** A standalone repo whose whole job is planning. It has the same `openspec/` shape you already know (specs and changes) plus a small identity file. You register it on your machine once, by name, and then any OpenSpec command can work in it from anywhere.
 
-**Reference.** A declaration, in a code repo's `openspec/config.yaml`, of a store that repo draws on. References are read-only: the repo keeps its own root, and `openspec instructions` gains an index of the referenced store's specs, each with the exact command to fetch it.
+**Reference.** A declaration, in a code repo's `openspec/config.yaml`, of a store that repo draws on. References are read-only: the repo keeps its own root, and `openspec-cn instructions` gains an index of the referenced store's specs, each with the exact command to fetch it.
 
-**Working context.** What `openspec context` assembles for the current repo: its OpenSpec root plus every store it references, each with how to fetch it. The answer to "what am I working with?"
+**Working context.** What `openspec-cn context` assembles for the current repo: its OpenSpec root plus every store it references, each with how to fetch it. The answer to "what am I working with?"
 
-**Workset.** A personal, machine-local set of folders you open together (a store alongside the code repos you work on). Created explicitly with `openspec workset create`; nothing about those local paths is committed to the shared planning repo.
+**Workset.** A personal, machine-local set of folders you open together (a store alongside the code repos you work on). Created explicitly with `openspec-cn workset create`; nothing about those local paths is committed to the shared planning repo.
 
 ## See also
 

@@ -77,8 +77,8 @@ Explore creates no artifacts and writes no code. It's a free, no-stakes conversa
 If you want explicit scaffold-and-build commands (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:bulk-archive`, `/opsx:onboard`), enable them with:
 
 ```bash
-openspec config profile
-openspec update
+openspec-cn config profile
+openspec-cn update
 ```
 
 ## Workflow Patterns (Expanded Mode)
@@ -445,7 +445,7 @@ Catches mismatches before you close out the change.
 
 ### Name Changes Clearly
 
-Good names make `openspec list` useful:
+Good names make `openspec-cn list` useful:
 
 ```text
 Good:                          Avoid:

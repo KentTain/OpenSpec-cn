@@ -196,7 +196,7 @@ export class ArchiveCommand {
     try {
       await fs.access(changesDir);
     } catch {
-      throw new Error("未找到 OpenSpec changes 目录。请先运行 'openspec init'。");
+      throw new Error("未找到 OpenSpec changes 目录。请先运行 'openspec-cn init'。");
     }
 
     // Get change name interactively if not provided
@@ -442,7 +442,7 @@ export class ArchiveCommand {
                   throw new ArchiveBlockedError(
                     'archive_spec_validation_failed',
                     `为 '${specName}' 重建的 spec 验证失败。未更改任何文件。`,
-                    `修复 change deltas 后运行 ${withStoreFlag(root, `openspec validate ${specName}`)}。`
+                    `修复 change deltas 后运行 ${withStoreFlag(root, `openspec-cn validate ${specName}`)}。`
                   );
                 }
                 console.log(chalk.red(`\n${specName} 重建规范中存在验证错误（不会写入更改）：`));

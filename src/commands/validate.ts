@@ -222,7 +222,7 @@ export class ValidateCommand {
     if (type === 'change') {
       bullets.push('- 确保变更在 specs/ 中有 deltas：使用 ## ADDED/MODIFIED/REMOVED/RENAMED Requirements 标题');
       bullets.push('- 每个需求必须包含至少一个 #### Scenario: 块');
-      bullets.push(`- 调试解析的 deltas：${withStoreFlag(root, `openspec show ${id} --json --deltas-only`)}`);
+      bullets.push(`- 调试解析的 deltas：${withStoreFlag(root, `openspec-cn show ${id} --json --deltas-only`)}`);
     } else {
       bullets.push('- 确保规范包含 ## Purpose 和 ## Requirements 部分');
       bullets.push('- 每个需求必须包含至少一个 #### Scenario: 块');
@@ -344,7 +344,7 @@ export class ValidateCommand {
       if (firstFailure) {
         const storeFlag = isStoreSelectedRoot(root) ? ` --store ${root.storeId}` : '';
         console.log(
-          `详情：openspec validate ${firstFailure.id} --type ${firstFailure.type}${storeFlag}`
+          `详情：openspec-cn validate ${firstFailure.id} --type ${firstFailure.type}${storeFlag}`
         );
       }
     }

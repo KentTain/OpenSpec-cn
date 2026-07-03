@@ -2,7 +2,7 @@
 name: openspec-explore
 description: 进入探索模式 - 一个用于探索想法、调查问题、澄清需求的思考伙伴。当用户想在变更之前或期间先思考一番时使用。
 license: MIT
-compatibility: Requires openspec CLI.
+compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"

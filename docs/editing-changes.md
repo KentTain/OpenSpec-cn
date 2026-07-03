@@ -41,7 +41,7 @@ You don't have to "go back," because you never left. The workflow is fluid: revi
 
 Concretely, after some `/opsx:apply` work:
 
-- Want to re-examine the plan? Open the artifacts and read them, or run `openspec show <change>` in your terminal for a consolidated view.
+- Want to re-examine the plan? Open the artifacts and read them, or run `openspec-cn show <change>` in your terminal for a consolidated view.
 - Found something to change? Edit the artifact (or ask the AI to), then continue.
 - Want a structured check that the code matches the plan? Run `/opsx:verify` (expanded command). It reports completeness, correctness, and coherence without blocking anything. See [Workflows: Verify](workflows.md#verify-check-your-work).
 
