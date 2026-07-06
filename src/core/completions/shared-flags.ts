@@ -1,4 +1,4 @@
-import type { FlagDefinition } from './types.js';
+﻿import type { FlagDefinition } from './types.js';
 
 /**
  * Common flags used across multiple commands.
@@ -22,14 +22,14 @@ export const COMMON_FLAGS = {
   } as FlagDefinition,
   type: {
     name: 'type',
-    description: '当类型不明确时指定项目类型',
+    description: '当项目类型不明确时指定类型',
     takesValue: true,
     values: ['change', 'spec'],
   } as FlagDefinition,
   store: {
     name: 'store',
     description:
-      '用作 OpenSpec 根目录的 Store ID（Store 是已注册的独立 OpenSpec 仓库）',
+      '用作 OpenSpec 根目录的 store id（store 是您在本机上注册的独立 OpenSpec 仓库）',
     takesValue: true,
   } as FlagDefinition,
 } as const;

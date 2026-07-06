@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
@@ -37,7 +37,7 @@ describe('change validate (interactive behavior)', () => {
       expect(err).toBeDefined();
       expect(err.status).not.toBe(0);
       expect(err.stderr.toString()).toContain('可用ID：');
-      expect(err.stderr.toString()).toContain('openspec-cn list');
+      expect(err.stderr.toString()).toContain('openspec-cn change list');
     } finally {
       process.chdir(originalCwd);
       process.env = originalEnv;

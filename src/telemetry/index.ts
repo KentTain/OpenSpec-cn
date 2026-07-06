@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Telemetry module for anonymous usage analytics.
  *
  * Privacy-first design:
@@ -152,7 +152,7 @@ export async function maybeShowTelemetryNotice(): Promise<void> {
 
     // Display notice
     console.log(
-      '提示：OpenSpec 会收集匿名使用统计数据。如需退出，请设置环境变量：OPENSPEC_TELEMETRY=0'
+      '注意：OpenSpec 收集匿名使用统计。可通过 OPENSPEC_TELEMETRY=0 退出'
     );
 
     // Mark as seen

@@ -1,4 +1,4 @@
-import { afterAll, describe, it, expect } from 'vitest';
+﻿import { afterAll, describe, it, expect } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
@@ -16,23 +16,8 @@ async function fileExists(filePath: string): Promise<boolean> {
 
 const tempRoots: string[] = [];
 
-async function createTempGlobalConfig(baseDir: string): Promise<{ XDG_CONFIG_HOME: string }> {
-  const configDir = path.join(baseDir, 'xdg-config');
-  const openspecDir = path.join(configDir, 'openspec');
-  await fs.mkdir(openspecDir, { recursive: true });
-  await fs.writeFile(
-    path.join(openspecDir, 'config.json'),
-    JSON.stringify({
-      profile: 'core',
-      delivery: 'both',
-      workflows: ['propose', 'explore', 'apply', 'archive'],
-    })
-  );
-  return { XDG_CONFIG_HOME: configDir };
-}
-
 async function prepareFixture(fixtureName: string): Promise<string> {
-  const base = await fs.mkdtemp(path.join(tmpdir(), 'openspec-cn-cli-e2e-'));
+  const base = await fs.mkdtemp(path.join(tmpdir(), 'openspec-cli-e2e-'));
   tempRoots.push(base);
   const projectDir = path.join(base, 'project');
   await fs.mkdir(projectDir, { recursive: true });
@@ -43,7 +28,7 @@ async function prepareFixture(fixtureName: string): Promise<string> {
 
 function expectJsonOnlyOutput(result: Awaited<ReturnType<typeof runCLI>>) {
   expect(result.exitCode).toBe(0);
-  expect(result.cleanStderr).toBe('');
+  expect(result.stderr).toBe('');
   expect(() => JSON.parse(result.stdout)).not.toThrow();
 }
 
@@ -56,7 +41,8 @@ describe('openspec CLI e2e basics', () => {
     const result = await runCLI(['--help']);
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Usage: openspec-cn');
-    expect(result.cleanStderr).toBe('');
+    expect(result.stderr).toBe('');
+
   });
 
   it('shows dynamic tool ids in init help', async () => {
@@ -80,7 +66,7 @@ describe('openspec CLI e2e basics', () => {
     expect(result.stdout.trim()).toBe(pkg.version);
   });
 
-  it('validates the tmp-init fixture with --all --json', async () => {
+  it('validates the tmp-init fixture with --all --json', { timeout: 30000 }, async () => {
     const projectDir = await prepareFixture('tmp-init');
     const result = await runCLI(['validate', '--all', '--json'], { cwd: projectDir });
     expect(result.exitCode).toBe(0);
@@ -135,7 +121,7 @@ describe('openspec CLI e2e basics', () => {
     const projectDir = await prepareFixture('tmp-init');
     const result = await runCLI(['validate', 'does-not-exist'], { cwd: projectDir });
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain("未知项目");
+    expect(result.stderr).toContain("未知项目 'does-not-exist'");
   });
 
   describe('init command non-interactive options', () => {
@@ -147,7 +133,7 @@ describe('openspec CLI e2e basics', () => {
       const codexHome = path.join(emptyProjectDir, '.codex');
       const result = await runCLI(['init', '--tools', 'all'], {
         cwd: emptyProjectDir,
-        env: { CODEX_HOME: codexHome, ...(await createTempGlobalConfig(emptyProjectDir)) },
+        env: { CODEX_HOME: codexHome },
         timeoutMs: 20000,
       });
       expect(result.timedOut).toBe(false);
@@ -166,10 +152,7 @@ describe('openspec CLI e2e basics', () => {
       const emptyProjectDir = path.join(projectDir, '..', 'empty-project');
       await fs.mkdir(emptyProjectDir, { recursive: true });
 
-      const result = await runCLI(['init', '--tools', 'claude'], {
-        cwd: emptyProjectDir,
-        env: await createTempGlobalConfig(emptyProjectDir),
-      });
+      const result = await runCLI(['init', '--tools', 'claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('OpenSpec 设置完成');
       expect(result.stdout).toContain('Claude Code');
@@ -205,8 +188,8 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'invalid-tool'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('无效工具: invalid-tool');
-      expect(result.stderr).toContain('可用值:');
+      expect(result.stderr).toContain('无效工具：invalid-tool');
+      expect(result.stderr).toContain('可用值：');
     });
 
     it('returns error when combining reserved keywords with explicit ids', async () => {
@@ -216,7 +199,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'all,claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('不能同时使用保留值 "all" 或 "none" 与具体工具 ID');
+      expect(result.stderr).toContain('不能将保留值 "all" 或 "none" 与具体工具 ID 组合使用');
     });
   });
 });

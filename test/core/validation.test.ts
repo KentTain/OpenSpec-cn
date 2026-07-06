@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Validator } from '../../src/core/validation/validator.js';
@@ -62,7 +62,7 @@ describe('Validation Schemas', () => {
       const result = RequirementSchema.safeParse(requirement);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('需求必须包含 SHALL、MUST、必须或禁止关键字');
+        expect(result.error.issues[0].message).toBe('需求必须包含 SHALL 或 MUST 关键字');
       }
     });
 
@@ -111,7 +111,7 @@ describe('Validation Schemas', () => {
       const result = SpecSchema.safeParse(spec);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('规范必须至少有一个需求');
+        expect(result.error.issues[0].message).toBe('Spec 必须至少有一个需求');
       }
     });
   });
@@ -152,7 +152,7 @@ describe('Validation Schemas', () => {
       const result = ChangeSchema.safeParse(change);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('为什么部分必须至少50个字符');
+        expect(result.error.issues[0].message).toBe('Why 章节必须至少 50 个字符');
       }
     });
 
@@ -173,7 +173,7 @@ describe('Validation Schemas', () => {
       const result = ChangeSchema.safeParse(change);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('考虑拆分包含超过10个增量的变更');
+        expect(result.error.issues[0].message).toBe('超过 10 个 delta 时请考虑拆分 change');
       }
     });
   });
@@ -197,7 +197,7 @@ describe('Validator', () => {
 ## Purpose
 This specification defines the requirements for user authentication in the system.
 
-## 需求
+## Requirements
 
 ### The system SHALL provide secure user authentication
 The system SHALL provide secure user authentication mechanisms.
@@ -228,7 +228,7 @@ Then they see an error message`;
     it('should detect missing overview section', async () => {
       const specContent = `# User Authentication Spec
 
-## 需求
+## Requirements
 
 ### The system SHALL provide secure user authentication
 
@@ -245,7 +245,7 @@ Then authenticated`;
       
       expect(report.valid).toBe(false);
       expect(report.summary.errors).toBeGreaterThan(0);
-      expect(report.issues.some(i => i.message.includes('目的'))).toBe(true);
+      expect(report.issues.some(i => i.message.includes('Purpose'))).toBe(true);
     });
 
     it('should error on delta headers inside a main spec', async () => {
@@ -279,7 +279,7 @@ The system SHALL do B.
 
       expect(report.valid).toBe(false);
       expect(
-        report.issues.some(i => i.level === 'ERROR' && i.message.includes('主规范包含增量标题'))
+        report.issues.some(i => i.level === 'ERROR' && i.message.includes('主 spec 包含 delta 标题'))
       ).toBe(true);
       expect(
         report.issues.some(i => i.level === 'ERROR' && i.message.includes('需求标题 "### Requirement: B" 出现在主'))
@@ -349,8 +349,8 @@ The system SHALL ...
       const report = await new Validator().validateSpec(specPath);
 
       expect(report.valid).toBe(true);
-      expect(report.issues.some(i => i.message.includes('主规范包含增量标题'))).toBe(false);
-      expect(report.issues.some(i => i.message.includes('出现在主 ## Requirements 部分之外'))).toBe(false);
+      expect(report.issues.some(i => i.message.includes('主 spec 包含 delta 标题'))).toBe(false);
+      expect(report.issues.some(i => i.message.includes('出现在主 ## Requirements section'))).toBe(false);
     });
   });
 
@@ -389,7 +389,7 @@ We need to implement user authentication to secure the application and protect u
       
       expect(report.valid).toBe(false);
       expect(report.summary.errors).toBeGreaterThan(0);
-      expect(report.issues.some(i => i.message.includes('为什么'))).toBe(true);
+      expect(report.issues.some(i => i.message.includes('Why'))).toBe(true);
     });
   });
 
@@ -400,7 +400,7 @@ We need to implement user authentication to secure the application and protect u
 ## Purpose
 Brief overview
 
-## 需求
+## Requirements
 
 ### The system SHALL do something
 
@@ -424,7 +424,7 @@ Then result`;
 ## Purpose
 Brief overview
 
-## 需求
+## Requirements
 
 ### The system SHALL do something
 
@@ -452,9 +452,9 @@ Then result`;
 
       const deltaSpec = `# Test Spec
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: Circuit Breaker State Management SHALL be implemented
+### Requirement: Circuit Breaker State Management SHALL be implemented
 **ID**: REQ-CB-001
 **Priority**: P1 (High)
 
@@ -482,9 +482,9 @@ The system MUST implement a circuit breaker with three states.
 
       const deltaSpec = `# Test Spec
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: Error Handling
+### Requirement: Error Handling
 **ID**: REQ-ERR-001
 **Priority**: P2
 
@@ -512,9 +512,9 @@ The system SHALL handle all errors gracefully.
 
       const deltaSpec = `# Test Spec
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: Logging Feature
+### Requirement: Logging Feature
 **ID**: REQ-LOG-001
 
 The system will log all events.
@@ -532,7 +532,7 @@ The system will log all events.
 
       expect(report.valid).toBe(false);
       expect(report.summary.errors).toBeGreaterThan(0);
-      expect(report.issues.some(i => i.message.includes('必须包含 SHALL、MUST、必须 或 禁止'))).toBe(true);
+      expect(report.issues.some(i => i.message.includes('必须包含 SHALL 或 MUST'))).toBe(true);
     });
 
     it('should hint the author when ADDED requirement only has SHALL/MUST in the header', async () => {
@@ -559,9 +559,9 @@ Error handling logic goes here.
       const report = await validator.validateChangeDeltaSpecs(changeDir);
 
       expect(report.valid).toBe(false);
-      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL'));
-      expect(shallMessage?.message).toContain('而不仅仅是标题中');
-      expect(shallMessage?.message).toContain('### 需求:');
+      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL 或 MUST'));
+      expect(shallMessage?.message).toContain('而非仅在标题中');
+      expect(shallMessage?.message).toContain('### Requirement:');
     });
 
     it('should hint the author when MODIFIED requirement only has SHALL/MUST in the header', async () => {
@@ -588,9 +588,9 @@ Please describe how validation should work here.
       const report = await validator.validateChangeDeltaSpecs(changeDir);
 
       expect(report.valid).toBe(false);
-      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL'));
-      expect(shallMessage?.message).toContain('而不仅仅是标题中');
-      expect(shallMessage?.message).toContain('### 需求:');
+      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL 或 MUST'));
+      expect(shallMessage?.message).toContain('而非仅在标题中');
+      expect(shallMessage?.message).toContain('### Requirement:');
     });
 
     it('should keep the generic SHALL/MUST error when neither header nor body contain the keyword', async () => {
@@ -617,8 +617,8 @@ The system will log all events.
       const report = await validator.validateChangeDeltaSpecs(changeDir);
 
       expect(report.valid).toBe(false);
-      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL'));
-      expect(shallMessage?.message).not.toContain('而不仅仅是标题中');
+      const shallMessage = report.issues.find(i => i.message.includes('必须包含 SHALL 或 MUST'));
+      expect(shallMessage?.message).not.toContain('而非仅在标题中');
     });
 
     it('should handle requirements without metadata fields', async () => {
@@ -628,9 +628,9 @@ The system will log all events.
 
       const deltaSpec = `# Test Spec
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: Simple Feature
+### Requirement: Simple Feature
 The system SHALL implement this feature.
 
 #### Scenario: Basic usage
@@ -655,9 +655,9 @@ The system SHALL implement this feature.
 
       const deltaSpec = `# Test Spec
 
-## 新增需求
+## Added Requirements
 
-### 需求: Mixed Case Handling
+### Requirement: Mixed Case Handling
 The system MUST support mixed case delta headers.
 
 #### Scenario: Case insensitive parsing

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+﻿import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFile } from 'child_process';
 import { promises as fs, realpathSync } from 'fs';
 import path from 'path';
@@ -257,7 +257,7 @@ describe('standalone store lifecycle journey', () => {
     const humanDoctor = await runCLI(['store', 'doctor', STORE_ID], { env: machineA });
     expect(humanDoctor.exitCode).toBe(0);
     expect(humanDoctor.stdout).toContain(
-      '检测到仓库（提交：有，未提交变更：无，远程：无）'
+      'Git: 检测到仓库 (提交: 有, 未提交更改: 无, 远程: 无)'
     );
   });
 
@@ -282,7 +282,7 @@ describe('standalone store lifecycle journey', () => {
       { env: machineA, cwd: projectDir }
     );
     expect(status.exitCode).toBe(0);
-    expect(status.stderr).toContain(`正在使用 OpenSpec 根目录：${STORE_ID}`);
+    expect(status.stderr).toContain(`使用 OpenSpec 根目录: ${STORE_ID}`);
     expect(status.stdout).not.toContain('Planning home');
 
     const instructions = await runCLI(
@@ -401,7 +401,7 @@ describe('standalone store lifecycle journey', () => {
       { env: machineB, cwd: base }
     );
     expect(created.exitCode).toBe(0);
-    expect(created.stderr).toContain(`正在使用 OpenSpec 根目录：${STORE_ID}`);
+    expect(created.stderr).toContain(`使用 OpenSpec 根目录: ${STORE_ID}`);
     expect(created.stdout).toContain(`--store ${STORE_ID}`);
 
     const instructions = await runCLI(
@@ -421,7 +421,7 @@ describe('standalone store lifecycle journey', () => {
       { env: machineB, cwd: base }
     );
     expect(status.exitCode).toBe(0);
-    expect(status.stdout).toContain('所有产出物已完成!');
+    expect(status.stdout).toContain('所有产出物已完成！');
 
     const validated = await runCLI(
       ['validate', changeId, '--store', STORE_ID],
@@ -448,7 +448,7 @@ describe('standalone store lifecycle journey', () => {
       { env: machineB, cwd: base }
     );
     expect(failedApply.exitCode).not.toBe(0);
-    expect(failedApply.stderr).toContain(`正在使用 OpenSpec 根目录：${STORE_ID}`);
+    expect(failedApply.stderr).toContain(`使用 OpenSpec 根目录: ${STORE_ID}`);
     expect(failedApply.stderr).toContain(`openspec-cn new change <name> --store ${STORE_ID}`);
   });
 

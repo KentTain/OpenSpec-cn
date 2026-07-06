@@ -1,10 +1,10 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 /**
  * Postinstall script that hints about shell completions
  *
  * Completion installation is opt-in: the user must run
- * `openspec completion install` explicitly. This script only
+ * `openspec-cn completion install` explicitly. This script only
  * prints a one-line tip after npm install.
  *
  * The tip is suppressed when:
@@ -70,7 +70,7 @@ async function main() {
     }
 
     // Completions are opt-in — just print a hint
-    console.log(`\n提示：运行 'openspec-cn completion install' 以安装 shell 补全`);
+    console.log(`\nTip: Run 'openspec-cn completion install' for shell completions`);
   } catch (error) {
     // Fail gracefully - never break npm install
   }

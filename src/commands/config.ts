@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+﻿import { Command } from 'commander';
 import { spawn, execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -149,11 +149,11 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
   const lines: string[] = [];
 
   if (before.delivery !== after.delivery) {
-    lines.push(`交付方式：${before.delivery} -> ${after.delivery}`);
+    lines.push(`delivery: ${before.delivery} -> ${after.delivery}`);
   }
 
   if (before.profile !== after.profile) {
-    lines.push(`档案：${before.profile} -> ${after.profile}`);
+    lines.push(`profile: ${before.profile} -> ${after.profile}`);
   }
 
   const beforeOrdered = stableWorkflowOrder(before.workflows);
@@ -167,12 +167,12 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
   if (added.length > 0 || removed.length > 0) {
     const tokens: string[] = [];
     if (added.length > 0) {
-      tokens.push(`已添加 ${added.join(', ')}`);
+      tokens.push(`新增 ${added.join(', ')}`);
     }
     if (removed.length > 0) {
-      tokens.push(`已移除 ${removed.join(', ')}`);
+      tokens.push(`移除 ${removed.join(', ')}`);
     }
-    lines.push(`工作流：${tokens.join('；')}`);
+    lines.push(`workflows: ${tokens.join('；')}`);
   }
 
   return {
@@ -197,7 +197,7 @@ function maybeWarnProjectConfigDrift(
 }
 
 function printConfigProfileApplyGuidance(): void {
-  console.log('配置已更新。请在项目中运行 `openspec-cn update` 以应用。');
+  console.log('配置已更新。请在您的项目中运行 `openspec-cn update` 来应用。');
 }
 
 /**
@@ -209,7 +209,7 @@ export function registerConfigCommand(program: Command): void {
   const configCmd = program
     .command('config')
     .description('查看并修改全局 OpenSpec 配置')
-    .option('--scope <scope>', '配置作用域（目前仅支持 "global"）')
+    .option('--scope <scope>', '配置范围（目前仅支持 "global"）')
     .hook('preAction', (thisCommand) => {
       const opts = thisCommand.opts();
       if (opts.scope && opts.scope !== 'global') {
@@ -230,7 +230,7 @@ export function registerConfigCommand(program: Command): void {
   configCmd
     .command('list')
     .description('显示当前所有设置')
-    .option('--json', '以 JSON 格式输出')
+    .option('--json', '以JSON格式输出')
     .action((options: { json?: boolean }) => {
       const config = getGlobalConfig();
 
@@ -251,8 +251,8 @@ export function registerConfigCommand(program: Command): void {
         console.log(formatValueYaml(config));
 
         // Annotate profile settings
-        const profileSource = rawConfig.profile !== undefined ? '(显式设置)' : '(默认倦)';
-        const deliverySource = rawConfig.delivery !== undefined ? '(显式设置)' : '(默认倦)';
+        const profileSource = rawConfig.profile !== undefined ? '(显式设置)' : '(默认值)';
+        const deliverySource = rawConfig.delivery !== undefined ? '(显式设置)' : '(默认值)';
         console.log(`\n档案设置：`);
         console.log(`  profile: ${config.profile} ${profileSource}`);
         console.log(`  delivery: ${config.delivery} ${deliverySource}`);
@@ -291,15 +291,15 @@ export function registerConfigCommand(program: Command): void {
     .command('set <key> <value>')
     .description('设置值（自动转换类型）')
     .option('--string', '强制将值存为字符串')
-    .option('--allow-unknown', '允许设置未知的键')
+    .option('--allow-unknown', '允许设置未知键')
     .action((key: string, value: string, options: { string?: boolean; allowUnknown?: boolean }) => {
       const allowUnknown = Boolean(options.allowUnknown);
       const keyValidation = validateConfigKeyPath(key);
       if (!keyValidation.valid && !allowUnknown) {
         const reason = keyValidation.reason ? ` ${keyValidation.reason}。` : '';
         console.error(`错误：无效的配置键 "${key}"。${reason}`);
-        console.error('使用 "openspec-cn config list" 查看可用键。');
-        console.error('传递 --allow-unknown 以跳过此检查。');
+        console.error('使用 "openspec-cn config list" 查看可用的键。');
+        console.error('传递 --allow-unknown 可跳过此检查。');
         process.exitCode = 1;
         return;
       }
@@ -325,7 +325,7 @@ export function registerConfigCommand(program: Command): void {
 
       const displayValue =
         typeof coercedValue === 'string' ? `"${coercedValue}"` : String(coercedValue);
-      console.log(`设置 ${key} = ${displayValue}`);
+      console.log(`已设置 ${key} = ${displayValue}`);
     });
 
   // config unset
@@ -376,7 +376,7 @@ export function registerConfigCommand(program: Command): void {
         }
 
         if (!confirmed) {
-          console.log('已取消重置。');
+          console.log('重置已取消。');
           return;
         }
       }
@@ -394,7 +394,7 @@ export function registerConfigCommand(program: Command): void {
 
       if (!editor) {
         console.error('错误：未配置编辑器');
-        console.error('请将 EDITOR 或 VISUAL 环境变量设置为您首选的编辑器');
+        console.error('请将 EDITOR 或 VISUAL 环境变量设置为您偏好的编辑器');
         console.error('示例：export EDITOR=vim');
         process.exitCode = 1;
         return;
@@ -420,7 +420,7 @@ export function registerConfigCommand(program: Command): void {
           if (code === 0) {
             resolve();
           } else {
-            reject(new Error(`编辑器以状态码 ${code} 退出`));
+            reject(new Error(`编辑器退出代码 ${code}`));
           }
         });
         child.on('error', reject);
@@ -472,7 +472,7 @@ export function registerConfigCommand(program: Command): void {
 
       // Non-interactive check
       if (!process.stdout.isTTY) {
-        console.error('需要交互模式。使用 `openspec-cn config profile core` 或通过环境/标志设置配置。');
+        console.error('需要交互模式。使用 `openspec-cn config profile core` 或通过环境变量/标志设置配置。');
         process.exitCode = 1;
         return;
       }
@@ -486,10 +486,10 @@ export function registerConfigCommand(program: Command): void {
         const currentState = resolveCurrentProfileState(config);
 
         console.log(chalk.bold('\n当前档案设置'));
-        console.log(`  交付方式：${currentState.delivery}`);
-        console.log(`  工作流：${formatWorkflowSummary(currentState.workflows, currentState.profile)}`);
-        console.log(chalk.dim('  交付方式 = 工作流的安装位置（SKILL、命令或两者）'));
-        console.log(chalk.dim('  工作流 = 可用的操作（提议、探索、应用等）'));
+        console.log(`  Delivery: ${currentState.delivery}`);
+        console.log(`  Workflows: ${formatWorkflowSummary(currentState.workflows, currentState.profile)}`);
+        console.log(chalk.dim('  Delivery = 工作流的安装位置（skills、命令或两者）'));
+        console.log(chalk.dim('  Workflows = 可用的工作流动作（propose、explore、apply 等）'));
         console.log();
 
         const action = await select<ProfileAction>({
@@ -498,28 +498,28 @@ export function registerConfigCommand(program: Command): void {
             {
               value: 'both',
               name: '交付方式和工作流',
-              description: '一起更新安装模式和可用操作',
+              description: '同时更新安装模式和可用动作',
             },
             {
               value: 'delivery',
               name: '仅交付方式',
-              description: '变更工作流的安装位置',
+              description: '更改工作流的安装位置',
             },
             {
               value: 'workflows',
               name: '仅工作流',
-              description: '变更可用的工作流操作',
+              description: '更改可用的工作流动作',
             },
             {
               value: 'keep',
               name: '保持当前设置（退出）',
-              description: '保留配置不变并退出',
+              description: '不修改配置并退出',
             },
           ],
         });
 
         if (action === 'keep') {
-          console.log('没有配置变更。');
+          console.log('配置未变更。');
           maybeWarnProjectConfigDrift(process.cwd(), currentState, chalk.yellow);
           return;
         }
@@ -539,8 +539,8 @@ export function registerConfigCommand(program: Command): void {
             },
             {
               value: 'skills' as Delivery,
-              name: '仅Skills',
-              description: '仅将工作流作为SKILL安装',
+              name: '仅 Skills',
+              description: '仅将工作流作为技能安装',
             },
             {
               value: 'commands' as Delivery,
@@ -565,7 +565,7 @@ export function registerConfigCommand(program: Command): void {
           const formatWorkflowChoice = (workflow: string) => {
             const metadata = WORKFLOW_PROMPT_META[workflow] ?? {
               name: workflow,
-      description: `工作流: ${workflow}`,
+              description: `工作流: ${workflow}`,
             };
             return {
               value: workflow,
@@ -594,7 +594,7 @@ export function registerConfigCommand(program: Command): void {
 
         const diff = diffProfileState(currentState, nextState);
         if (!diff.hasChanges) {
-          console.log('没有配置变更。');
+          console.log('配置未变更。');
           maybeWarnProjectConfigDrift(process.cwd(), nextState, chalk.yellow);
           return;
         }
@@ -615,7 +615,7 @@ export function registerConfigCommand(program: Command): void {
         const openspecDir = path.join(projectDir, OPENSPEC_DIR_NAME);
         if (fs.existsSync(openspecDir)) {
           const applyNow = await confirm({
-            message: '立即将变更应用到此项目？',
+            message: '立即将更改应用到此项目？',
             default: true,
           });
 

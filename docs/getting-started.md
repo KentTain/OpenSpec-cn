@@ -1,286 +1,287 @@
-# 快速上手
+﻿# Getting Started
 
-本指南讲解 OpenSpec 安装并初始化之后如何工作。安装说明见 [主 README](../README.md#quick-start) 或 [安装指南](installation.md)。第一次接触整套文档？[文档首页](README.md) 有完整索引。
+This guide explains how OpenSpec works after you've installed and initialized it. For installation instructions, see the [main README](../README.md#quick-start) or the [Installation guide](installation.md). New to the whole docs set? The [documentation home](README.md) maps everything.
 
-> **这些命令在哪里输入？** 两个地方，混淆它们是最常见的早期绊脚石。
+> **Where do I type these commands?** Two places, and mixing them up is the most common early stumble.
 >
-> - `openspec ...` 命令（如 `openspec-cn init`）在**终端**里运行。
-> - `/opsx:...` 命令（如 `/opsx:propose`）在**AI 助手的聊天**里运行，就是你会让它写代码的那个对话框。
+> - `openspec ...` commands (like `openspec-cn init`) run in your **terminal**.
+> - `/opsx:...` commands (like `/opsx:propose`) run in your **AI assistant's chat**, the same box where you'd ask it to write code.
 >
-> 没有单独的"交互模式"要启动。你只要在聊天里输入斜杠命令，助手就会接管。完整解释见 [命令是如何工作的](how-commands-work.md)。
+> There's no separate "interactive mode" to start. You just type the slash command in chat and your assistant takes it from there. Full explanation: [How Commands Work](how-commands-work.md).
 
-## 头五分钟
+## Your First Five Minutes
 
-完整循环，每步标注了发生地点：
+The whole loop, with each step labeled by where it happens:
 
 ```text
-TERMINAL   $ npm install -g @studyzy/openspec-cn@latest
+TERMINAL   $ npm install -g @fission-ai/openspec@latest
 TERMINAL   $ cd your-project && openspec-cn init
-AI CHAT      /opsx:explore                    (可选：先想清楚)
-AI CHAT      /opsx:propose add-dark-mode      (AI 起草计划；你审查)
-AI CHAT      /opsx:apply                      (AI 构建)
-AI CHAT      /opsx:archive                    (specs 更新，change 归档)
+AI CHAT      /opsx:explore                    (optional: think it through first)
+AI CHAT      /opsx:propose add-dark-mode      (AI drafts the plan; you review it)
+AI CHAT      /opsx:apply                      (AI builds it)
+AI CHAT      /opsx:archive                    (specs updated, change filed away)
 ```
 
-两步终端配置，之后你就活在聊天里。本指南剩下的部分拆解每一步做什么、你会看到什么。
+Two terminal steps to set up, then you live in chat. The rest of this guide unpacks what each step does and what you'll see.
 
-> **还不确定要做什么？从 `/opsx:explore` 开始。** 它是一个零成本思考伙伴，会阅读你的代码库、权衡选项，把模糊想法变成具体计划——这一切都发生在任何制品或代码存在之前。图景清晰后，它把工作交给 `/opsx:propose`。这是和一个会自信地造错东西的 AI 协作时最值得养成的习惯。见 [Explore 指南](explore.md)。
+> **Not sure what to build yet? Start with `/opsx:explore`.** It's a no-stakes thinking partner that reads your codebase, weighs options, and sharpens a fuzzy idea into a concrete plan, all before any artifact or code exists. When the picture is clear, it hands off to `/opsx:propose`. This is the single best habit for working with an AI that will otherwise confidently build the wrong thing. See the [Explore guide](explore.md).
 
-## 工作原理
+## How It Works
 
-OpenSpec 帮助你和你的 AI 编程助手在编写任何代码之前，就要构建的内容达成一致。
+OpenSpec helps you and your AI coding assistant agree on what to build before any code is written.
 
-**默认快速路径（`core` 配置文件）：**
+**Default quick path (core profile):**
 
 ```text
 /opsx:explore ──► /opsx:propose ──► /opsx:apply ──► /opsx:sync ──► /opsx:archive
-   (可选)
+   (optional)
 ```
 
-想清楚要做什么时从 `/opsx:explore` 开始；已经知道想要什么时直接跳到 `/opsx:propose`。explore 在默认 profile 中，想用时随时可用。
+Start with `/opsx:explore` when you're figuring out what to do, or jump straight to `/opsx:propose` when you already know. Explore is in the default profile, so it's always there when you want it.
 
-**扩展路径（自定义工作流选择）：**
+**Expanded path (custom workflow selection):**
 
 ```text
-/opsx:new ──► /opsx:ff 或 /opsx:continue ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+/opsx:new ──► /opsx:ff or /opsx:continue ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
 ```
 
-默认全局配置文件为 `core`，包含 `propose`、`explore`、`apply`、`sync` 和 `archive`。你可以通过 `openspec-cn config profile` 启用扩展工作流命令，然后运行 `openspec-cn update`。
+The default global profile is `core`, which includes `propose`, `explore`, `apply`, `sync`, and `archive`. You can enable the expanded workflow commands with `openspec-cn config profile` and then `openspec-cn update`.
 
-## OpenSpec 创建的内容
+## What OpenSpec Creates
 
-在运行 `openspec-cn init` 后，你的项目会拥有如下结构：
+After running `openspec-cn init`, your project has this structure:
 
 ```
 openspec/
-├── specs/              # 单一事实来源（系统的行为）
+├── specs/              # Source of truth (your system's behavior)
 │   └── <domain>/
 │       └── spec.md
-├── changes/            # 提议的更新（每个变更一个文件夹）
+├── changes/            # Proposed updates (one folder per change)
 │   └── <change-name>/
 │       ├── proposal.md
 │       ├── design.md
 │       ├── tasks.md
-│       └── specs/      # 增量规范（正在变更的内容）
+│       └── specs/      # Delta specs (what's changing)
 │           └── <domain>/
 │               └── spec.md
-└── config.yaml         # 项目配置（可选）
+└── config.yaml         # Project configuration (optional)
 ```
 
-**两个关键目录：**
+**Two key directories:**
 
-- **`specs/`** - 单一事实来源。这些规范描述了你系统当前的行为。按领域组织（例如 `specs/auth/`、`specs/payments/`）。
+- **`specs/`** - The source of truth. These specs describe how your system currently behaves. Organized by domain (e.g., `specs/auth/`, `specs/payments/`).
 
-- **`changes/`** - 提议的修改。每个变更都有自己的文件夹，包含所有相关制品。当变更完成时，其规范会合并到主 `specs/` 目录中。
+- **`changes/`** - Proposed modifications. Each change gets its own folder with all related artifacts. When a change is complete, its specs merge into the main `specs/` directory.
 
-## 理解制品
+## Understanding Artifacts
 
-每个变更文件夹包含用于指导工作的制品：
+Each change folder contains artifacts that guide the work:
 
-| 制品 | 用途 |
+| Artifact | Purpose |
 |----------|---------|
-| `proposal.md` | "为什么"和"做什么" - 捕获意图、范围和方法 |
-| `specs/` | 增量规范，显示新增/修改/删除的需求 |
-| `design.md` | "如何做" - 技术方法和架构决策 |
-| `tasks.md` | 带复选框的实施清单 |
+| `proposal.md` | The "why" and "what" - captures intent, scope, and approach |
+| `specs/` | Delta specs showing ADDED/MODIFIED/REMOVED requirements |
+| `design.md` | The "how" - technical approach and architecture decisions |
+| `tasks.md` | Implementation checklist with checkboxes |
 
-**制品相互构建：**
+**Artifacts build on each other:**
 
 ```
 proposal ──► specs ──► design ──► tasks ──► implement
    ▲           ▲          ▲                    │
    └───────────┴──────────┴────────────────────┘
-            在学习过程中更新
+            update as you learn
 ```
 
-在实施过程中，你可以随时返回并完善之前的制品。
+You can always go back and refine earlier artifacts as you learn more during implementation.
 
-## 增量规范如何工作
+## How Delta Specs Work
 
-增量规范是 OpenSpec 的核心概念。它们显示相对于当前规范正在变化的内容。
+Delta specs are the key concept in OpenSpec. They show what's changing relative to your current specs.
 
-### 格式
+### The Format
 
-增量规范使用章节来指示变更类型：
+Delta specs use sections to indicate the type of change:
 
 ```markdown
-# 认证增量规范
+# Delta for Auth
 
-## 新增需求
+## ADDED Requirements
 
-### 需求：双因素认证
-系统必须在登录时要求第二因素。
+### Requirement: Two-Factor Authentication
+The system MUST require a second factor during login.
 
-#### 场景：需要 OTP
-- 当 用户启用了 2FA
-- 当 用户提交了有效凭证
-- 则 显示 OTP 挑战
+#### Scenario: OTP required
+- GIVEN a user with 2FA enabled
+- WHEN the user submits valid credentials
+- THEN an OTP challenge is presented
 
-## 修改需求
+## MODIFIED Requirements
 
-### 需求：会话超时
-系统必须在 30 分钟无活动后过期会话。
-（之前为：60 分钟）
+### Requirement: Session Timeout
+The system SHALL expire sessions after 30 minutes of inactivity.
+(Previously: 60 minutes)
 
-#### 场景：空闲超时
-- 当 存在已认证的会话
-- 当 30 分钟无活动
-- 则 会话失效
+#### Scenario: Idle timeout
+- GIVEN an authenticated session
+- WHEN 30 minutes pass without activity
+- THEN the session is invalidated
 
-## 移除需求
+## REMOVED Requirements
 
-### 需求：记住我
-（已弃用，改为使用 2FA）
+### Requirement: Remember Me
+(Deprecated in favor of 2FA)
 ```
 
-### 归档时会发生什么
+### What Happens on Archive
 
-当你归档一个变更时：
+When you archive a change:
 
-1. **ADDED** 需求被追加到主规范
-2. **MODIFIED** 需求替换现有版本
-3. **REMOVED** 需求从主规范中删除
+1. **ADDED** requirements are appended to the main spec
+2. **MODIFIED** requirements replace the existing version
+3. **REMOVED** requirements are deleted from the main spec
 
-变更文件夹移动到 `openspec/changes/archive/` 用于审计历史。
+The change folder moves to `openspec/changes/archive/` for audit history.
 
-## 示例：你的第一个变更
+## Example: Your First Change
 
-让我们逐步介绍如何为应用程序添加深色模式。
+Let's walk through adding dark mode to an application.
 
-### 1. 开始变更（默认方式）
+### 1. Start the Change (Default)
 
 ```text
-你：/opsx:propose add-dark-mode
+You: /opsx:propose add-dark-mode
 
-AI：已创建 openspec/changes/add-dark-mode/
-     ✓ proposal.md — 为什么要做这个，变更内容是什么
-     ✓ specs/       — 需求和场景
-     ✓ design.md    — 技术方案
-     ✓ tasks.md     — 实施清单
-     已准备好实施！
+AI:  Created openspec/changes/add-dark-mode/
+     ✓ proposal.md — why we're doing this, what's changing
+     ✓ specs/       — requirements and scenarios
+     ✓ design.md    — technical approach
+     ✓ tasks.md     — implementation checklist
+     Ready for implementation!
 ```
 
-如果你启用了扩展工作流配置文件，也可以分两步完成：先 `/opsx:new` 然后 `/opsx:ff`（或用 `/opsx:continue` 逐步完成）。
+If you've enabled the expanded workflow profile, you can also do this as two steps: `/opsx:new` then `/opsx:ff` (or `/opsx:continue` incrementally).
 
-### 2. 创建的内容
+### 2. What Gets Created
 
-**proposal.md** - 捕获意图：
+**proposal.md** - Captures the intent:
 
 ```markdown
-# 提案：添加深色模式
+# Proposal: Add Dark Mode
 
-## 意图
-用户要求提供深色模式选项，以减少夜间使用时的眼睛疲劳。
+## Intent
+Users have requested a dark mode option to reduce eye strain
+during nighttime usage.
 
-## 范围
-- 在设置中添加主题切换
-- 支持系统偏好检测
-- 在 localStorage 中持久化偏好
+## Scope
+- Add theme toggle in settings
+- Support system preference detection
+- Persist preference in localStorage
 
-## 方案
-使用 CSS 自定义属性进行主题化，配合 React context
-进行状态管理。
+## Approach
+Use CSS custom properties for theming with a React context
+for state management.
 ```
 
-**specs/ui/spec.md** - 显示新需求的增量规范：
+**specs/ui/spec.md** - Delta showing new requirements:
 
 ```markdown
-# UI 增量规范
+# Delta for UI
 
-## 新增需求
+## ADDED Requirements
 
-### 需求：主题选择
-系统必须允许用户在浅色和深色主题之间进行选择。
+### Requirement: Theme Selection
+The system SHALL allow users to choose between light and dark themes.
 
-#### 场景：手动切换
-- 当 用户在任意页面上
-- 当 用户点击主题切换按钮
-- 则 主题立即切换
-- 并且 偏好在会话间持久化
+#### Scenario: Manual toggle
+- GIVEN a user on any page
+- WHEN the user clicks the theme toggle
+- THEN the theme switches immediately
+- AND the preference persists across sessions
 
-#### 场景：系统偏好
-- 当 用户没有保存的偏好
-- 当 应用程序加载时
-- 则 使用系统的首选配色方案
+#### Scenario: System preference
+- GIVEN a user with no saved preference
+- WHEN the application loads
+- THEN the system's preferred color scheme is used
 ```
 
-**tasks.md** - 实施清单：
+**tasks.md** - Implementation checklist:
 
 ```markdown
-# 任务
+# Tasks
 
-## 1. 主题基础设施
-- [ ] 1.1 创建带浅色/深色状态的 ThemeContext
-- [ ] 1.2 添加用于颜色的 CSS 自定义属性
-- [ ] 1.3 实现 localStorage 持久化
+## 1. Theme Infrastructure
+- [ ] 1.1 Create ThemeContext with light/dark state
+- [ ] 1.2 Add CSS custom properties for colors
+- [ ] 1.3 Implement localStorage persistence
 
-## 2. UI 组件
-- [ ] 2.1 创建 ThemeToggle 组件
-- [ ] 2.2 在设置页面中添加切换按钮
-- [ ] 2.3 更新 Header 以包含快捷切换
+## 2. UI Components
+- [ ] 2.1 Create ThemeToggle component
+- [ ] 2.2 Add toggle to settings page
+- [ ] 2.3 Update Header to include quick toggle
 
-## 3. 样式
-- [ ] 3.1 定义深色主题调色板
-- [ ] 3.2 更新组件以使用 CSS 变量
+## 3. Styling
+- [ ] 3.1 Define dark theme color palette
+- [ ] 3.2 Update components to use CSS variables
 ```
 
-### 3. 实施
+### 3. Implement
 
 ```
-你：/opsx:apply
+You: /opsx:apply
 
-AI：正在处理任务...
-     ✓ 1.1 创建了带浅色/深色状态的 ThemeContext
-     ✓ 1.2 添加了 CSS 自定义属性到 globals.css
-     ✓ 1.3 实现了 localStorage 持久化
-     ✓ 2.1 创建了 ThemeToggle 组件
+AI:  Working through tasks...
+     ✓ 1.1 Created ThemeContext with light/dark state
+     ✓ 1.2 Added CSS custom properties to globals.css
+     ✓ 1.3 Implemented localStorage persistence
+     ✓ 2.1 Created ThemeToggle component
      ...
-     所有任务完成！
+     All tasks complete!
 ```
 
-在实施过程中，如果你发现设计需要调整，只需更新制品然后继续。
+During implementation, if you discover the design needs adjustment, just update the artifact and continue.
 
-### 4. 归档
+### 4. Archive
 
 ```
-你：/opsx:archive
+You: /opsx:archive
 
-AI：正在归档 add-dark-mode...
-     ✓ 已将规范合并到 openspec/specs/ui/spec.md
-     ✓ 已移动到 openspec/changes/archive/2025-01-24-add-dark-mode/
-     完成！准备下一个功能。
+AI:  Archiving add-dark-mode...
+     ✓ Merged specs into openspec/specs/ui/spec.md
+     ✓ Moved to openspec/changes/archive/2025-01-24-add-dark-mode/
+     Done! Ready for the next feature.
 ```
 
-你的增量规范现在是主规范的一部分，记录了你系统的工作方式。
+Your delta specs are now part of the main specs, documenting how your system works.
 
-## 验证和审查
+## Verifying and Reviewing
 
-使用 CLI 检查你的变更：
+Use the CLI to check on your changes:
 
 ```bash
-# 列出活动变更
+# List active changes
 openspec-cn list
 
-# 查看变更详情
+# View change details
 openspec-cn show add-dark-mode
 
-# 验证规范格式
+# Validate spec formatting
 openspec-cn validate add-dark-mode
 
-# 交互式仪表盘
+# Interactive dashboard
 openspec-cn view
 ```
 
-## 下一步
+## Next Steps
 
-- [先做探索](explore.md) —— 动手前用 `/opsx:explore` 把想法想清楚
-- [在已有项目中使用 OpenSpec](existing-projects.md) —— 在大型老代码库上起步
-- [编辑与迭代变更](editing-changes.md) —— 更新制品、回退、调和手动修改
-- [核心概念一览](overview.md) —— 一页纸讲清整体心智模型
-- [示例与配方](examples.md) —— 真实变更，从头到尾
-- [工作流](workflows.md) —— 常见模式以及何时用哪个命令
-- [命令](commands.md) —— 所有斜杠命令的完整参考
-- [概念](concepts.md) —— 深入理解 specs、changes、schemas
-- [自定义](customization.md) —— 让 OpenSpec 按你的方式工作
-- [Stores](stores-beta/user-guide.md) —— 跨仓库或团队的规划？放在独立仓库里（beta）
-- [常见问题](faq.md) 和 [故障排查](troubleshooting.md) —— 卡住的时候
+- [Explore First](explore.md) - Use `/opsx:explore` to think through an idea before you commit
+- [Using OpenSpec in an Existing Project](existing-projects.md) - Start on a large brownfield codebase
+- [Editing & Iterating on a Change](editing-changes.md) - Update artifacts, go back, reconcile manual edits
+- [Core Concepts at a Glance](overview.md) - The whole mental model on one page
+- [Examples & Recipes](examples.md) - Real changes, start to finish
+- [Workflows](workflows.md) - Common patterns and when to use each command
+- [Commands](commands.md) - Full reference for all slash commands
+- [Concepts](concepts.md) - Deeper understanding of specs, changes, and schemas
+- [Customization](customization.md) - Make OpenSpec work your way
+- [Stores](stores-beta/user-guide.md) - Planning that spans repos or teams? Keep it in its own repo (beta)
+- [FAQ](faq.md) and [Troubleshooting](troubleshooting.md) - When you get stuck

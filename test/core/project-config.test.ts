@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -90,7 +90,7 @@ rules:
           },
         });
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("配置中 'schema' 字段无效")
+          expect.stringContaining("配置中的 'schema' 字段无效")
         );
       });
 
@@ -115,9 +115,9 @@ rules:
             proposal: ['Valid rule'],
           },
         });
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("配置中 'context' 字段无效")
-      );
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("配置中的 'context' 字段无效")
+        );
       });
 
       it('should return partial config when rules is not an object', () => {
@@ -137,9 +137,10 @@ rules: ["not", "an", "object"]
           schema: 'spec-driven',
           context: 'Valid context',
         });
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("配置中 'rules' 字段无效")
-      );      });
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("配置中的 'rules' 字段无效")
+        );
+      });
 
       it('should handle rules: null without aborting config parsing', () => {
         // YAML `rules:` with no value parses to null
@@ -160,9 +161,10 @@ rules:
           schema: 'spec-driven',
           context: 'Valid context',
         });
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("配置中 'rules' 字段无效")
-      );      });
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("配置中的 'rules' 字段无效")
+        );
+      });
 
       it('should filter out invalid rules for specific artifact', () => {
         const configDir = path.join(tempDir, 'openspec');
@@ -189,7 +191,7 @@ rules:
           },
         });
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("Rules for 'specs' must be an array of strings")
+          expect.stringContaining("'specs' 的 rules 必须是字符串数组")
         );
       });
 
@@ -217,7 +219,7 @@ rules:
           },
         });
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("Some rules for 'proposal' are empty strings")
+          expect.stringContaining("'proposal' 的部分 rules 是空字符串")
         );
       });
 
@@ -255,7 +257,7 @@ rules:
 
         expect(config).toBeNull();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('could not parse')
+          expect.stringContaining('无法解析')
         );
         // The warning names the file and never dumps a stack trace.
         const warned = consoleWarnSpy.mock.calls.at(-1)?.[0] as string;
@@ -273,7 +275,7 @@ rules:
 
         expect(config).toBeNull();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('not a valid YAML object')
+          expect.stringContaining('不是有效的 YAML 对象')
         );
       });
 
@@ -310,7 +312,7 @@ rules:
           { id: 'other-context' },
         ]);
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("部分 'references' 条目无效")
+          expect.stringContaining("'references' 部分条目无效")
         );
       });
 
@@ -328,7 +330,7 @@ rules:
         ]);
         expect('targets' in (config ?? {})).toBe(false);
         expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-          expect.stringContaining("Some 'targets' entries are invalid")
+          expect.stringContaining("'targets' 部分条目无效")
         );
       });
 
@@ -354,7 +356,7 @@ rules:
           { id: 'bad-remote-context' },
         ]);
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("部分 'references' 条目无效")
+          expect.stringContaining("'references' 部分条目无效")
         );
       });
 
@@ -365,7 +367,7 @@ rules:
         writeConfig('schema: spec-driven\nreferences: not-an-array\n');
         expect(readProjectConfig(tempDir)?.references).toBeUndefined();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("配置中 'references' 字段无效")
+          expect.stringContaining("配置中的 'references' 字段无效")
         );
       });
     });
@@ -384,7 +386,7 @@ rules:
 
         expect(config?.context).toBe(smallContext);
         expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-          expect.stringContaining('Context too large')
+          expect.stringContaining('Context 过大')
         );
       });
 
@@ -402,7 +404,7 @@ rules:
         expect(config).toEqual({ schema: 'spec-driven' });
         expect(config?.context).toBeUndefined();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Context too large (51.0KB, limit: 50KB)')
+          expect.stringContaining('Context 过大（51.0KB，限制：50KB）')
         );
         expect(consoleWarnSpy).toHaveBeenCalledWith(
           expect.stringContaining('忽略 context 字段')
@@ -422,7 +424,7 @@ rules:
 
         expect(config?.context).toBe(exactContext);
         expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-          expect.stringContaining('Context too large')
+          expect.stringContaining('Context 过大')
         );
       });
 
@@ -443,7 +445,7 @@ context: |
 
         expect(config?.context).toBeUndefined();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Context too large')
+          expect.stringContaining('Context 过大')
         );
       });
     });
@@ -591,9 +593,9 @@ rules:
       const warnings = validateConfigRules(rules, validIds, 'spec-driven');
 
       expect(warnings).toHaveLength(2);
-      expect(warnings[0]).toContain('Unknown artifact ID in rules: "testplan"');
-      expect(warnings[0]).toContain('Valid IDs for schema "spec-driven": design, proposal, specs, tasks');
-      expect(warnings[1]).toContain('Unknown artifact ID in rules: "documentation"');
+      expect(warnings[0]).toContain('rules 中未知的产出物 ID："testplan"');
+      expect(warnings[0]).toContain('schema "spec-driven" 的有效 ID：design, proposal, specs, tasks');
+      expect(warnings[1]).toContain('rules 中未知的产出物 ID："documentation"');
     });
 
     it('should return warnings for all unknown artifact IDs', () => {
@@ -630,14 +632,14 @@ rules:
       const message = suggestSchemas('spec-drven', availableSchemas); // Missing 'i'
 
       expect(message).toContain("Schema 'spec-drven' not found");
-      expect(message).toContain('Did you mean one of these?');
+      expect(message).toContain('您是指以下之一吗？');
       expect(message).toContain('spec-driven (built-in)');
     });
 
     it('should suggest custom-workflow for workflow typo', () => {
       const message = suggestSchemas('custom-workflo', availableSchemas);
 
-      expect(message).toContain('Did you mean one of these?');
+      expect(message).toContain('您是指以下之一吗？');
       expect(message).toContain('custom-workflow');
     });
 

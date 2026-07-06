@@ -1,59 +1,59 @@
-# 安装
+﻿# Installation
 
-## 前置条件
+## Prerequisites
 
-- **Node.js 20.19.0 或更高版本** —— 查看版本：`node --version`
+- **Node.js 20.19.0 or higher** — Check your version: `node --version`
 
-## 包管理器
+## Package Managers
 
 ### npm
 
 ```bash
-npm install -g @studyzy/openspec-cn@latest
+npm install -g @fission-ai/openspec@latest
 ```
 
 ### pnpm
 
 ```bash
-pnpm add -g @studyzy/openspec-cn@latest
+pnpm add -g @fission-ai/openspec@latest
 ```
 
 ### yarn
 
 ```bash
-yarn global add @studyzy/openspec-cn@latest
+yarn global add @fission-ai/openspec@latest
 ```
 
 ### bun
 
-Bun 可以全局安装 OpenSpec，但 OpenSpec 当前运行在 Node.js 上。
-你仍需要在 `PATH` 中提供 Node.js 20.19.0 或更高版本。
+Bun can install OpenSpec globally, but OpenSpec currently runs on Node.js.
+You still need Node.js 20.19.0 or higher available on `PATH`.
 
 ```bash
-bun add -g @studyzy/openspec-cn@latest
+bun add -g @fission-ai/openspec@latest
 ```
 
 ## Nix
 
-无需安装，直接运行 OpenSpec：
+Run OpenSpec directly without installation:
 
 ```bash
-nix run github:studyzy/OpenSpec-cn -- init
+nix run github:Fission-AI/OpenSpec -- init
 ```
 
-或者安装到 profile：
+Or install to your profile:
 
 ```bash
-nix profile install github:studyzy/OpenSpec-cn
+nix profile install github:Fission-AI/OpenSpec
 ```
 
-或者在 `flake.nix` 中加入到开发环境：
+Or add to your development environment in `flake.nix`:
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    openspec.url = "github:studyzy/OpenSpec-cn";
+    openspec.url = "github:Fission-AI/OpenSpec";
   };
 
   outputs = { nixpkgs, openspec, ... }: {
@@ -64,52 +64,52 @@ nix profile install github:studyzy/OpenSpec-cn
 }
 ```
 
-## 验证安装
+## Verify Installation
 
 ```bash
-openspec-cn --version
+openspec --version
 ```
 
-## 更新
+## Updating
 
-升级包版本，然后刷新每个项目生成的文件：
+Upgrade the package, then refresh each project's generated files:
 
 ```bash
-npm install -g @studyzy/openspec-cn@latest   # 或对应的 pnpm/yarn/bun 命令
-openspec-cn update                            # 在每个项目内运行
+npm install -g @fission-ai/openspec@latest   # or pnpm/yarn/bun equivalent
+openspec-cn update                              # run inside each project
 ```
 
-`openspec-cn update` 会重新生成你已配置工具的 skill 和命令文件，让你的斜杠命令与已安装版本保持一致。
+`openspec-cn update` regenerates the skill and command files for the tools you've configured, so your slash commands stay current with the installed version.
 
-## 卸载
+## Uninstalling
 
-OpenSpec 没有 `openspec uninstall` 命令，因为它只是一个全局包加上你项目里的一些文件。卸载只需几个手动步骤，且这些步骤都不会触碰你的源代码。
+There's no `openspec-cn uninstall` command, because OpenSpec is just a global package plus some files in your project. Removing it is a few manual steps, and nothing here touches your source code.
 
-**1. 移除全局包：**
+**1. Remove the global package:**
 
 ```bash
-npm uninstall -g @studyzy/openspec-cn   # 或：pnpm rm -g / yarn global remove / bun rm -g
+npm uninstall -g @fission-ai/openspec   # or: pnpm rm -g / yarn global remove / bun rm -g
 ```
 
-**2. 从项目中移除 OpenSpec（可选）。** 如果你不再需要 specs 和 changes，删除 `openspec/` 目录即可：
+**2. Remove OpenSpec from a project (optional).** Delete the `openspec/` directory if you no longer want its specs and changes:
 
 ```bash
 rm -rf openspec/
 ```
 
-动手前请三思：`openspec/specs/` 和 `openspec/changes/archive/` 记录了系统如何运转以及为何如此演进。如果你可能需要这段历史，即使卸载后也请保留该目录（或保留在 git 中）。
+Think before you do this: `openspec/specs/` and `openspec/changes/archive/` are your record of how the system behaves and why it changed. If you might want that history, keep the folder (or keep it in git) even after uninstalling.
 
-**3. 移除生成的 AI 工具文件��可选）。** OpenSpec 会把 skill 和命令文件写入各工具的目录，例如 `.claude/skills/openspec-*/`、`.cursor/commands/opsx-*` 等等。针对你配置过的工具，删除 `openspec-*` skill 与 `opsx-*` 命令即可。每个工具的具体路径见 [支持的工具](supported-tools.md)。
+**3. Remove generated AI tool files (optional).** OpenSpec writes skill and command files into per-tool directories like `.claude/skills/openspec-*/`, `.cursor/commands/opsx-*`, and so on. Delete the `openspec-*` skills and `opsx-*` commands for whichever tools you configured. The exact paths per tool are listed in [Supported Tools](supported-tools.md).
 
-如果你在 `CLAUDE.md` 或 `AGENTS.md` 等文件中也有 OpenSpec 标记块，请手动删除这些块；这些文件中你自己写的内容仍归你所有。
+If you also have OpenSpec marker blocks in files like `CLAUDE.md` or `AGENTS.md`, remove those blocks by hand; your own content in those files is yours to keep.
 
-## 下一步
+## Next Steps
 
-安装完成后，在你的项目中初始化 OpenSpec：
+After installing, initialize OpenSpec in your project:
 
 ```bash
 cd your-project
 openspec-cn init
 ```
 
-完整流程请参见 [快速上手](getting-started.md)。
+See [Getting Started](getting-started.md) for a full walkthrough.

@@ -1,4 +1,4 @@
-import * as nodeFs from 'node:fs';
+﻿import * as nodeFs from 'node:fs';
 import * as path from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { z } from 'zod';
@@ -178,13 +178,13 @@ function storeStateDiagnostic(label: string): {
   return {
     code: 'invalid_store_registry',
     target: 'store.registry',
-    fix: `修复或删除 ${getStoreRegistryPath({})}。`,
+    fix: `修复或移除 ${getStoreRegistryPath({})}。`,
   };
 }
 
 function invalidStoreStateError(label: string, message: string): StoreError {
   const diagnostic = storeStateDiagnostic(label);
-  return new StoreError(`Invalid ${label}: ${message}`, diagnostic.code, {
+  return new StoreError(`无效的 ${label}：${message}`, diagnostic.code, {
     target: diagnostic.target,
     fix: diagnostic.fix,
   });
@@ -321,7 +321,7 @@ export async function writeStoreRegistryState(
 }
 
 const storeRegistryLockError = makeLockErrorFactory({
-  createSubject: 'the registry lock file',
+  createSubject: '注册表锁文件',
   busyMessage: 'Store 注册表正忙。',
   code: 'store_registry_busy',
   target: 'store.registry',
@@ -394,7 +394,7 @@ export async function resolveGitStoreBackendConfig(
     : path.resolve(cwd, input.localPath);
 
   if (!(await pathIsDirectory(resolvedPath))) {
-    throw new Error(`Store 本地路径不存在：${input.localPath}`);
+    throw new Error(`Store 本地路径不存在: ${input.localPath}`);
   }
 
   if (input.remote !== undefined && input.remote.length === 0) {
@@ -402,7 +402,7 @@ export async function resolveGitStoreBackendConfig(
   }
 
   if (input.branch !== undefined && input.branch.length === 0) {
-    throw new Error('Store 分支在提供时不能为空。');
+    throw new Error('提供 Store branch 时不能为空。');
   }
 
   return {

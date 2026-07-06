@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Input resolution and error builders shared by the workset command
  * and its interactive prompt flows.
  */
@@ -24,11 +24,11 @@ import {
 
 function memberInvalidError(problem: string): StoreError {
   return new StoreError(
-    `无效的工作集成员：${problem}。`,
+    `无效的 workset 成员：${problem}。`,
     'workset_member_invalid',
     {
       target: 'workset.member',
-      fix: '请传递 --member <path> 指定现有文件夹，或 --member <name>=<path> 指定标签。',
+      fix: '使用 --member <path> 指定已有文件夹，或使用 --member <name>=<path> 为其添加标签。',
     }
   );
 }
@@ -40,12 +40,12 @@ async function resolveMemberFlag(raw: string): Promise<WorksetMember> {
   const rawPath = separator > 0 ? raw.slice(separator + 1) : raw;
 
   if (rawPath.length === 0) {
-    throw memberInvalidError(`'${raw}' 没有路径`);
+    throw memberInvalidError(`'${raw}' has no path`);
   }
 
   const resolvedPath = path.resolve(expandUserPath(rawPath));
   if (!(await pathIsDirectory(resolvedPath))) {
-    throw memberInvalidError(`'${rawPath}' 不是现有的文件夹`);
+    throw memberInvalidError(`'${rawPath}' is not an existing folder`);
   }
 
   const name = label ?? path.basename(resolvedPath);
@@ -122,9 +122,9 @@ export function toolUnknownError(
     .filter((opener) => isOpenerEnabled(opener))
     .map((opener) => opener.id)
     .join(', ');
-  return new StoreError(`Unknown tool '${toolId}'.`, 'workset_tool_unknown', {
+  return new StoreError(`未知的工具 '${toolId}'。`, 'workset_tool_unknown', {
     target: 'workset.tool',
-    fix: `Known tools: ${knownIds}. Add new tools under "openers" in ${getGlobalConfigPath()}.`,
+    fix: `已知工具: ${knownIds}。在 ${getGlobalConfigPath()} 的 "openers" 下添加新工具。`,
   });
 }
 
@@ -153,7 +153,7 @@ export function toolUnavailableError(
   const alternative = firstInstalledAlternative(table, opener.id, scan);
 
   return new StoreError(
-    `${opener.label} ('${opener.command}') is not on PATH.`,
+    `${opener.label}（'${opener.command}'）不在 PATH 中。`,
     'workset_tool_unavailable',
     {
       target: 'workset.tool',
@@ -175,7 +175,7 @@ export function noToolInstalledError(
     .map((opener) => opener.command)
     .join(', ');
   return new StoreError(
-    'None of the known tools is on PATH.',
+    '已知的工具均不在 PATH 中。',
     'workset_tool_unavailable',
     {
       target: 'workset.tool',

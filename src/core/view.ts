@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+﻿import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 import { getTaskProgressForChange, formatTaskStatus } from '../utils/task-progress.js';
@@ -9,11 +9,11 @@ export class ViewCommand {
     const openspecDir = path.join(targetPath, 'openspec');
     
     if (!fs.existsSync(openspecDir)) {
-      console.error(chalk.red('未找到 OpenSpec 目录'));
+      console.error(chalk.red('未找到 openspec 目录'));
       process.exit(1);
     }
 
-    console.log(chalk.bold('\nOpenSpec 看板\n'));
+    console.log(chalk.bold('\nOpenSpec Dashboard\n'));
     console.log('═'.repeat(60));
 
     // Get changes and specs data
@@ -25,7 +25,7 @@ export class ViewCommand {
 
     // Display draft changes
     if (changesData.draft.length > 0) {
-      console.log(chalk.bold.gray('\n草稿变更'));
+      console.log(chalk.bold.gray('\nDraft Changes'));
       console.log('─'.repeat(60));
       changesData.draft.forEach((change) => {
         console.log(`  ${chalk.gray('○')} ${change.name}`);
@@ -34,7 +34,7 @@ export class ViewCommand {
 
     // Display active changes
     if (changesData.active.length > 0) {
-      console.log(chalk.bold.cyan('\n活动变更'));
+      console.log(chalk.bold.cyan('\nActive Changes'));
       console.log('─'.repeat(60));
       changesData.active.forEach((change) => {
         const progressBar = this.createProgressBar(change.progress.completed, change.progress.total);
@@ -51,7 +51,7 @@ export class ViewCommand {
 
     // Display completed changes
     if (changesData.completed.length > 0) {
-      console.log(chalk.bold.green('\n已完成变更'));
+      console.log(chalk.bold.green('\nCompleted Changes'));
       console.log('─'.repeat(60));
       changesData.completed.forEach((change) => {
         console.log(`  ${chalk.green('✓')} ${change.name}`);
@@ -60,14 +60,14 @@ export class ViewCommand {
 
     // Display specifications
     if (specsData.length > 0) {
-      console.log(chalk.bold.blue('\n规范'));
+      console.log(chalk.bold.blue('\nSpecifications'));
       console.log('─'.repeat(60));
       
       // Sort specs by requirement count (descending)
       specsData.sort((a, b) => b.requirementCount - a.requirementCount);
       
       specsData.forEach(spec => {
-        const reqLabel = spec.requirementCount === 1 ? '需求' : '需求';
+        const reqLabel = spec.requirementCount === 1 ? 'requirement' : 'requirements';
         console.log(
           `  ${chalk.blue('▪')} ${chalk.bold(spec.name.padEnd(30))} ${chalk.dim(`${spec.requirementCount} ${reqLabel}`)}`
         );
@@ -75,7 +75,7 @@ export class ViewCommand {
     }
 
     console.log('\n' + '═'.repeat(60));
-    console.log(chalk.dim(`\n使用 ${chalk.white('openspec-cn list --changes')} 或 ${chalk.white('openspec-cn list --specs')} 查看详细信息`));
+    console.log(chalk.dim(`\nUse ${chalk.white('openspec-cn list --changes')} or ${chalk.white('openspec-cn list --specs')} for detailed views`));
   }
 
   private async getChangesData(openspecDir: string): Promise<{
@@ -184,21 +184,22 @@ export class ViewCommand {
       // This is a simplification
     });
 
-    console.log(chalk.bold('摘要:'));
+    console.log(chalk.bold('摘要：'));
     console.log(
-      `  ${chalk.cyan('●')} 规范: ${chalk.bold(totalSpecs)} 个规范, ${chalk.bold(totalRequirements)} 个需求`
+      `  ${chalk.cyan('●')} 规范：${chalk.bold(totalSpecs)} 个 spec，${chalk.bold(totalRequirements)} 个需求`
     );
     if (changesData.draft.length > 0) {
-      console.log(`  ${chalk.gray('●')} 草稿变更: ${chalk.bold(changesData.draft.length)}`);
+      console.log(`  ${chalk.gray('●')} 草稿变更：${chalk.bold(changesData.draft.length)}`);
     }
     console.log(
-      `  ${chalk.yellow('●')} 活动变更: ${chalk.bold(changesData.active.length)} 个进行中`
+      `  ${chalk.yellow('●')} 活跃变更：${chalk.bold(changesData.active.length)} 个进行中`
     );
-    console.log(`  ${chalk.green('●')} 已完成变更: ${chalk.bold(changesData.completed.length)}`);
+    console.log(`  ${chalk.green('●')} 已完成变更：${chalk.bold(changesData.completed.length)}`);
+
     if (totalTasks > 0) {
       const overallProgress = Math.round((completedTasks / totalTasks) * 100);
       console.log(
-        `  ${chalk.magenta('●')} 任务进度: ${chalk.bold(`${completedTasks}/${totalTasks}`)} (完成 ${overallProgress}%)`
+        `  ${chalk.magenta('●')} Task Progress: ${chalk.bold(`${completedTasks}/${totalTasks}`)} (${overallProgress}% complete)`
       );
     }
   }

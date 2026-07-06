@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -152,7 +152,7 @@ describe('writeChangeMetadata', () => {
         schema: 'unknown-schema',
         created: '2025-01-05',
       })
-    ).toThrow(/未知 Schema 'unknown-schema'/);
+    ).toThrow(/未知 schema 'unknown-schema'/);
   });
 });
 
@@ -229,7 +229,7 @@ describe('readChangeMetadata', () => {
     const metaPath = path.join(changeDir, '.openspec.yaml');
     await fs.writeFile(metaPath, 'schema: unknown-schema\n', 'utf-8');
 
-    expect(() => readChangeMetadata(changeDir)).toThrow(/未知 Schema/);
+    expect(() => readChangeMetadata(changeDir)).toThrow(/未知 schema/);
   });
 });
 
@@ -362,7 +362,7 @@ describe('validateSchemaName', () => {
 
   it('should throw for unknown schema', () => {
     expect(() => validateSchemaName('unknown-schema')).toThrow(
-      /未知 Schema 'unknown-schema'/
+      /未知 schema 'unknown-schema'/
     );
   });
 });

@@ -1,4 +1,4 @@
-import ora from 'ora';
+﻿import ora from 'ora';
 import path from 'path';
 import { Validator } from '../core/validation/validator.js';
 import {
@@ -82,7 +82,7 @@ export class ValidateCommand {
     const choice = await select({
       message: '您想要验证什么？',
       choices: [
-        { name: '全部（���更 + 规范）', value: 'all' },
+        { name: '全部（变更 + 规范）', value: 'all' },
         { name: '所有变更', value: 'changes' },
         { name: '所有规范', value: 'specs' },
         { name: '选择特定的变更或规范', value: 'one' },
@@ -108,11 +108,11 @@ export class ValidateCommand {
   }
 
   private printNonInteractiveHint(root: ResolvedOpenSpecRoot): void {
-    console.error('没有要验证的内容。请尝试以下之一：');
+    console.error('没有可验证的内容。请尝试以下之一：');
     console.error(`  ${withStoreFlag(root, 'openspec-cn validate --all')}`);
     console.error(`  ${withStoreFlag(root, 'openspec-cn validate --changes')}`);
     console.error(`  ${withStoreFlag(root, 'openspec-cn validate --specs')}`);
-    console.error(`  ${withStoreFlag(root, 'openspec-cn validate <项目名称>')}`);
+    console.error(`  ${withStoreFlag(root, 'openspec-cn validate <item-name>')}`);
     console.error('或在交互式终端中运行。');
   }
 
@@ -126,7 +126,7 @@ export class ValidateCommand {
     if (!type) {
       const suggestions = nearestMatches(itemName, [...changes, ...specs]);
       const message = suggestions.length
-        ? `未知项目 '${itemName}'。你是否想输入：${suggestions.join(', ')}？`
+        ? `未知项目 '${itemName}'。您是否想要：${suggestions.join(', ')}?`
         : `未知项目 '${itemName}'。`;
       if (opts.json) {
         console.log(
@@ -153,7 +153,7 @@ export class ValidateCommand {
                   severity: 'error',
                   code: 'ambiguous_item',
                   message: `模糊的项目 '${itemName}' 同时匹配变更和规范。`,
-                  fix: '请传递 --type change|spec。',
+                  fix: '传递 --type change|spec。',
                 },
               ],
             },
@@ -167,7 +167,7 @@ export class ValidateCommand {
       console.error(`模糊的项目 '${itemName}' 同时匹配变更和规范。`);
       // The noun-form commands are cwd-based and cannot reach a selected store.
       if (isStoreSelectedRoot(root)) {
-        console.error('请传递 --type change|spec。');
+        console.error('传递 --type change|spec。');
       } else {
         console.error('传递 --type change|spec，或使用：openspec-cn change validate / openspec-cn spec validate');
       }
@@ -220,13 +220,13 @@ export class ValidateCommand {
   private printNextSteps(type: ItemType, id: string, root: ResolvedOpenSpecRoot): void {
     const bullets: string[] = [];
     if (type === 'change') {
-      bullets.push('- 确保变更在 specs/ 中有增量：使用标题 ## 新增|修改|移除|重命名需求');
-      bullets.push('- 每个需求必须至少包含一个 #### 场景: 块');
-      bullets.push(`- 调试解析的增量：${withStoreFlag(root, `openspec-cn show ${id} --json --deltas-only`)}`);
+      bullets.push('- 确保变更在 specs/ 中有 deltas：使用 ## ADDED/MODIFIED/REMOVED/RENAMED Requirements 标题');
+      bullets.push('- 每个需求必须包含至少一个 #### Scenario: 块');
+      bullets.push(`- 调试解析的 deltas：${withStoreFlag(root, `openspec-cn show ${id} --json --deltas-only`)}`);
     } else {
-      bullets.push('- 确保规范包含## 目的和## 需求部分');
-      bullets.push('- 每个需求必须至少包含一个#### 场景:块');
-      bullets.push('- 使用--json重新运行以查看结构化报告');
+      bullets.push('- 确保规范包含 ## Purpose 和 ## Requirements 部分');
+      bullets.push('- 每个需求必须包含至少一个 #### Scenario: 块');
+      bullets.push('- 使用 --json 重新运行以查看结构化报告');
     }
     console.error('后续步骤：');
     bullets.forEach(b => console.error(`  ${b}`));
@@ -336,9 +336,8 @@ export class ValidateCommand {
       console.log(JSON.stringify(out, null, 2));
     } else {
       for (const res of results) {
-        const typeLabel = res.type === 'change' ? '变更' : '规范';
-        if (res.valid) console.log(`✓ ${typeLabel}/${res.id}`);
-        else console.error(`✗ ${typeLabel}/${res.id}`);
+        if (res.valid) console.log(`✓ ${res.type}/${res.id}`);
+        else console.error(`✗ ${res.type}/${res.id}`);
       }
       console.log(`汇总：通过 ${summary.totals.passed} 项，失败 ${summary.totals.failed} 项（共 ${summary.totals.items} 项）`);
       const firstFailure = results.find((res) => !res.valid);

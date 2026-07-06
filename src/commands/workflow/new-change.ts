@@ -1,4 +1,4 @@
-/**
+﻿/**
  * New Change Command
  *
  * Creates a new change directory with optional description and schema in the
@@ -55,7 +55,7 @@ interface NewChangeOutput {
 function assertRemovedOptionsAbsent(options: NewChangeOptions): void {
   if (options.initiative !== undefined) {
     throw new RootSelectionError(
-      '--initiative 已不再支持。普通变更不再附加到 initiative；--store <id> 用于选择 OpenSpec 根目录。',
+      '--initiative is no longer supported. Normal changes no longer attach to initiatives; --store <id> selects the OpenSpec root.',
       'initiative_option_removed',
       { target: 'change.options' }
     );
@@ -63,7 +63,7 @@ function assertRemovedOptionsAbsent(options: NewChangeOptions): void {
 
   if (options.areas !== undefined) {
     throw new RootSelectionError(
-      '--areas 已不再支持。工作区受影响区域不再是普通 OpenSpec 根目录路径的一部分。',
+      '--areas is no longer supported. Workspace affected areas are not part of the normal OpenSpec root path.',
       'areas_option_removed',
       { target: 'change.options' }
     );
@@ -80,7 +80,7 @@ function printCreatedChangeHuman(
     !isStoreSelectedRoot(root) && root.path === process.cwd()
       ? formatChangeLocation(toPlanningHome(root), payload.change.id)
       : payload.change.path;
-  console.log(`已创建变更 '${payload.change.id}'，位置：${location}/`);
+  console.log(`已创建变更 '${payload.change.id}'，位置 ${location}/`);
   console.log(`Schema：${payload.change.schema}`);
   console.log(`下一步：${withStoreFlag(root, `openspec-cn status --change ${payload.change.id}`)}`);
 }
@@ -117,7 +117,7 @@ export async function newChangeCommand(name: string | undefined, options: NewCha
 
     const resolvedSchema = options.schema ?? root.defaultSchema;
     if (spinner) {
-      spinner.start(`正在创建变更 '${name}'，使用 Schema '${resolvedSchema}'...`);
+      spinner.start(`正在创建变更 '${name}'（schema '${resolvedSchema}'）...`);
     }
 
     const result = await createChange(projectRoot, name, {

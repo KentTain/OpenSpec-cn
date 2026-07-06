@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Status Command
  *
  * Displays artifact completion status for a change.
@@ -75,13 +75,13 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
           );
           return;
         }
-        console.log(`没有活跃的变更。请使用以下命令创建一个：${newChangeHint}`);
+        console.log(`没有活跃的变更。使用以下命令创建：${newChangeHint}`);
         return;
       }
       // Changes exist but --change not provided
       spinner?.stop();
       throw new Error(
-        `缺少必需选项 --change。可用的变更:\n  ${available.join('\n  ')}`
+        `缺少必需选项 --change。可用的变更：\n  ${available.join('\n  ')}`
       );
     }
 
@@ -130,7 +130,7 @@ export function printStatusText(status: ChangeStatus): void {
   if (status.changeRoot) {
     console.log(`变更根目录：${status.changeRoot}`);
   }
-  console.log(`进度: ${doneCount}/${total} 个产出物已完成`);
+  console.log(`进度：${doneCount}/${total} 个产出物已完成`);
   console.log();
 
   for (const artifact of status.artifacts) {
@@ -139,7 +139,7 @@ export function printStatusText(status: ChangeStatus): void {
     let line = `${indicator} ${artifact.id}`;
 
     if (artifact.status === 'blocked' && artifact.missingDeps && artifact.missingDeps.length > 0) {
-      line += color(` (被以下内容阻塞: ${artifact.missingDeps.join(', ')})`);
+      line += color(`（被阻塞：${artifact.missingDeps.join(', ')}）`);
     }
 
     console.log(line);
@@ -147,6 +147,6 @@ export function printStatusText(status: ChangeStatus): void {
 
   if (status.isComplete) {
     console.log();
-    console.log(chalk.green('所有产出物已完成!'));
+    console.log(chalk.green('所有产出物已完成！'));
   }
 }

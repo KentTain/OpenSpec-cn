@@ -1,4 +1,4 @@
-# Logs
+﻿# Logs
 logs
 *.log
 npm-debug.log*
@@ -154,12 +154,11 @@ result
 .opencode/
 opencode.json
 
-.idea/
-.npmrc
 # Codex
 .codex/
 
 # Bob
 .bob/
+.idea/
 .serena/
 graphify-out/

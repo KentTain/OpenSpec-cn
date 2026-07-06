@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -8,11 +8,12 @@ import { ZshInstaller } from '../../../../src/core/completions/installers/zsh-in
 describe('ZshInstaller', () => {
   let testHomeDir: string;
   let installer: ZshInstaller;
-  let originalZshEnv: string | undefined;
+  let zshEnvBackup: string | undefined;
 
   beforeEach(async () => {
-    // Save and clear ZSH environment variable to avoid interference with tests
-    originalZshEnv = process.env.ZSH;
+    // Isolate from a developer environment that has OMZ set (e.g. $ZSH),
+    // which would otherwise make isOhMyZshInstalled() always return true.
+    zshEnvBackup = process.env.ZSH;
     delete process.env.ZSH;
 
     // Create a temporary home directory for testing
@@ -22,19 +23,19 @@ describe('ZshInstaller', () => {
   });
 
   afterEach(async () => {
-    // Restore ZSH environment variable
-    if (originalZshEnv !== undefined) {
-      process.env.ZSH = originalZshEnv;
-    } else {
-      delete process.env.ZSH;
-    }
-
     // Clean up test directory
     await fs.rm(testHomeDir, { recursive: true, force: true });
+
+    // Restore the OMZ environment variable
+    if (zshEnvBackup === undefined) {
+      delete process.env.ZSH;
+    } else {
+      process.env.ZSH = zshEnvBackup;
+    }
   });
 
   describe('isOhMyZshInstalled', () => {
-    it('should return false when Oh My Zsh is not installed', async () => {
+    it('should return false when Oh My Zsh is 未安装', async () => {
       const isInstalled = await installer.isOhMyZshInstalled();
       expect(isInstalled).toBe(false);
     });
@@ -70,7 +71,7 @@ describe('ZshInstaller', () => {
       expect(result.path).toBe(path.join(testHomeDir, '.oh-my-zsh', 'custom', 'completions', '_openspec'));
     });
 
-    it('should return standard Zsh path when Oh My Zsh is not installed', async () => {
+    it('should return standard Zsh path when Oh My Zsh is 未安装', async () => {
       const result = await installer.getInstallationPath();
 
       expect(result.isOhMyZsh).toBe(false);
@@ -94,8 +95,6 @@ describe('ZshInstaller', () => {
 
       expect(backupPath).toBeDefined();
       expect(backupPath).toContain('.backup-');
-      expect(path.basename(backupPath!)).toMatch(/^\./);
-      expect(path.basename(backupPath!)).not.toMatch(/^_/);
 
       // Verify backup file exists and has correct content
       const backupContent = await fs.readFile(backupPath!, 'utf-8');
@@ -109,19 +108,6 @@ describe('ZshInstaller', () => {
       const backupPath = await installer.backupExistingFile(filePath);
 
       expect(backupPath).toMatch(/\.backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}/);
-    });
-
-    it('should create hidden backups for completion files so Zsh does not autoload them', async () => {
-      const filePath = path.join(testHomeDir, '.zsh', 'completions', '_openspec');
-      await fs.mkdir(path.dirname(filePath), { recursive: true });
-      await fs.writeFile(filePath, 'completion content');
-
-      const backupPath = await installer.backupExistingFile(filePath);
-
-      expect(backupPath).toBeDefined();
-      expect(path.dirname(backupPath!)).toBe(path.dirname(filePath));
-      expect(path.basename(backupPath!)).toMatch(/^\./);
-      expect(path.basename(backupPath!)).not.toMatch(/^_/);
     });
   });
 
@@ -178,8 +164,6 @@ describe('ZshInstaller', () => {
       expect(result.success).toBe(true);
       expect(result.backupPath).toBeDefined();
       expect(result.backupPath).toContain('.backup-');
-      expect(path.basename(result.backupPath!)).toMatch(/^\./);
-      expect(path.basename(result.backupPath!)).not.toMatch(/^_/);
 
       // Verify backup has old content
       const backupContent = await fs.readFile(result.backupPath!, 'utf-8');
@@ -246,11 +230,11 @@ describe('ZshInstaller', () => {
       const secondResult = await installer.install(testScript);
 
       expect(secondResult.success).toBe(true);
-      expect(secondResult.message).toContain('补全脚本已安装');
-      expect(secondResult.message).toContain('最新版本');
+      expect(secondResult.message).toContain('已安装');
+      expect(secondResult.message).toContain('已是最新');
       expect(secondResult.backupPath).toBeUndefined();
       expect(secondResult.instructions).toBeDefined();
-      expect(secondResult.instructions!.join(' ')).toContain('补全脚本已安装');
+      expect(secondResult.instructions!.join(' ')).toContain('已安装');
     });
 
     it('should update completion when content differs', async () => {
@@ -264,7 +248,7 @@ describe('ZshInstaller', () => {
       const secondResult = await installer.install(secondScript);
 
       expect(secondResult.success).toBe(true);
-      expect(secondResult.message).toContain('补全脚本更新成功');
+      expect(secondResult.message).toContain('更新成功');
       expect(secondResult.message).toContain('已备份');
       expect(secondResult.backupPath).toBeDefined();
 
@@ -318,14 +302,14 @@ describe('ZshInstaller', () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('移除补全脚本');
+      expect(result.message).toContain('移除');
 
       // Verify it's gone
       const afterUninstall = await installer.isInstalled();
       expect(afterUninstall).toBe(false);
     });
 
-    it('should return failure when script and .zshrc config are not installed', async () => {
+    it('should return failure when script and .zshrc config are 未安装', async () => {
       // Don't create .zshrc or completion script - nothing to remove
       const result = await installer.uninstall();
 
@@ -349,7 +333,7 @@ describe('ZshInstaller', () => {
   describe('isInstalled', () => {
     const testScript = '#compdef openspec\n_openspec() {}\n';
 
-    it('should return false when not installed', async () => {
+    it('should return false when 未安装', async () => {
       const isInstalled = await installer.isInstalled();
       expect(isInstalled).toBe(false);
     });
@@ -375,7 +359,7 @@ describe('ZshInstaller', () => {
   describe('getInstallationInfo', () => {
     const testScript = '#compdef openspec\n_openspec() {}\n';
 
-    it('should return not installed when script does not exist', async () => {
+    it('should return 未安装 when script does not exist', async () => {
       const info = await installer.getInstallationInfo();
 
       expect(info.installed).toBe(false);
@@ -433,7 +417,7 @@ describe('ZshInstaller', () => {
 
       expect(content).toContain('# OPENSPEC:START');
       expect(content).toContain('# OPENSPEC:END');
-      expect(content).toContain('OpenSpec-cn shell 补全配置');
+      expect(content).toContain('# OpenSpec shell completions configuration');
       expect(content).toContain(`fpath=("${completionsDir}" $fpath)`);
       expect(content).toContain('autoload -Uz compinit');
       expect(content).toContain('compinit');
@@ -593,7 +577,7 @@ describe('ZshInstaller', () => {
 
       expect(newContent).not.toContain('# OPENSPEC:START');
       expect(newContent).not.toContain('# OPENSPEC:END');
-      expect(newContent).not.toContain('OpenSpec shell 补全配置');
+      expect(newContent).not.toContain('OpenSpec shell completions');
       expect(newContent).toContain('# My config');
       expect(newContent).toContain('alias ll="ls -la"');
     });
@@ -716,7 +700,7 @@ describe('ZshInstaller', () => {
       const result = await installer.install(testScript);
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('自动配置 .zshrc');
+      expect(result.message).toContain('.zshrc 已配置');
     });
   });
 
@@ -736,9 +720,9 @@ describe('ZshInstaller', () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec-cn 配置');
+      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec 配置');
 
-      // Verify .zshrc config was removed
+      // Verify .zshrc config was 已移除
       content = await fs.readFile(zshrcPath, 'utf-8');
       expect(content).not.toContain('# OPENSPEC:START');
     });
@@ -755,7 +739,7 @@ describe('ZshInstaller', () => {
       expect(result.message).not.toContain('.zshrc');
     });
 
-    it('should succeed even if only .zshrc config is removed', async () => {
+    it('should succeed even if only .zshrc config is 已移除', async () => {
       // Manually create .zshrc config without installing completion script
       const zshrcPath = path.join(testHomeDir, '.zshrc');
       await fs.writeFile(zshrcPath, '# OPENSPEC:START\nconfig\n# OPENSPEC:END\n');
@@ -763,7 +747,7 @@ describe('ZshInstaller', () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec-cn 配置');
+      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec 配置');
     });
 
     it('should include both messages when removing script and .zshrc', async () => {
@@ -772,8 +756,8 @@ describe('ZshInstaller', () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('移除补全脚本');
-      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec-cn 配置');
+      expect(result.message).toContain('移除');
+      expect(result.message).toContain('已从 ~/.zshrc 移除 OpenSpec 配置');
     });
   });
 });

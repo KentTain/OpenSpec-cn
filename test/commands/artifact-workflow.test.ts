@@ -1,24 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { runCLI } from '../helpers/run-cli.js';
 import { FileSystemUtils } from '../../src/utils/file-system.js';
-
-async function createTempGlobalConfig(baseDir: string): Promise<{ XDG_CONFIG_HOME: string }> {
-  const configDir = path.join(baseDir, 'xdg-config');
-  const openspecDir = path.join(configDir, 'openspec');
-  await fs.mkdir(openspecDir, { recursive: true });
-  await fs.writeFile(
-    path.join(openspecDir, 'config.json'),
-    JSON.stringify({
-      profile: 'core',
-      delivery: 'both',
-      workflows: ['propose', 'explore', 'apply', 'archive'],
-    })
-  );
-  return { XDG_CONFIG_HOME: configDir };
-}
 
 describe('artifact-workflow CLI commands', () => {
   let tempDir: string;
@@ -53,7 +38,7 @@ describe('artifact-workflow CLI commands', () => {
   }
 
   /**
-   * Creates a test change with the specified artifacts completed.
+   * Creates a test change with the specified 个产出物已完成d.
    * Note: An "active" change requires at least a proposal.md file to be detected.
    * If no artifacts are specified, we create an empty proposal to make it detectable.
    */
@@ -128,7 +113,7 @@ describe('artifact-workflow CLI commands', () => {
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.cleanStderr).toBe('');
+      expect(result.stderr).toBe('');
 
       const json = JSON.parse(result.stdout);
       expect(json.changeName).toBe('json-change');
@@ -147,7 +132,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status', '--change', 'complete-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('4/4 个产出物已完成');
-      expect(result.stdout).toContain('所有产出物已完成!');
+      expect(result.stdout).toContain('所有产出物已完成！');
     });
 
     it('exits gracefully when no changes exist', async () => {
@@ -211,21 +196,21 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status', '--change', '../foo'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('变更名称无效');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects absolute path in change name', async () => {
       const result = await runCLI(['status', '--change', '/etc/passwd'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('变更名称无效');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects slashes in change name', async () => {
       const result = await runCLI(['status', '--change', 'foo/bar'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('变更名称无效');
+      expect(output).toContain('无效的变更名称');
     });
   });
 
@@ -265,7 +250,7 @@ describe('artifact-workflow CLI commands', () => {
       });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('<warning>');
-      expect(result.stdout).toContain('此产出物有未满足的依赖项');
+      expect(result.stdout).toContain('status="missing"');
     });
 
     it('outputs JSON for instructions', async () => {
@@ -275,7 +260,7 @@ describe('artifact-workflow CLI commands', () => {
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.cleanStderr).toBe('');
+      expect(result.stderr).toBe('');
 
       const json = JSON.parse(result.stdout);
       expect(json.artifactId).toBe('design');
@@ -290,8 +275,8 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['instructions', '--change', 'test-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('缺少必需参数 <artifact>');
-      expect(output).toContain('有效的产出物:');
+      expect(output).toContain('缺少必要参数 <artifact>');
+      expect(output).toContain('可用产出物');
     });
 
     it('errors for unknown artifact', async () => {
@@ -302,8 +287,8 @@ describe('artifact-workflow CLI commands', () => {
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain("在 Schema 'spec-driven' 中未找到产出物 'unknown-artifact'");
-      expect(output).toContain('有效的产出物:');
+      expect(output).toContain("未找到产出物 'unknown-artifact'");
+      expect(output).toContain('可用产出物');
     });
   });
 
@@ -312,24 +297,24 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['templates'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Schema：spec-driven');
-      expect(result.stdout).toContain('proposal：');
-      expect(result.stdout).toContain('design：');
-      expect(result.stdout).toContain('specs：');
-      expect(result.stdout).toContain('tasks：');
+      expect(result.stdout).toContain('proposal:');
+      expect(result.stdout).toContain('design:');
+      expect(result.stdout).toContain('specs:');
+      expect(result.stdout).toContain('tasks:');
     });
 
     it('shows template paths for specified schema', async () => {
       const result = await runCLI(['templates', '--schema', 'spec-driven'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Schema：spec-driven');
-      expect(result.stdout).toContain('proposal：');
-      expect(result.stdout).toContain('design：');
+      expect(result.stdout).toContain('proposal:');
+      expect(result.stdout).toContain('design:');
     });
 
     it('outputs JSON mapping of templates', async () => {
       const result = await runCLI(['templates', '--json'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.cleanStderr).toBe('');
+      expect(result.stderr).toBe('');
 
       const json = JSON.parse(result.stdout);
       expect(json.proposal).toBeDefined();
@@ -350,7 +335,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['new', 'change', 'my-new-feature'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       const output = getOutput(result);
-      expect(output).toContain("创建变更 'my-new-feature'");
+      expect(output).toContain("已创建变更 'my-new-feature'");
 
       const changeDir = path.join(changesDir, 'my-new-feature');
       const stat = await fs.stat(changeDir);
@@ -364,7 +349,7 @@ describe('artifact-workflow CLI commands', () => {
       );
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('--initiative 已不再支持');
+      expect(output).toContain('--initiative is no longer supported');
       await expect(fs.stat(path.join(changesDir, 'linked-change'))).rejects.toMatchObject({
         code: 'ENOENT',
       });
@@ -376,7 +361,7 @@ describe('artifact-workflow CLI commands', () => {
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('--areas 已不再支持');
+      expect(output).toContain('--areas is no longer supported');
       await expect(fs.stat(path.join(changesDir, 'area-change'))).rejects.toMatchObject({
         code: 'ENOENT',
       });
@@ -416,7 +401,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['new', 'change', 'invalid name'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('错误');
+      expect(output).toContain('Error');
     });
 
     it('errors for duplicate change name', async () => {
@@ -425,7 +410,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['new', 'change', 'existing-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('已存在于');
+      expect(output).toContain('已存在');
     });
 
     it('errors when name argument is missing', async () => {
@@ -442,10 +427,10 @@ describe('artifact-workflow CLI commands', () => {
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('## 应用：apply-change');
+      expect(result.stdout).toContain('## Apply: apply-change');
       expect(result.stdout).toContain('Schema：spec-driven');
-      expect(result.stdout).toContain('上下文文件：');
-      expect(result.stdout).toContain('指令：');
+      expect(result.stdout).toContain('### 上下文文件');
+      expect(result.stdout).toContain('### 指令');
     });
 
     it('shows blocked state when required artifacts are missing', async () => {
@@ -456,8 +441,8 @@ describe('artifact-workflow CLI commands', () => {
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('被阻塞');
-      expect(result.stdout).toContain('缺失的产出物: tasks');
+      expect(result.stdout).toContain('已阻塞');
+      expect(result.stdout).toContain('缺失的产出物：tasks');
     });
 
     it('outputs JSON for apply instructions', async () => {
@@ -468,7 +453,7 @@ describe('artifact-workflow CLI commands', () => {
         { cwd: tempDir }
       );
       expect(result.exitCode).toBe(0);
-      expect(result.cleanStderr).toBe('');
+      expect(result.stderr).toBe('');
 
       const json = JSON.parse(result.stdout);
       const expectedProposalPath = canonical(path.join(changesDir, 'json-apply', 'proposal.md'));
@@ -546,7 +531,7 @@ apply:
       });
       expect(result.exitCode).toBe(0);
       // Should show the instruction from spec-driven schema apply block
-      expect(result.stdout).toContain('逐个处理待办任务');
+      expect(result.stdout).toContain('work through pending tasks');
     });
 
     it('shows all_done state when all tasks are complete', async () => {
@@ -566,8 +551,8 @@ apply:
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('所有任务已完成');
-      expect(result.stdout).toContain('已准备好归档');
+      expect(result.stdout).toContain('complete ✓');
+      expect(result.stdout).toContain('可以归档了');
     });
 
     it('uses spec-driven schema apply configuration', async () => {
@@ -731,7 +716,7 @@ artifacts:
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('无效工具: unknown-tool');
+      expect(output).toContain('无效工具：unknown-tool');
     });
 
     it('errors for tool without skillsDir', async () => {
@@ -741,13 +726,12 @@ artifacts:
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('无效工具: agents');
+      expect(output).toContain('无效工具：agents');
     });
 
     it('creates skills for Claude tool', async () => {
       const result = await runCLI(['experimental', '--tool', 'claude'], {
         cwd: tempDir,
-        env: await createTempGlobalConfig(tempDir),
       });
       expect(result.exitCode).toBe(0);
       const output = normalizePaths(getOutput(result));
@@ -763,7 +747,6 @@ artifacts:
     it('creates skills for Cursor tool', async () => {
       const result = await runCLI(['experimental', '--tool', 'cursor'], {
         cwd: tempDir,
-        env: await createTempGlobalConfig(tempDir),
       });
       expect(result.exitCode).toBe(0);
       const output = normalizePaths(getOutput(result));
@@ -784,7 +767,6 @@ artifacts:
     it('creates skills for Windsurf tool', async () => {
       const result = await runCLI(['experimental', '--tool', 'windsurf'], {
         cwd: tempDir,
-        env: await createTempGlobalConfig(tempDir),
       });
       expect(result.exitCode).toBe(0);
       const output = normalizePaths(getOutput(result));

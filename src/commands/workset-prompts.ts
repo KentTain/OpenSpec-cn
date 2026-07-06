@@ -1,4 +1,4 @@
-/**
+﻿/**
  * The workset command's interactive prompt flows (the compose wizard,
  * the open-time tool select, the remove confirm). @inquirer is always
  * imported dynamically at the call site - never at module top.
@@ -38,14 +38,14 @@ export async function composeInteractively(
 ): Promise<Workset> {
   const prompts = await import('@inquirer/prompts');
 
-  console.log('[1/3] 为工作集命名');
+  console.log('[1/3] 命名 workset');
   let name: string;
   if (givenName !== undefined) {
     name = validateWorksetName(givenName);
-    console.log(`  工作集名称：${name}`);
+    console.log(`  Workset 名称: ${name}`);
   } else {
     name = await prompts.input({
-      message: '工作集名称：',
+      message: 'Workset 名称:',
       required: true,
       validate(value: string) {
         try {
@@ -66,22 +66,22 @@ export async function composeInteractively(
 
   console.log('');
   console.log(
-    '[2/3] 添加成员文件夹（第一个是主文件夹——会话从这里开始）'
+    '[2/3] Add member folders (the first one is the primary - sessions start there)'
   );
   const members: WorksetMember[] = await resolveMemberFlags(input.memberFlags);
   if (members.length > 0) {
     finalizeWorkset(name, members, input.tool, table);
     for (const member of members) {
-      console.log(`  已添加 '${member.name}'（${member.path}）`);
+      console.log(`  已添加 '${member.name}' (${member.path})`);
     }
   }
 
   while (true) {
     if (members.length > 0) {
       const next = await prompts.select({
-        message: '添加另一个文件夹或完成：',
+        message: '添加另一个文件夹或完成:',
         choices: [
-          { name: '完成', value: 'finish' },
+          { name: 'Finish', value: 'finish' },
           { name: '添加另一个文件夹', value: 'add' },
         ],
         default: 'finish',
@@ -92,13 +92,13 @@ export async function composeInteractively(
     }
 
     const rawPath = await prompts.input({
-      message: '文件夹路径：',
+      message: '文件夹路径:',
       ...(members.length === 0 ? { default: '.', prefill: 'editable' } : {}),
       required: true,
       async validate(value: string) {
         const resolved = path.resolve(expandUserPath(value));
         if (!(await pathIsDirectory(resolved))) {
-          return `'${value}' 不是现有的文件夹`;
+          return `'${value}' is not an existing folder`;
         }
         return true;
       },
@@ -109,7 +109,7 @@ export async function composeInteractively(
     const collision = members.some((member) => member.name === label);
     if (memberLabelProblem(label) !== null || collision) {
       label = await prompts.input({
-        message: '为该成员命名（文件夹标签）：',
+        message: '为此成员命名（文件夹标签）:',
         required: true,
         validate(value: string) {
           const problem = memberLabelProblem(value);
@@ -117,7 +117,7 @@ export async function composeInteractively(
             return problem;
           }
           if (members.some((member) => member.name === value)) {
-            return `成员名称 '${value}' 重复`;
+            return `duplicate member name '${value}'`;
           }
           return true;
         },
@@ -125,21 +125,21 @@ export async function composeInteractively(
     }
 
     members.push({ name: label, path: resolvedPath });
-    console.log(`  已添加 '${label}'（${resolvedPath}）`);
+    console.log(`  Added '${label}' (${resolvedPath})`);
   }
 
   console.log('');
-  console.log('[3/3] 选择你的工具');
+  console.log('[3/3] Choose your tool');
   let tool = input.tool;
   if (tool === undefined) {
     const choices = listOpenerChoices(table);
     const available = choices.filter((choice) => choice.available);
     if (available.length === 0) {
       console.log(
-        '  已知的工具都不在 PATH 中；不保存偏好。'
+        '  None of the known tools is on PATH; not saving a preference.'
       );
       console.log(
-        `  （已知工具：${choices.map((choice) => `${choice.opener.id} ${choice.note ?? ''}`.trim()).join(', ')}）`
+        `  (Known tools: ${choices.map((choice) => `${choice.opener.id} ${choice.note ?? ''}`.trim()).join(', ')})`
       );
     } else {
       tool = await promptToolFromChoices(available);
@@ -154,7 +154,7 @@ export async function promptToolFromChoices(
 ): Promise<string> {
   const { select } = await import('@inquirer/prompts');
   return select({
-    message: '打开方式：',
+    message: '打开方式:',
     choices: available.map((choice) => ({
       name: choice.opener.label,
       value: choice.opener.id,
@@ -165,7 +165,7 @@ export async function promptToolFromChoices(
 export async function promptOpenNow(label: string): Promise<boolean> {
   const { confirm } = await import('@inquirer/prompts');
   return confirm({
-    message: `现在用 ${label} 打开它？`,
+    message: `现在在 ${label} 中打开？`,
     default: true,
   });
 }
@@ -182,7 +182,7 @@ export async function confirmRemoveInteractively(
   }
 
   return confirm({
-    message: `移除工作集 '${workset.name}'？（成员文件夹不会被改动）`,
+    message: `删除 workset '${workset.name}'？（成员文件夹不会被触及）`,
     default: false,
   });
 }

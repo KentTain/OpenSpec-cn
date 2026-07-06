@@ -1,4 +1,4 @@
-import type { PlanningHome } from './planning-home.js';
+﻿import type { PlanningHome } from './planning-home.js';
 
 export interface PlanningHomeSummary {
   kind: 'repo';
@@ -69,10 +69,10 @@ export function buildNextSteps(input: ChangeNextStepsInput): string[] {
   if (readyArtifact) {
     const storeFlag = input.storeId ? ` --store ${input.storeId}` : '';
     steps.push(
-      `在编写该产出物之前，运行 openspec-cn instructions ${readyArtifact.id} --change "${input.changeName}"${storeFlag} --json。`
+      `Run openspec-cn instructions ${readyArtifact.id} --change "${input.changeName}"${storeFlag} --json before writing that artifact.`
     );
   } else if (input.allArtifactsComplete) {
-    steps.push('All planning artifacts are complete; review tasks before implementation.');
+    steps.push('所有规划产出物已完成；在实现前审查任务。');
   }
 
   return steps;

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -187,7 +187,7 @@ describe('InitCommand', () => {
       const logCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
       expect(
         logCalls.some(
-          (entry) => entry.includes('已跳过命令') && entry.includes('kimi') && entry.includes('无适配器'),
+          (entry) => entry.includes('已跳过命令：kimi') && entry.includes('（无适配器）'),
         ),
       ).toBe(true);
     });
@@ -236,7 +236,7 @@ describe('InitCommand', () => {
     it('should throw error for invalid tool names', async () => {
       const initCommand = new InitCommand({ tools: 'invalid-tool', force: true });
 
-      await expect(initCommand.execute(testDir)).rejects.toThrow(/无效工具.*: invalid-tool/);
+      await expect(initCommand.execute(testDir)).rejects.toThrow(/无效工具：invalid-tool/);
     });
 
     it('should handle comma-separated tool names with spaces', async () => {
@@ -255,7 +255,7 @@ describe('InitCommand', () => {
       const initCommand = new InitCommand({ tools: 'all,claude', force: true });
 
       await expect(initCommand.execute(testDir)).rejects.toThrow(
-        /不能同时使用保留值 "all" 或 "none" 与具体工具 ID/
+        /不能将保留值 "all" 或 "none" 与具体工具 ID 组合使用/
       );
     });
 
@@ -426,7 +426,7 @@ describe('InitCommand', () => {
       );
 
       const initCommand = new InitCommand({ tools: 'claude', force: true });
-      await expect(initCommand.execute(readOnlyDir)).rejects.toThrow(/没有权限/);
+      await expect(initCommand.execute(readOnlyDir)).rejects.toThrow(/权限不足/);
     });
 
     it('should throw error in non-interactive mode without --tools flag and no detected tools', async () => {
@@ -544,7 +544,7 @@ describe('InitCommand - profile and detection features', () => {
     });
 
     await expect(initCommand.execute(testDir)).rejects.toThrow(
-      /无效的档案 "invalid-profile"/
+      /无效的 profile "invalid-profile"/
     );
   });
 

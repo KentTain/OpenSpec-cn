@@ -45,12 +45,12 @@ export function validateConfigKeyPath(path: string): { valid: boolean; reason?: 
   const rawKeys = path.split('.');
 
   if (rawKeys.length === 0 || rawKeys.some((key) => key.trim() === '')) {
-    return { valid: false, reason: 'Key path must not be empty' };
+    return { valid: false, reason: '键路径不能为空' };
   }
 
   const rootKey = rawKeys[0];
   if (!KNOWN_TOP_LEVEL_KEYS.has(rootKey)) {
-    return { valid: false, reason: `Unknown top-level key "${rootKey}"` };
+    return { valid: false, reason: `未知的顶层键 "${rootKey}"` };
   }
 
   if (rootKey === 'featureFlags') {
@@ -272,6 +272,6 @@ export function validateConfig(config: unknown): { success: boolean; error?: str
       const messages = zodError.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
       return { success: false, error: messages.join('; ') };
     }
-    return { success: false, error: 'Unknown validation error' };
+    return { success: false, error: '未知的验证错误' };
   }
 }

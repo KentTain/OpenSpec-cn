@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -16,8 +16,8 @@ describe('instruction-loader', () => {
       // Uses built-in spec-driven schema
       const template = loadTemplate('spec-driven', 'proposal.md');
 
-      expect(template).toContain('## 为什么');
-      expect(template).toContain('## 变更内容');
+      expect(template).toContain('## Why');
+      expect(template).toContain('## What Changes');
     });
 
     it('should throw TemplateLoadError for non-existent template', () => {
@@ -149,7 +149,7 @@ describe('instruction-loader', () => {
       const context = loadChangeContext(tempDir, 'my-change');
       const instructions = generateInstructions(context, 'proposal');
 
-      expect(instructions.template).toContain('## 为什么');
+      expect(instructions.template).toContain('## Why');
     });
 
     it('should show dependencies with completion status', () => {
@@ -193,7 +193,7 @@ describe('instruction-loader', () => {
       const context = loadChangeContext(tempDir, 'my-change');
 
       expect(() => generateInstructions(context, 'nonexistent')).toThrow(
-        "未找到产出物 'nonexistent'"
+        "在 schema 'spec-driven' 中未找到产出物 'nonexistent'"
       );
     });
 
@@ -218,7 +218,7 @@ context: |
         expect(instructions.context).toContain('Tech stack: TypeScript, React');
         expect(instructions.context).toContain('API style: RESTful');
         expect(instructions.template).not.toContain('Tech stack');
-        expect(instructions.template).toContain('## 为什么'); // Actual template content
+        expect(instructions.template).toContain('## Why'); // Actual template content
       });
 
       it('should return undefined context when config is absent', () => {
@@ -227,7 +227,7 @@ context: |
 
         expect(instructions.context).toBeUndefined();
         expect(instructions.rules).toBeUndefined();
-        expect(instructions.template).toContain('## 为什么'); // Actual template content
+        expect(instructions.template).toContain('## Why'); // Actual template content
       });
 
       it('should preserve multi-line context', () => {
@@ -357,7 +357,7 @@ rules:
         // All three should be separate
         expect(instructions.context).toBe('Project context here');
         expect(instructions.rules).toEqual(['Rule 1']);
-        expect(instructions.template).toContain('## 为什么');
+        expect(instructions.template).toContain('## Why');
         // Template should not contain context or rules
         expect(instructions.template).not.toContain('Project context here');
         expect(instructions.template).not.toContain('Rule 1');
@@ -379,7 +379,7 @@ context: Project context only
 
         expect(instructions.context).toBe('Project context only');
         expect(instructions.rules).toBeUndefined();
-        expect(instructions.template).toContain('## 为什么');
+        expect(instructions.template).toContain('## Why');
       });
 
       it('should handle rules without context', () => {
@@ -400,7 +400,7 @@ rules:
 
         expect(instructions.context).toBeUndefined();
         expect(instructions.rules).toEqual(['Rule only']);
-        expect(instructions.template).toContain('## 为什么');
+        expect(instructions.template).toContain('## Why');
       });
 
       it('should work without project root parameter', () => {
@@ -409,7 +409,7 @@ rules:
 
         expect(instructions.context).toBeUndefined();
         expect(instructions.rules).toBeUndefined();
-        expect(instructions.template).toContain('## 为什么');
+        expect(instructions.template).toContain('## Why');
       });
     });
 
@@ -443,7 +443,7 @@ rules:
         generateInstructions(context, 'proposal', tempDir);
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Unknown artifact ID in rules: "invalid-artifact"')
+          expect.stringContaining('rules 中未知的产出物 ID："invalid-artifact"')
         );
       });
 
@@ -475,7 +475,7 @@ rules:
           // Note: We may have gotten warnings from other tests, so check that
           // the count didn't increase by more than 1 from the first call
           const callCount = consoleWarnSpy.mock.calls.filter(call =>
-            call[0]?.includes('Unknown artifact ID in rules')
+            call[0]?.includes('rules 中未知的产出物 ID')
           ).length;
 
           expect(callCount).toBeGreaterThanOrEqual(1);

@@ -1,5 +1,5 @@
-/**
- * `openspec context` (slice 4.1): the working set a root's declarations
+﻿/**
+ * `openspec-cn context` (slice 4.1): the working set a root's declarations
  * describe, as an agent brief (JSON), a human listing, or an editor
  * view (`--code-workspace`). Assembly is presentation over the Phase 3
  * relationship data; doctor is the health surface. The only write this
@@ -73,11 +73,11 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
 
   if (availableStores.length > 0) {
     console.log('');
-    console.log('引用的 store');
+    console.log('引用的 stores');
     for (const member of availableStores) {
       console.log(memberLine(member));
       if (member.fetch) {
-        console.log(`    获取：${member.fetch}`);
+        console.log(`  获取: ${member.fetch}`);
       }
     }
   }
@@ -88,8 +88,8 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
     // emptied-by-omission set must not claim nothing was declared.
     console.log(
       declaredReferenceCount > 0
-        ? '声明的引用全部解析到此根目录；工作集仅包含此根目录。'
-        : '未声明引用；工作集仅包含此根目录。'
+        ? '声明的引用全部解析到此根目录；工作集仅为此根目录。'
+        : '未声明引用；工作集仅为此根目录。'
     );
   }
 
@@ -102,16 +102,16 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
         continue;
       }
       for (const diagnostic of member.status) {
-        console.log(`  - ${member.id}：${diagnostic.message}`);
+        console.log(`  - ${member.id}: ${diagnostic.message}`);
         if (diagnostic.fix) {
-          console.log(`    修复：${diagnostic.fix}`);
+          console.log(`    修复: ${diagnostic.fix}`);
         }
       }
     }
     for (const diagnostic of workingSet.status) {
-      console.log(`  提示：${diagnostic.message}`);
+      console.log(`  备注: ${diagnostic.message}`);
       if (diagnostic.fix) {
-        console.log(`  修复：${diagnostic.fix}`);
+        console.log(`  Fix: ${diagnostic.fix}`);
       }
     }
   }
@@ -129,7 +129,7 @@ function writeCodeWorkspace(
       'context_file_exists',
       {
         target: 'context.output',
-        fix: `请传递 --force 覆盖，或选择其他路径。`,
+        fix: `Pass --force to overwrite, or choose a different path.`,
       }
     );
   }
@@ -138,7 +138,7 @@ function writeCodeWorkspace(
     throw new StoreError(
       `输出目录不存在：${parent}。`,
       'context_output_dir_missing',
-      { target: 'context.output', fix: '请先创建目录，或选择其他路径。' }
+      { target: 'context.output', fix: '先创建目录，或选择其他路径。' }
     );
   }
 
@@ -151,8 +151,8 @@ function writeCodeWorkspace(
     .map((member) => member.id);
   const summary =
     skipped.length > 0
-      ? `已写入 ${resolved}（共 ${available + 1} 个文件夹；不可用：${skipped.join(', ')}）`
-      : `已写入 ${resolved}（共 ${available + 1} 个文件夹）`;
+      ? `Wrote ${resolved} (${available + 1} folders; not available: ${skipped.join(', ')})`
+      : `Wrote ${resolved} (${available + 1} folders)`;
   // stderr keeps JSON stdout pure; for humans it reads inline.
   console.error(summary);
 }
@@ -167,11 +167,11 @@ export function registerContextCommand(program: Command): void {
     .description(description)
     .option('--store <id>', COMMON_FLAGS.store.description)
     .addOption(
-      new Option('--store-path <path>', '已移除；请注册 store 并使用 --store').hideHelp()
+      new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
     )
-    .option('--json', '以 JSON 格式输出 agent 摘要')
-    .option('--code-workspace <path>', '同时为该集合写入 VS Code 工作区文件')
-    .option('--force', '覆盖已存在的 --code-workspace 文件')
+    .option('--json', '以 JSON 格式输出代理简报')
+    .option('--code-workspace <path>', '同时为此集合写入 VS Code 工作区文件')
+    .option('--force', '覆盖已有的 --code-workspace 文件')
     .action(
       async (options: {
         store?: string;

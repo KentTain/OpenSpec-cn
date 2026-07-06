@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process';
+﻿import { execFile } from 'node:child_process';
 import * as nodeFs from 'node:fs';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
@@ -46,7 +46,7 @@ export async function initGitRepository(storeRoot: string): Promise<boolean> {
       'store_git_init_failed',
       {
         target: 'store.git',
-        fix: '安装 Git 或使用 --no-init-git 重新运行设置。',
+        fix: '安装 Git 或使用 --no-init-git 重新运行 setup。',
       }
     );
   }
@@ -65,21 +65,21 @@ export async function assertGitCommitIdentity(probeCwd: string): Promise<void> {
     } catch (error) {
       if (isSpawnNotFoundError(error)) {
         throw new StoreError(
-          'Git 不可用，因此设置无法创建 store 的初始提交。',
+          'Git 不可用，因此 setup 无法创建初始 store 提交。',
           'store_git_init_failed',
           {
             target: 'store.git',
-            fix: '安装 Git 或使用 --no-init-git 重新运行设置。',
+            fix: '安装 Git 或使用 --no-init-git 重新运行 setup。',
           }
         );
       }
 
       throw new StoreError(
-        '未配置可用的 Git 提交身份，因此设置无法创建 store 的初始提交。',
+        '没有可用的 Git 提交身份配置，因此 setup 无法创建初始 store 提交。',
         'store_git_identity_missing',
         {
           target: 'store.git',
-          fix: '运行 git config --global user.name "你的名字" 和 git config --global user.email "you@example.com"，或使用 --no-init-git 重新运行设置。',
+          fix: '运行 git config --global user.name "Your Name" 和 git config --global user.email "you@example.com"，或使用 --no-init-git 重新运行 setup。',
         }
       );
     }
@@ -115,11 +115,11 @@ export async function commitStoreFiles(
     }).catch(() => undefined);
 
     throw new StoreError(
-      `Failed to create the initial store commit: ${error instanceof Error ? error.message : String(error)}`,
+      `创建初始 store 提交失败：${error instanceof Error ? error.message : String(error)}`,
       'store_git_commit_failed',
       {
         target: 'store.git',
-        fix: '手动提交创建的文件，或使用 --no-init-git 重新运行设置。',
+        fix: '手动提交已创建的文件，或使用 --no-init-git 重新运行 setup。',
       }
     );
   }

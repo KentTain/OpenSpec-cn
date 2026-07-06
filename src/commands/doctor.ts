@@ -1,5 +1,5 @@
-/**
- * `openspec doctor` (slice 3.6): the root-scoped relationship-health
+﻿/**
+ * `openspec-cn doctor` (slice 3.6): the root-scoped relationship-health
  * report. Read-only — it answers "are the roots this work relates to
  * available on this machine?" and never clones, syncs, or repairs.
  */
@@ -134,7 +134,7 @@ function printEntrySection<T extends { status: { message: string; fix?: string }
       continue;
     }
     for (const diagnostic of entry.status) {
-      console.log(`  - ${idOf(entry)}：${diagnostic.message}`);
+      console.log(`  - ${idOf(entry)}: ${diagnostic.message}`);
       if (diagnostic.fix) {
         console.log(`    修复：${diagnostic.fix}`);
       }
@@ -147,30 +147,30 @@ function printHumanHealth(health: RelationshipHealth, declaredReferenceCount: nu
   console.log('');
   console.log('根目录');
   console.log(`  位置：${health.root.path}`);
-  console.log(`  OpenSpec 根目录：${health.root.healthy ? '正常' : '不健康'}`);
+  console.log(`  OpenSpec 根目录：${health.root.healthy ? '正常' : '异常'}`);
   if (health.store) {
-    const metadataNote = health.store.metadata.valid ? '元数据正常' : '元数据无效';
-    console.log(`  Store：${health.store.id}（${metadataNote}）`);
+    const metadataNote = health.store.metadata.valid ? '元数据正常' : '元数据异常';
+    console.log(`  存储：${health.store.id} (${metadataNote})`);
   }
   printDiagnosticLines('  ', [...health.root.status, ...(health.store?.status ?? [])]);
 
-  // "(未声明)" 必须永不撒谎：自引用会从索引中省略，
-  // 因此被省略而变空的列表会有自己的一行。
+  // "(none declared)" must never lie: self-references are omitted from
+  // the index, so an emptied-by-omission list gets its own line.
   const referencesEmptyLine =
     health.references.length === 0 && declaredReferenceCount > 0
-      ? '（声明的引用全部解析到此根目录）'
-      : '（未声明）';
+      ? '(声明的引用全部解析到此根目录)'
+      : '(未声明)';
   printEntrySection(
     '引用',
     health.references,
     referencesEmptyLine,
-    (entry) => `${entry.store_id}：正常${entry.root ? `（${entry.root}）` : ''}`,
+    (entry) => `${entry.store_id}: ok${entry.root ? ` (${entry.root})` : ''}`,
     (entry) => entry.store_id
   );
 
   for (const entry of health.status) {
     console.log('');
-    console.log(`提示：${entry.message}`);
+    console.log(`注意：${entry.message}`);
     if (entry.fix) {
       console.log(`修复：${entry.fix}`);
     }
@@ -180,14 +180,14 @@ function printHumanHealth(health: RelationshipHealth, declaredReferenceCount: nu
 export function registerDoctorCommand(program: Command): void {
   const description =
     COMMAND_REGISTRY.find((entry) => entry.name === 'doctor')?.description ??
-    '报告已解析 OpenSpec 根目录的关系健康状况';
+    '报告已解析的 OpenSpec 根目录的关系健康状况';
 
   program
     .command('doctor')
     .description(description)
     .option('--store <id>', COMMON_FLAGS.store.description)
     .addOption(
-      new Option('--store-path <path>', '已移除；请注册 store 并使用 --store').hideHelp()
+      new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
     )
     .option('--json', '以 JSON 格式输出')
     .action(async (options: { store?: string; storePath?: string; json?: boolean }) => {

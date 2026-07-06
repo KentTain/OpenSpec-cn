@@ -1,44 +1,58 @@
-# Stores：在独立仓库中规划
+﻿# Stores: Plan in Its Own Repo
 
-> **Beta。** Stores、references、working context 和 worksets 是新功能。命令名、标志、文件格式和 JSON 输出可能在版本间变化。下面每一段 walkthrough 都是基于当前构建跑过的，但升级后请重读本指南。
+> **Beta.** Stores, references, working context, and worksets are
+> new. Command names, flags, file formats, and JSON output may still change
+> shape between releases. Every walkthrough below was run against the
+> current build, but re-read this guide after upgrading.
 
-## 解决什么问题
+## The problem this solves
 
-OpenSpec 通常住在一个代码仓库里：一个与代码同级的 `openspec/` 文件夹，存着该仓库的 specs 和 changes。
+OpenSpec normally lives inside one code repo: an `openspec/` folder next to
+your code, holding specs and changes for that repo.
 
-当你的规划比一个仓库更大时，这种模型就不够用了：
+That stops fitting the moment your planning is bigger than one repo:
 
-- 你的工作跨多个仓库——一个功能同时触及 API server、web app 和共享库。计划该放在谁的 `openspec/` 文件夹里？
-- 你的团队在代码存在之前就规划，或规划永远不变成*这个*仓库里的代码。
-- Requirement 由一个团队拥有、被其他团队消费。Wiki 版本会漂移，而你的 coding agent 又读不了它。
+- Your work spans several repos — one feature touches the API server, the
+  web app, and a shared library. Whose `openspec/` folder does the plan
+  live in?
+- Your team plans before code exists, or plans things that never become
+  code in *this* repo.
+- Requirements are owned by one team and consumed by others. The wiki
+  version drifts, and your coding agent can't read it anyway.
 
-**store** 就是答案：一个唯一职责是规划的独立仓库。它有你已熟悉的 `openspec/` 形态——specs 和 changes——加一个小小的身份文件。你在你的机器上按名字注册一次，之后每个普通 OpenSpec 命令都能在任何位置操作它。
+A **store** is the answer: a standalone repo whose whole job is planning.
+It has the same `openspec/` shape you already know — specs and changes —
+plus a small identity file. You register it on your machine once, by name,
+and then every normal OpenSpec command can work in it from anywhere.
 
-## 形态
+## The shape
 
 ```
-            team-plans  (一个 store：在独立仓库里规划)
-            ├── .openspec-store/store.yaml     身份："我是 team-plans"
+            team-plans  (a store: planning in its own repo)
+            ├── .openspec-store/store.yaml     identity: "I am team-plans"
             └── openspec/
-                ├── specs/      真相是什么
-                └── changes/    正在推进什么
+                ├── specs/      what is true
+                └── changes/    what is in motion
                       ▲
-                      │ 在每台机器上按名字注册；
-                      │ 通过 push/clone 像普通仓库一样共享
+                      │ registered on each machine by name;
+                      │ shared by pushing/cloning like any repo
         ┌─────────────┼─────────────┐
         │             │             │
     web-app       api-server     mobile-app
-   (代码仓库)    (代码仓库)     (代码仓库)
+   (code repo)   (code repo)    (code repo)
 ```
 
-两条规则让这件事保持简单：
+Two rules keep this simple:
 
-1. **store 就是一个 git 仓库。** 你自己 commit、push、pull、review 它。OpenSpec 从不自行 clone、sync 或 push 任何东西。
-2. **声明，不是机器。** 仓库可以*声明*它们与 store 的关系（见下）。声明改变的是 OpenSpec 能告诉你什么——从不改变你的命令在哪里执行。
+1. **A store is just a git repo.** You commit, push, pull, and review it
+   yourself. OpenSpec never clones, syncs, or pushes anything on its own.
+2. **Declarations, not machinery.** Repos can *declare* how they relate to
+   stores (shown below). Declarations change what OpenSpec can tell you —
+   never where your commands act.
 
-## 五分钟到你的第一个 store
+## Five minutes to your first store
 
-两条命令带你从零到一个可工作的、store 范围的 change：
+Two commands take you from nothing to a working, store-scoped change:
 
 ```bash
 openspec-cn store setup team-plans --path ~/openspec/team-plans
@@ -66,13 +80,17 @@ Schema: spec-driven
 Next: openspec-cn status --change add-login --store team-plans
 ```
 
-这就是全部模型。从这里开始，生命周期就是你熟悉的那套——`status`、`instructions`、`validate`、`archive`——每条命令加 `--store team-plans`，每个打印的提示都替你带上这个 flag。`Using OpenSpec root:` 这一行总是告诉你命令正在哪里执行。
+That's the whole model. From here the lifecycle is exactly what you know —
+`status`, `instructions`, `validate`, `archive` — with `--store team-plans`
+on each command, and every printed hint carries the flag for you. The
+`Using OpenSpec root:` line always tells you where a command is acting.
 
-## 故事：一个团队，一个规划仓库
+## Story: one team, one planning repo
 
-一个团队把 specs 和 changes 放在 `team-plans` 里，而不是散落在各代码仓库中。
+A team keeps its specs and changes in `team-plans` instead of scattering
+them across code repos.
 
-**第一天（谁搭环境谁来跑）：**
+**Day one (whoever sets it up):**
 
 ```bash
 openspec-cn store setup team-plans --path ~/openspec/team-plans \
@@ -80,32 +98,41 @@ openspec-cn store setup team-plans --path ~/openspec/team-plans \
 git -C ~/openspec/team-plans push -u origin main
 ```
 
-传 `--remote` 会在初始提交里把 clone URL 记进 store 自己的身份文件（`.openspec-store/store.yaml`）。每个未来的 clone 天生知道它从哪儿来，所以健康检查和错误消息能为还没有它的队友打印一条完整、可粘贴的修复命令。
+Passing `--remote` records the clone URL inside the store's own identity
+file (`.openspec-store/store.yaml`), in the initial commit. Every future
+clone is born knowing where it came from, so health checks and error
+messages can print a complete, pasteable fix for teammates who don't have
+it yet.
 
-**每个队友（每台机器一次）：**
+**Every teammate (once per machine):**
 
 ```bash
 git clone git@github.com:acme/team-plans.git ~/openspec/team-plans
 openspec-cn store register ~/openspec/team-plans
 ```
 
-从此，每个人都按名字在同一个规划仓库里工作：
+From then on, everyone works in the same planning repo by name:
 
 ```bash
 openspec-cn status --store team-plans --change add-login
 openspec-cn show add-login --store team-plans
 ```
 
-**共享工作是 git，故意的。** 你创建的 change 在你 commit 并 push 之前只存在于你的 checkout 里——和代码一样。计划白得 branch、pull request 和 review，因为 store 就是一个普通仓库。
+**Sharing work is git, on purpose.** A change you create exists only in
+your checkout until you commit and push it — same as code. Plans get
+branches, pull requests, and review for free, because a store is an
+ordinary repo.
 
-**把团队的代码仓库连起来。** 一个规划完全外部化的代码仓库只需要一行，放在 `openspec/config.yaml` 里：
+**Connecting the team's code repos.** A code repo whose planning is fully
+externalized needs exactly one line, in `openspec/config.yaml`:
 
 ```yaml
 # web-app/openspec/config.yaml
 store: team-plans
 ```
 
-现在在 `web-app` 里运行的每条 OpenSpec 命令都会在 `team-plans` 上执行，无需任何 flag：
+Now every OpenSpec command run inside `web-app` acts on `team-plans` with
+no flags at all:
 
 ```bash
 cd ~/src/web-app
@@ -117,44 +144,59 @@ Using OpenSpec root: team-plans (/Users/you/openspec/team-plans)
 ...
 ```
 
-这个指针是 fallback，从不覆盖：显式 `--store` 总是优先，如果仓库长出了真实的规划文件夹，那些优先（并附一条移除过期指针的警告）。
+The pointer is a fallback, never an override: an explicit `--store` always
+wins, and if the repo grows real planning folders of its own, those win
+(with a warning to remove the stale pointer).
 
-## 故事：跨团队边界的需求
+## Story: requirements that cross team lines
 
-一个平台团队拥有 requirement。产品团队在他们自己的仓库里、用自己的 design 来实现。一个 reference 描述这种关系而不移动任何人的工作。
+A platform team owns the requirements. Product teams build against them,
+in their own repos, with their own designs. A reference describes that
+relationship without moving anyone's work.
 
 ```
-   platform-reqs (store)                 api-server (代码仓库)
-   由平台团队拥有                       由产品团队拥有
+   platform-reqs (store)                 api-server (code repo)
+   owned by the platform team            owned by a product team
    ┌──────────────────────────┐          ┌──────────────────────────┐
    │ openspec/specs/          │ ◀────────│ openspec/config.yaml     │
-   │   payments/spec.md       │ 读取     │   references:            │
+   │   payments/spec.md       │ reads    │   references:            │
    │   auth/spec.md           │          │     - platform-reqs      │
    │                          │          │ openspec/specs/          │
-   │ openspec/changes/        │          │   (他们自己的 design)    │
-   │   平台工作                │          │ openspec/changes/        │
-   │                          │          │   (他们自己的工作)        │
+   │ openspec/changes/        │          │   (their own designs)    │
+   │   platform work          │          │ openspec/changes/        │
+   │                          │          │   (their own work)       │
    │                          │          └──────────────────────────┘
    └──────────────────────────┘
 ```
 
-**产品团队在它仓库的 `openspec/config.yaml` 里声明它依赖什么：**
+**The product team declares what it draws on** in its repo's
+`openspec/config.yaml`:
 
 ```yaml
 references:
   - platform-reqs
 ```
 
-reference 是只读上下文。仓库保留自己的 `openspec/` 根；工作留在那里。变的是：该仓库里的 `openspec-cn instructions` 现在包含被引用 store 的 spec 索引——每条带一行摘要和确切的获取命令（`openspec-cn show <spec-id> --type spec --store platform-reqs`）。在 `api-server` 里工作的 agent 能找到上游的 payment requirement，引用它，并在仓库自己的根里写低层 design——不需要任何人粘贴上下文。
+References are read-only context. The repo keeps its own `openspec/` root;
+work stays there. What changes: `openspec-cn instructions` in that repo now
+includes an index of the referenced store's specs — each with a one-line
+summary and the exact fetch command (`openspec-cn show <spec-id> --type spec
+--store platform-reqs`). An agent working in `api-server` can find the
+upstream payment requirements, cite them, and write its low-level design in
+the repo's own root — without anyone pasting context around.
 
-reference 可携带 clone 源，这样还没有该 store 的队友得到的是一条完整修复而不是死胡同：
+A reference can carry its clone source, so teammates who don't have the
+store yet get a complete fix instead of a dead end:
 
 ```yaml
 references:
   - { id: platform-reqs, remote: "git@github.com:acme/platform-reqs.git" }
 ```
 
-**当你想让计划和代码一起打开时，做一个 workset。** 这是个人且显式的：每个人选自己机器上真正一起工作的文件夹。这些本地 checkout 路径不会被提交到共享规划仓库。
+**When you want the plan and code open together, make a workset.** This is
+personal and explicit: each person chooses the folders they actually work
+with on their machine. Nothing about those local checkout paths is
+committed to the shared planning repo.
 
 ```bash
 openspec-cn workset create platform \
@@ -163,9 +205,10 @@ openspec-cn workset create platform \
   --member ~/src/web-app
 ```
 
-## 你总能问的两个问题
+## Two questions you can always ask
 
-**"我的设置健康吗？"** —— `openspec-cn doctor` 检查当前根和它引用的 store，只读，每个发现带一条可粘贴的修复：
+**"Is my setup healthy?"** — `openspec-cn doctor` checks the current root and
+its referenced stores, read-only, with a pasteable fix per finding:
 
 ```
 Doctor
@@ -181,7 +224,8 @@ References
 
 ```
 
-**"我在和什么一起工作？"** —— `openspec-cn context` 从 OpenSpec 声明组装出工作集：根和它引用的 store。
+**"What am I working with?"** — `openspec-cn context` assembles the working
+set from OpenSpec declarations: the root and the stores it references.
 
 ```
 Working context for api-server (/Users/you/src/api-server)
@@ -194,17 +238,22 @@ Referenced stores
     Fetch: openspec-cn show <spec-id> --type spec --store platform-reqs
 ```
 
-两者都支持 `--json` 供 agent 使用。`openspec-cn context --code-workspace <path>` 额外写一份包含整个集合的 VS Code workspace 文件——这是该命令唯一的写操作。
+Both support `--json` for agents. `openspec-cn context --code-workspace
+<path>` additionally writes a VS Code workspace file containing the whole
+set — the only write this command performs.
 
-## Workset：把你一起工作的文件夹重新打开
+## Worksets: reopen the folders you work on together
 
-与以上所有分开：大多数人每个会话都打开同样几个文件夹——规划仓库加两三个代码仓库。一个 **workset** 就是这种个人、命名的视图，用一条命令在你选的工具里重新打开。
+Separate from all of the above: most people open the same few folders
+together every session — the planning repo plus two or three code repos.
+A **workset** is a personal, named view of exactly that, reopened with one
+command in your tool of choice.
 
 ```
   workset "platform"                 openspec-cn workset open platform
   ├── team-plans   ~/openspec/team-plans         │
   ├── api-server   ~/src/api-server              ▼
-  └── web-app      ~/src/web-app       三个都在你的工具里打开
+  └── web-app      ~/src/web-app       all three open in your tool
 ```
 
 ```bash
@@ -220,49 +269,73 @@ platform  (opens in VS Code)
   api-server  /Users/you/src/api-server
 ```
 
-`openspec-cn workset open platform` 然后启动保存的工具：编辑器（VS Code、Cursor）打开一个包含每个成员的窗口并返回。第一个成员是主成员。任何时候用 `--tool <id>` 覆盖工具。
+`openspec-cn workset open platform` then launches the saved tool: editors
+(VS Code, Cursor) open one window with every member and return. The first
+member is the primary. Override the tool any time with `--tool <id>`.
 
-workset 刻意*不是*共享状态。它住在你机器上、从不提交、对工作不做任何声明——它只记录你喜欢一起打开什么。删除一个 workset 从不触碰成员文件夹。新工具是配置，不是代码：任何能用 workspace 文件或 per-folder attach 标志启动的工具，都能在全局 config（`openspec-cn config edit`）的 `openers` 键下添加。
+Worksets are deliberately *not* shared state. They live on your machine,
+are never committed, and make no claims about the work — they only record
+what you like open together. Removing one never touches the member
+folders. New tools are configuration, not code: anything launched via a
+workspace file or per-folder attach flags can be added under the `openers`
+key in the global config (`openspec-cn config edit`).
 
-## 命令如何决定在哪里执行
+## How commands decide where to act
 
-每条普通命令按同样顺序解析它的根：
+Every normal command resolves its root the same way, in this order:
 
 ```
-1. --store <id>          你显式说了            → 那个 store
-2. nearest openspec/     这里有真实规划根      → 这个仓库
-   (从 cwd 向上找)
-3. store: pointer        config.yaml 声明一个  → 那个 store
-4. 以上都不是            这台机器上注册过       → 报错并给选择提示
-                         store？
-                         没注册过 store？       → 当前目录
-                                                 （经典行为）
+1. --store <id>          you said so explicitly        → that store
+2. nearest openspec/     a real planning root here     → this repo
+   (walking up from cwd)
+3. store: pointer        config.yaml declares a store  → that store
+4. none of the above     stores registered on this     → error with a
+                         machine?                        selection hint
+                         no stores registered?         → the current
+                                                          directory
+                                                          (classic behavior)
 ```
 
-`Using OpenSpec root:` 这一行（以及 `--json` 输出里的 `root` 块）告诉你你在哪种情况里。
+The `Using OpenSpec root:` line (and the `root` block in `--json` output)
+tells you which case you're in.
 
-## 已知限制
+## Known limitations
 
-- **Beta 形态。** 本页所有内容可能在版本间变化——名字、标志、文件格式、JSON 键。
-- **每个 store id 每台机器一个 checkout。** 在同一个 id 下注册第二个 checkout 会失败，提示先 `store unregister`。
-- **永远不 sync——故意的。** OpenSpec 从不 clone、pull 或 push。一个过期 checkout 显示过期的 spec，直到*你* pull；reference 是从磁盘上实际存在的内容实时索引的。
-- **某些命令留在原地。** `view`、`templates`、`schemas` 和已弃用的名词形式（`openspec change show`……）只在当前目录执行——不接受 `--store`。
-- **每机状态是每机的。** store 注册表和 workset 是本地设置。关于你机器布局的任何信息都不会被提交到共享规划中。
-- **workset 有两种启动风格。** 不能用 workspace 文件或 per-folder attach 标志启动的工具，不能作为 opener 添加。
-- **Agent JSON 有已知的大小写分歧**（store 家族键用 snake_case，workflow 家族用 camelCase）。在 [agent contract](../agent-contract.md) 中有记录；统一它推迟到版本化发布。
+- **Beta shape.** Everything on this page may change between releases —
+  names, flags, file formats, JSON keys.
+- **One checkout per store id per machine.** Registering a second checkout
+  under the same id fails with a hint to `store unregister` first.
+- **No sync, ever — by design.** OpenSpec never clones, pulls, or pushes.
+  A stale checkout shows stale specs until *you* pull; references are
+  indexed live from whatever is on disk.
+- **Some commands stay where they are.** `view`, `templates`, `schemas`,
+  and the deprecated noun forms (`openspec-cn change show`, ...) act on the
+  current directory only — no `--store`.
+- **Per-machine state is per-machine.** The store registry and worksets
+  are local settings. Nothing about your machine's layout is
+  ever committed to shared planning.
+- **Two launch styles for worksets.** A tool that can't be launched with a
+  workspace file or per-folder attach flags can't be added as an opener.
+- **Agent JSON has a known casing split** (store-family keys are
+  snake_case, workflow-family camelCase). Documented in the
+  [agent contract](../agent-contract.md); unifying it is deferred to a
+  versioned release.
 
-## 东西放在哪里
+## Where things live
 
-| 什么 | 哪里 | 共享？ |
+| What | Where | Shared? |
 |---|---|---|
-| 一个 store 的规划 | `<store>/openspec/`（specs、changes） | 是——commit 并 push |
-| 一个 store 的身份 | `<store>/.openspec-store/store.yaml` | 是——随 store 一起提交 |
-| store 注册表 | `<data dir>/openspec/stores/registry.yaml` | 否——仅本机 |
-| workset | `<data dir>/openspec/worksets/` | 否——仅本机 |
+| A store's planning | `<store>/openspec/` (specs, changes) | Yes — commit and push it |
+| A store's identity | `<store>/.openspec-store/store.yaml` | Yes — committed with the store |
+| The store registry | `<data dir>/openspec/stores/registry.yaml` | No — this machine only |
+| Worksets | `<data dir>/openspec/worksets/` | No — this machine only |
 
-`<data dir>` 在 macOS 和 Linux 上是 `~/.local/share/openspec`（或设置了 `$XDG_DATA_HOME` 时为 `$XDG_DATA_HOME/openspec`），在 Windows 上是 `%LOCALAPPDATA%\openspec`。
+`<data dir>` is `~/.local/share/openspec` on macOS and Linux (or
+`$XDG_DATA_HOME/openspec` when set), and `%LOCALAPPDATA%\openspec` on
+Windows.
 
-## 参考
+## Reference
 
-本页每条命令的确切 flag 和 JSON 形状：
-[CLI 参考](../cli.md)（Stores、Doctor、Working context、Personal worksets）和 [agent contract](../agent-contract.md)。
+Exact flags and JSON shapes for every command on this page:
+[CLI reference](../cli.md) (Stores, Doctor, Working context, Personal
+worksets) and the [agent contract](../agent-contract.md).

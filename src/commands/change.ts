@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+﻿import { promises as fs } from 'fs';
 import path from 'path';
 import { JsonConverter } from '../core/converters/json-converter.js';
 import { Validator } from '../core/validation/validator.js';
@@ -123,7 +123,7 @@ export class ChangeCommand {
             } catch (error) {
               // Tasks file may not exist, which is okay
               if (process.env.DEBUG) {
-                console.error(`\u8bfb\u53d6 ${tasksPath} \u4efb\u52a1\u6587\u4ef6\u5931\u8d25:`, error);
+                console.error(`读取任务文件失败 ${tasksPath}：`, error);
               }
             }
             
@@ -169,16 +169,16 @@ export class ChangeCommand {
           try {
             const tasksContent = await fs.readFile(tasksPath, 'utf-8');
             const { total, completed } = this.countTasks(tasksContent);
-            taskStatusText = ` [任务 ${completed}/${total}]`;
+            taskStatusText = ` [tasks ${completed}/${total}]`;
           } catch (error) {
             if (process.env.DEBUG) {
-              console.error(`\u8bfb\u53d6 ${tasksPath} \u4efb\u52a1\u6587\u4ef6\u5931\u8d25:`, error);
+              console.error(`读取 tasks 文件失败：${tasksPath}:`, error);
             }
           }
           const changeDir = path.join(changesPath, changeName);
           const parser = new ChangeParser(await fs.readFile(proposalPath, 'utf-8'), changeDir);
           const change = await parser.parseChangeWithDeltas(changeName);
-          const deltaCountText = ` [增量 ${change.deltas.length}]`;
+          const deltaCountText = ` [deltas ${change.deltas.length}]`;
           console.log(`${changeName}: ${title}${deltaCountText}${taskStatusText}`);
         } catch {
           console.log(`${changeName}: (无法读取)`);
@@ -211,18 +211,18 @@ export class ChangeCommand {
         return;
       }
     }
-    
+
     const changeDir = path.join(changesPath, changeName);
-    
+
     try {
       await fs.access(changeDir);
     } catch {
       throw new Error(`在 ${changeDir} 未找到变更 "${changeName}"`);
     }
-    
+
     const validator = new Validator(options?.strict || false);
     const report = await validator.validateChangeDeltaSpecs(changeDir);
-    
+
     if (options?.json) {
       console.log(JSON.stringify(report, null, 2));
     } else {
@@ -265,7 +265,7 @@ export class ChangeCommand {
   }
 
   private extractTitle(content: string, changeName: string): string {
-    const match = content.match(/^#\s+(?:Change:|变更：|变更:)\s*(.+)$/im);
+    const match = content.match(/^#\s+(?:Change:\s+)?(.+)$/im);
     return match ? match[1].trim() : changeName;
   }
 
@@ -288,8 +288,8 @@ export class ChangeCommand {
 
   private printNextSteps(): void {
     const bullets: string[] = [];
-    bullets.push('- 确保变更在specs/中有增量：使用标题## 新增|修改|移除|重命名需求');
-    bullets.push('- 每个需求必须至少包含一个#### 场景:块');
+    bullets.push('- 确保变更在 specs/ 中有 deltas：使用 ## ADDED/MODIFIED/REMOVED/RENAMED Requirements 标题');
+    bullets.push('- 每个需求必须包含至少一个 #### Scenario: 块');
     bullets.push('- 调试解析的增量：openspec-cn change show <id> --json --deltas-only');
     console.error('后续步骤：');
     bullets.forEach(b => console.error(`  ${b}`));

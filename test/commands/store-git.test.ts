@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Command } from 'commander';
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
@@ -131,9 +131,9 @@ describe('store git lifecycle', () => {
       message: '创建此 store？',
       default: true,
     });
-    expect(consoleLogSpy).toHaveBeenCalledWith('  Git：已初始化');
+    expect(consoleLogSpy).toHaveBeenCalledWith('  Git: 已初始化');
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      '通过提交并推送此 store 来分享，就像普通 Git 仓库一样。'
+      '像普通 Git 仓库一样提交并推送此 store 来分享。'
     );
     expect(fs.existsSync(path.join(storeRoot, '.git'))).toBe(true);
     const committed = execFileSync('git', ['log', '--format=%s'], { cwd: storeRoot })
@@ -291,9 +291,9 @@ describe('store git lifecycle', () => {
     expect(register.exitCode).toBe(1);
     const registerStatus = parseJson(register).status[0];
     expect(registerStatus.code).toBe('store_register_root_unhealthy');
-    expect(registerStatus.message).toContain('没有提交');
+    expect(registerStatus.message).toContain('no commits');
     expect(registerStatus.fix).toBe(
-      '如果这是 store 克隆：提交并推送源 store，拉入此克隆后重新运行 register。'
+      '如果这是 store 克隆：提交并推送 origin store，拉取到此克隆中，然后重新运行 register。'
     );
   });
 });

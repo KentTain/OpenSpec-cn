@@ -1,4 +1,4 @@
-import { MarkdownParser, Section } from './markdown-parser.js';
+﻿import { MarkdownParser, Section } from './markdown-parser.js';
 import { Change, Delta, DeltaOperation, Requirement } from '../schemas/index.js';
 import path from 'path';
 import { promises as fs } from 'fs';
@@ -19,15 +19,15 @@ export class ChangeParser extends MarkdownParser {
 
   async parseChangeWithDeltas(name: string): Promise<Change> {
     const sections = this.parseSections();
-    const why = this.findSection(sections, 'Why')?.content || this.findSection(sections, '为什么')?.content || '';
-    const whatChanges = this.findSection(sections, 'What Changes')?.content || this.findSection(sections, '变更内容')?.content || '';
+    const why = this.findSection(sections, 'Why')?.content || '';
+    const whatChanges = this.findSection(sections, 'What Changes')?.content || '';
     
     if (!why) {
-      throw new Error('变更必须有为什么部分');
+      throw new Error('Change 必须包含 Why 章节');
     }
-    
+
     if (!whatChanges) {
-      throw new Error('变更必须有变更内容部分');
+      throw new Error('Change 必须包含 What Changes 章节');
     }
 
     // Parse deltas from the What Changes section (simple format)
@@ -85,15 +85,15 @@ export class ChangeParser extends MarkdownParser {
     const deltas: Delta[] = [];
     const sections = this.parseSectionsFromContent(content);
     
-    // 解析新增需求
-    const addedSection = this.findSection(sections, '新增需求') || this.findSection(sections, 'ADDED Requirements');
+    // Parse ADDED requirements
+    const addedSection = this.findSection(sections, 'ADDED Requirements');
     if (addedSection) {
       const requirements = this.parseRequirements(addedSection);
       requirements.forEach(req => {
         deltas.push({
           spec: specName,
           operation: 'ADDED' as DeltaOperation,
-          description: `添加需求: ${req.text}`,
+          description: `Add requirement: ${req.text}`,
           // Provide both single and plural forms for compatibility
           requirement: req,
           requirements: [req],
@@ -101,38 +101,38 @@ export class ChangeParser extends MarkdownParser {
       });
     }
     
-    // 解析修改需求
-    const modifiedSection = this.findSection(sections, '修改需求') || this.findSection(sections, 'MODIFIED Requirements');
+    // Parse MODIFIED requirements
+    const modifiedSection = this.findSection(sections, 'MODIFIED Requirements');
     if (modifiedSection) {
       const requirements = this.parseRequirements(modifiedSection);
       requirements.forEach(req => {
         deltas.push({
           spec: specName,
           operation: 'MODIFIED' as DeltaOperation,
-          description: `修改需求: ${req.text}`,
+          description: `Modify requirement: ${req.text}`,
           requirement: req,
           requirements: [req],
         });
       });
     }
     
-    // 解析移除需求
-    const removedSection = this.findSection(sections, '移除需求') || this.findSection(sections, 'REMOVED Requirements');
+    // Parse REMOVED requirements
+    const removedSection = this.findSection(sections, 'REMOVED Requirements');
     if (removedSection) {
       const requirements = this.parseRequirements(removedSection);
       requirements.forEach(req => {
         deltas.push({
           spec: specName,
           operation: 'REMOVED' as DeltaOperation,
-          description: `移除需求: ${req.text}`,
+          description: `Remove requirement: ${req.text}`,
           requirement: req,
           requirements: [req],
         });
       });
     }
     
-    // 解析重命名需求
-    const renamedSection = this.findSection(sections, '重命名需求') || this.findSection(sections, 'RENAMED Requirements');
+    // Parse RENAMED requirements
+    const renamedSection = this.findSection(sections, 'RENAMED Requirements');
     if (renamedSection) {
       const renames = this.parseRenames(renamedSection.content);
       renames.forEach(rename => {
@@ -153,11 +153,10 @@ export class ChangeParser extends MarkdownParser {
     const lines = ChangeParser.normalizeContent(content).split('\n');
     
     let currentRename: { from?: string; to?: string } = {};
-    const REQUIREMENT_KEYWORD_PATTERN = '(?:Requirement|需求)';
     
     for (const line of lines) {
-      const fromMatch = line.match(new RegExp(`^\\s*-?\\s*FROM:\\s*\`?###\\s*${REQUIREMENT_KEYWORD_PATTERN}:\\s*(.+?)\`?\\s*$`));
-      const toMatch = line.match(new RegExp(`^\\s*-?\\s*TO:\\s*\`?###\\s*${REQUIREMENT_KEYWORD_PATTERN}:\\s*(.+?)\`?\\s*$`));
+      const fromMatch = line.match(/^\s*-?\s*FROM:\s*`?###\s*Requirement:\s*(.+?)`?\s*$/);
+      const toMatch = line.match(/^\s*-?\s*TO:\s*`?###\s*Requirement:\s*(.+?)`?\s*$/);
       
       if (fromMatch) {
         currentRename.from = fromMatch[1].trim();

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { MarkdownParser } from '../../../src/core/parsers/markdown-parser.js';
 
 describe('MarkdownParser', () => {
@@ -90,7 +90,7 @@ When action
 Then result`;
 
       const parser = new MarkdownParser(content);
-      expect(() => parser.parseSpec('test')).toThrow('规范必须有目的部分');
+      expect(() => parser.parseSpec('test')).toThrow('必须包含 Purpose 章节');
     });
 
     it('should throw error for missing requirements', () => {
@@ -100,7 +100,7 @@ Then result`;
 This is a test spec`;
 
       const parser = new MarkdownParser(content);
-      expect(() => parser.parseSpec('test')).toThrow('规范必须有需求部分');
+      expect(() => parser.parseSpec('test')).toThrow('必须包含 Requirements 章节');
     });
 
     it('should ignore headings that appear inside fenced code blocks', () => {
@@ -206,7 +206,7 @@ We need to implement user authentication to secure the application and protect u
 - **test:** Add test`;
 
       const parser = new MarkdownParser(content);
-      expect(() => parser.parseChange('test')).toThrow('变更必须有为什么部分');
+      expect(() => parser.parseChange('test')).toThrow('必须包含 Why 章节');
     });
 
     it('should throw error for missing what changes section', () => {
@@ -216,7 +216,7 @@ We need to implement user authentication to secure the application and protect u
 Because we need it`;
 
       const parser = new MarkdownParser(content);
-      expect(() => parser.parseChange('test')).toThrow('变更必须有变更内容部分');
+      expect(() => parser.parseChange('test')).toThrow('必须包含 What Changes 章节');
     });
 
     it('should handle changes without deltas', () => {

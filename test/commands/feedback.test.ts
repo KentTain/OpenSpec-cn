@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FeedbackCommand } from '../../src/commands/feedback.js';
 import { execSync, execFileSync } from 'child_process';
 
@@ -46,7 +46,7 @@ describe('FeedbackCommand', () => {
         return '';
       });
 
-      mockExecFileSync.mockReturnValue('https://github.com/Fission-AI/OpenSpec/issues/123\n');
+      mockExecFileSync.mockReturnValue('https://github.com/studyzy/OpenSpec-cn/issues/123\n');
 
       await feedbackCommand.execute('Test');
 
@@ -72,7 +72,7 @@ describe('FeedbackCommand', () => {
         return '';
       });
 
-      mockExecFileSync.mockReturnValue('https://github.com/Fission-AI/OpenSpec/issues/123\n');
+      mockExecFileSync.mockReturnValue('https://github.com/studyzy/OpenSpec-cn/issues/123\n');
 
       await feedbackCommand.execute('Test');
 
@@ -100,7 +100,7 @@ describe('FeedbackCommand', () => {
 
       // Should display warning
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⚠️  未找到 GitHub CLI。需要手动提交。')
+        expect.stringContaining('未找到 GitHub CLI')
       );
 
       // Should show formatted feedback
@@ -134,7 +134,7 @@ describe('FeedbackCommand', () => {
 
       // Should display warning
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⚠️  GitHub 未认证。需要手动提交。')
+        expect.stringContaining('GitHub 未认证')
       );
 
       // Should show auth instructions
@@ -191,7 +191,7 @@ describe('FeedbackCommand', () => {
 
       // Should display success message
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('反馈提交成功！')
+        expect.stringContaining('反馈提交成功')
       );
 
       // Should display issue URL
@@ -228,7 +228,7 @@ describe('FeedbackCommand', () => {
       );
     });
 
-    it('should format title with "Feedback:" prefix', async () => {
+    it('should format title with "反馈:" prefix', async () => {
       mockExecSync.mockImplementation((cmd: string, options?: any) => {
         if (cmd === 'which gh' || cmd === 'where gh') {
           return Buffer.from('/usr/local/bin/gh');
@@ -243,7 +243,7 @@ describe('FeedbackCommand', () => {
 
       await feedbackCommand.execute('Test message');
 
-      // Verify title has "Feedback:" prefix
+      // Verify title has "反馈:" prefix
       expect(mockExecFileSync).toHaveBeenCalledWith(
         'gh',
         expect.arrayContaining([

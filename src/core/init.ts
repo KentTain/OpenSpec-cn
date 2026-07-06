@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Init Command
  *
  * Sets up OpenSpec with Agent Skills and /opsx:* slash commands.
@@ -125,15 +125,15 @@ export class InitCommand {
       if (!hasPlanningShape) {
         if (pointer.malformed) {
           throw new Error(
-            `The store declaration in ${pointer.filePath} is invalid (` +
+            `${pointer.filePath} 中的 store 声明无效（` +
               storePointerProblem(pointer.malformed) +
-              `). Fix or remove the store: line before running openspec-cn init.`
+              `）。请先修复或移除 store: 行，再运行 openspec-cn init。`
           );
         }
         if (pointer.value !== undefined) {
           throw new Error(
-            `This repo's planning is externalized to store '${pointer.value}' (${pointer.filePath}). ` +
-              `Remove the store: line first to convert this repo to a local OpenSpec root.`
+            `此仓库的规划已外部化到 store '${pointer.value}' (${pointer.filePath})。` +
+              `要先转换为本地 OpenSpec 根目录，请移除 store: 行。`
           );
         }
       }
@@ -195,7 +195,7 @@ export class InitCommand {
 
     // Check write permissions
     if (!(await FileSystemUtils.ensureWritePermissions(projectPath))) {
-      throw new Error(`没有权限写入 ${projectPath}`);
+      throw new Error(`权限不足，无法写入 ${projectPath}`);
     }
     return extendMode;
   }
@@ -215,7 +215,7 @@ export class InitCommand {
       return this.profileOverride;
     }
 
-    throw new Error(`无效的档案 "${this.profileOverride}"。可用档案： core、custom`);
+    throw new Error(`无效的 profile "${this.profileOverride}"。可用的 profiles：core, custom`);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -248,13 +248,13 @@ export class InitCommand {
     // Interactive mode: prompt for confirmation
     const { confirm } = await import('@inquirer/prompts');
     const shouldCleanup = await confirm({
-      message: '升级并清理旧文件？',
+      message: '是否升级并清理旧版文件？',
       default: true,
     });
 
     if (!shouldCleanup) {
       console.log(chalk.dim('初始化已取消。'));
-      console.log(chalk.dim('使用 --force 跳过此提示，或手动删除旧文件。'));
+      console.log(chalk.dim('使用 --force 跳过此提示，或手动移除旧版文件。'));
       process.exit(0);
     }
 
@@ -262,9 +262,11 @@ export class InitCommand {
   }
 
   private async performLegacyCleanup(projectPath: string, detection: LegacyDetectionResult): Promise<void> {
-    const spinner = ora('正在清理旧文件...').start();
+    const spinner = ora('正在清理旧版文件...').start();
+
     const result = await cleanupLegacyArtifacts(projectPath, detection);
-    spinner.succeed('旧文件已清理');
+
+    spinner.succeed('旧版文件已清理');
 
     const summary = formatCleanupSummary(result);
     if (summary) {
@@ -307,13 +309,13 @@ export class InitCommand {
         return [...detectedToolIds];
       }
       throw new Error(
-        `未检测到工具且未提供 --tools 参数。有效工具：\n  ${validTools.join('\n  ')}\n\n请使用 --tools all、--tools none 或 --tools claude,cursor,...`
+        `未检测到工具且未提供 --tools 参数。可用工具：\n  ${validTools.join('\n  ')}\n\n使用 --tools all、--tools none 或 --tools claude,cursor,...`
       );
     }
 
     if (validTools.length === 0) {
       throw new Error(
-        `没有可用于技能生成的工具。`
+        `没有可用于生成 skills 的工具。`
       );
     }
 
@@ -350,7 +352,7 @@ export class InitCommand {
       .map((toolId) => AI_TOOLS.find((t) => t.value === toolId)?.name || toolId);
 
     if (configuredNames.length > 0) {
-      console.log(`OpenSpec 已配置：${configuredNames.join(', ')}（已预选）`);
+      console.log(`已配置 OpenSpec：${configuredNames.join(', ')}（已预选）`);
     }
 
     const detectedOnlyNames = detectedTools
@@ -359,16 +361,16 @@ export class InitCommand {
 
     if (detectedOnlyNames.length > 0) {
       const detectionLabel = shouldPreselectDetected
-        ? '首次设置已预选'
-        : '未预选';
-      console.log(`检测到工具目录：${detectedOnlyNames.join(', ')}（${detectionLabel}）`);
+        ? 'pre-selected for first-time setup'
+        : 'not pre-selected';
+      console.log(`检测到的工具目录：${detectedOnlyNames.join(', ')}（${detectionLabel}）`);
     }
 
     const selectedTools = await searchableMultiSelect({
       message: `选择要设置的工具（共 ${validTools.length} 个可用）`,
       pageSize: 15,
       choices: sortedChoices,
-      validate: (selected: string[]) => selected.length > 0 || '至少选择一个工具',
+      validate: (selected: string[]) => selected.length > 0 || '请至少选择一个工具',
     });
 
     if (selectedTools.length === 0) {
@@ -386,7 +388,7 @@ export class InitCommand {
     const raw = this.toolsArg.trim();
     if (raw.length === 0) {
       throw new Error(
-        '--tools 选项需要一个值。请使用 "all"、"none" 或以逗号分隔的工具 ID 列表。'
+        'The --tools option requires a value. Use "all", "none", or a comma-separated list of tool IDs.'
       );
     }
 
@@ -410,14 +412,14 @@ export class InitCommand {
 
     if (tokens.length === 0) {
       throw new Error(
-        '当未使用 "all" 或 "none" 时，--tools 选项至少需要一个工具 ID。'
+        'The --tools option requires at least one tool ID when not using "all" or "none".'
       );
     }
 
     const normalizedTokens = tokens.map((token) => token.toLowerCase());
 
     if (normalizedTokens.some((token) => token === 'all' || token === 'none')) {
-      throw new Error('不能同时使用保留值 "all" 或 "none" 与具体工具 ID。');
+      throw new Error('不能将保留值 "all" 或 "none" 与具体工具 ID 组合使用。');
     }
 
     const invalidTokens = tokens.filter(
@@ -426,7 +428,7 @@ export class InitCommand {
 
     if (invalidTokens.length > 0) {
       throw new Error(
-        `无效工具: ${invalidTokens.join(', ')}。可用值: ${availableList}`
+        `无效工具：${invalidTokens.join(', ')}。可用值：${availableList}`
       );
     }
 
@@ -452,14 +454,14 @@ export class InitCommand {
       if (!tool) {
         const validToolIds = getToolsWithSkillsDir();
         throw new Error(
-          `未知工具 '${toolId}'。有效工具：\n  ${validToolIds.join('\n  ')}`
+          `未知工具 '${toolId}'。可用工具：\n  ${validToolIds.join('\n  ')}`
         );
       }
 
       if (!tool.skillsDir) {
         const validToolsWithSkills = getToolsWithSkillsDir();
         throw new Error(
-          `工具 '${toolId}' 不支持技能生成。支持技能生成的工具：\n  ${validToolsWithSkills.join('\n  ')}`
+          `Tool '${toolId}' does not support skill generation.\nTools with skill generation support:\n  ${validToolsWithSkills.join('\n  ')}`
         );
       }
 
@@ -550,7 +552,7 @@ export class InitCommand {
 
     // Process each tool
     for (const tool of tools) {
-      const spinner = ora(`正在配置 ${tool.name}...`).start();
+      const spinner = ora(`正在设置 ${tool.name}...`).start();
 
       try {
         // Generate skill files if delivery includes skills
@@ -595,7 +597,7 @@ export class InitCommand {
           removedCommandCount += await this.removeCommandFiles(projectPath, tool.value);
         }
 
-        spinner.succeed(`${tool.name} 配置完成`);
+        spinner.succeed(`${tool.name} 设置完成`);
 
         if (tool.wasConfigured) {
           refreshedTools.push(tool);
@@ -603,7 +605,7 @@ export class InitCommand {
           createdTools.push(tool);
         }
       } catch (error) {
-        spinner.fail(`${tool.name} 配置失败`);
+        spinner.fail(`${tool.name} 设置失败`);
         failedTools.push({ name: tool.name, error: error as Error });
       }
     }
@@ -682,11 +684,11 @@ export class InitCommand {
       const skillCount = delivery !== 'commands' ? getSkillTemplates(workflows).length : 0;
       const commandCount = delivery !== 'skills' ? getCommandContents(workflows).length : 0;
       if (skillCount > 0 && commandCount > 0) {
-        console.log(`${skillCount} 个技能和 ${commandCount} 个命令在 ${toolDirs}/ 中`);
+        console.log(`${skillCount} skills and ${commandCount} commands in ${toolDirs}/`);
       } else if (skillCount > 0) {
-        console.log(`${skillCount} 个技能在 ${toolDirs}/ 中`);
+        console.log(`${skillCount} skills in ${toolDirs}/`);
       } else if (commandCount > 0) {
-        console.log(`${commandCount} 个命令在 ${toolDirs}/ 中`);
+        console.log(`${commandCount} commands in ${toolDirs}/`);
       }
     }
 
@@ -697,26 +699,26 @@ export class InitCommand {
 
     // Show skipped commands
     if (results.commandsSkipped.length > 0) {
-      console.log(chalk.dim(`已跳过命令：${results.commandsSkipped.join(', ')} (无适配器)`));
+      console.log(chalk.dim(`已跳过命令：${results.commandsSkipped.join(', ')}（无适配器）`));
     }
     if (results.removedCommandCount > 0) {
-      console.log(chalk.dim(`已删除：${results.removedCommandCount} 个命令文件（交付方式: skills）`));
+      console.log(chalk.dim(`已移除：${results.removedCommandCount} 个命令文件（交付方式：skills）`));
     }
     if (results.removedSkillCount > 0) {
-      console.log(chalk.dim(`已删除：${results.removedSkillCount} 个技能目录（交付方式: commands）`));
+      console.log(chalk.dim(`已移除：${results.removedSkillCount} 个 skill 目录（交付方式：commands）`));
     }
 
     // Config status
     if (configStatus === 'created') {
-      console.log(`配置：openspec/config.yaml (schema: ${DEFAULT_SCHEMA})`);
+      console.log(`配置：openspec/config.yaml（schema：${DEFAULT_SCHEMA}）`);
     } else if (configStatus === 'exists') {
       // Show actual filename (config.yaml or config.yml)
       const configYaml = path.join(projectPath, OPENSPEC_DIR_NAME, 'config.yaml');
       const configYml = path.join(projectPath, OPENSPEC_DIR_NAME, 'config.yml');
       const configName = fs.existsSync(configYaml) ? 'config.yaml' : fs.existsSync(configYml) ? 'config.yml' : 'config.yaml';
-      console.log(`配置：openspec/${configName} (已存在)`);
+      console.log(`配置：openspec/${configName}（已存在）`);
     } else {
-      console.log(chalk.dim(`配置：已跳过 (非交互模式)`));
+      console.log(chalk.dim(`配置：已跳过（非交互模式）`));
     }
 
     // Getting started (task 7.6: show propose if in profile)
@@ -725,24 +727,24 @@ export class InitCommand {
     const activeWorkflows = [...getProfileWorkflows(activeProfile, globalCfg.workflows)];
     console.log();
     if (activeWorkflows.includes('propose')) {
-      console.log(chalk.bold('开始使用：'));
-      console.log('  开始您的第一个变更：/opsx:propose "您的想法"');
+      console.log(chalk.bold('入门指引：'));
+      console.log('  开始你的第一个变更：/opsx:propose "你的想法"');
     } else if (activeWorkflows.includes('new')) {
-      console.log(chalk.bold('开始使用：'));
-      console.log('  开始您的第一个变更：/opsx:new "您的想法"');
+      console.log(chalk.bold('入门指引：'));
+      console.log('  开始你的第一个变更：/opsx:new "你的想法"');
     } else {
-      console.log("完成。运行 'openspec-cn config profile' 配置您的工作流程。");
+      console.log("完成。运行 'openspec-cn config profile' 配置你的工作流。");
     }
 
     // Links
     console.log();
-    console.log(`了解更多：${chalk.cyan('https://github.com/studyzy/OpenSpec-cn')}`);
-    console.log(`反馈：   ${chalk.cyan('https://github.com/studyzy/OpenSpec-cn/issues')}`);
+    console.log(`了解更多：${chalk.cyan('https://github.com/Fission-AI/OpenSpec')}`);
+    console.log(`反馈：      ${chalk.cyan('https://github.com/Fission-AI/OpenSpec/issues')}`);
 
     // Restart instruction if any tools were configured
     if (results.createdTools.length > 0 || results.refreshedTools.length > 0) {
       console.log();
-      console.log(chalk.white('重启您的 IDE 以使斜杠命令生效。'));
+      console.log(chalk.white('重启 IDE 以使斜杠命令生效。'));
     }
 
     console.log();

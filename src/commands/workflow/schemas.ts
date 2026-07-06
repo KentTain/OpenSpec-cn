@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Schemas Command
  *
  * Lists available workflow schemas with descriptions.
@@ -28,19 +28,19 @@ export async function schemasCommand(options: SchemasOptions): Promise<void> {
     return;
   }
 
-  console.log('可用的 Schema:');
+  console.log('可用 Schema：');
   console.log();
 
   for (const schema of schemas) {
     let sourceLabel = '';
     if (schema.source === 'project') {
-      sourceLabel = chalk.cyan(' (项目)');
+      sourceLabel = chalk.cyan('（项目）');
     } else if (schema.source === 'user') {
-      sourceLabel = chalk.dim(' (用户覆盖)');
+      sourceLabel = chalk.dim('（用户覆盖）');
     }
     console.log(`  ${chalk.bold(schema.name)}${sourceLabel}`);
     console.log(`    ${schema.description}`);
-    console.log(`    产出物: ${schema.artifacts.join(' → ')}`);
+    console.log(`    产出物：${schema.artifacts.join(' → ')}`);
     console.log();
   }
 }

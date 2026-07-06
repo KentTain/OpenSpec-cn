@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -129,7 +129,7 @@ describe('store root selection for normal commands', () => {
         env,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stderr).toContain(`正在使用 OpenSpec 根目录：team-context（${storeRoot}）`);
+      expect(result.stderr).toContain(`使用 OpenSpec 根目录: team-context (${storeRoot})`);
       expect(result.stdout).toContain("已创建变更 'add-billing'");
       expect(result.stdout).toContain(
         path.join(storeRoot, 'openspec', 'changes', 'add-billing')
@@ -300,7 +300,7 @@ describe('store root selection for normal commands', () => {
       });
       expect(result.exitCode).toBe(0);
       expect(result.stdout.startsWith('## Why')).toBe(true);
-      expect(result.stderr).toContain(`正在使用 OpenSpec 根目录：team-context（${storeRoot}）`);
+      expect(result.stderr).toContain(`使用 OpenSpec 根目录: team-context (${storeRoot})`);
     });
 
     it('keeps instructions stdout as the artifact payload', async () => {
@@ -312,7 +312,7 @@ describe('store root selection for normal commands', () => {
       );
       expect(result.exitCode).toBe(0);
       expect(result.stdout.startsWith('<artifact id="design"')).toBe(true);
-      expect(result.stderr).toContain('正在使用 OpenSpec 根目录：team-context');
+      expect(result.stderr).toContain('使用 OpenSpec 根目录: team-context');
     });
 
     it('writes the status banner to stderr in human mode', async () => {
@@ -323,9 +323,9 @@ describe('store root selection for normal commands', () => {
         { cwd: appRepo, env }
       );
       expect(result.exitCode).toBe(0);
-      expect(result.stderr).toContain(`正在使用 OpenSpec 根目录：team-context（${storeRoot}）`);
+      expect(result.stderr).toContain(`使用 OpenSpec 根目录: team-context (${storeRoot})`);
       expect(result.stdout).toContain('变更：store-change');
-      expect(result.stdout).not.toContain('正在使用 OpenSpec 根目录');
+      expect(result.stdout).not.toContain('使用 OpenSpec 根目录');
     });
   });
 
@@ -352,7 +352,7 @@ describe('store root selection for normal commands', () => {
 
     it('reports unknown stores with the same message across commands', async () => {
       const expected =
-        "Unknown store 'team-contxt'. Registered stores: team-context.";
+        "未知的 store 'team-contxt'。已注册的 store: team-context。";
 
       const status = await runCLI(['status', '--store', 'team-contxt'], { cwd: appRepo, env });
       const list = await runCLI(['list', '--store', 'team-contxt'], { cwd: appRepo, env });
@@ -622,7 +622,7 @@ describe('store root selection for normal commands', () => {
       );
       expect(result.exitCode).toBe(1);
       const output = result.stdout + result.stderr;
-      expect(output).toContain('--initiative 已不再支持');
+      expect(output).toContain('--initiative is no longer supported');
       expect(
         fs.existsSync(path.join(localRepo, 'openspec', 'changes', 'linked-change'))
       ).toBe(false);
