@@ -1,4 +1,4 @@
-import { asStatus } from '../commands/shared-output.js';
+﻿import { asStatus } from '../commands/shared-output.js';
 import { Command, Option } from 'commander';
 import { createRequire } from 'module';
 import ora from 'ora';
@@ -70,11 +70,11 @@ function failWithError(
     process.exitCode = 1;
     return;
   }
-  ora().fail(`错误：${(error as Error).message}`);
+  ora().fail(`Error: ${(error as Error).message}`);
   // Resolution and store errors carry a pasteable fix - never drop it.
   const fix = (error as { diagnostic?: { fix?: string } }).diagnostic?.fix;
   if (fix) {
-    console.error(`修复建议：${fix}`);
+    console.error(`Fix: ${fix}`);
   }
   process.exitCode = process.exitCode ?? 1;
 }
@@ -92,11 +92,12 @@ export function getCommandPath(command: Command): string {
   let current: Command | null = command;
 
   while (current) {
-    const name = current.name();
-    // Skip the root 'openspec' command
-    if (name && name !== 'openspec') {
-      names.unshift(name);
+    // Stop at the root program (it has no parent); never include its name
+    // in the telemetry/path, regardless of what the program is called.
+    if (current.parent === null) {
+      break;
     }
+    names.unshift(current.name());
     current = current.parent;
   }
 
@@ -105,7 +106,7 @@ export function getCommandPath(command: Command): string {
 
 program
   .name('openspec-cn')
-  .description('面向规范驱动开发的 AI 原生框架')
+  .description('基于规范驱动开发的AI原生系统')
   .version(version, '-V, --version', '输出版本号')
   .helpOption('-h, --help', '显示命令帮助')
   .addHelpCommand('help [command]', '显示命令帮助');
@@ -216,9 +217,9 @@ program
 
 program
   .command('list')
-  .description('列出项目（默认显示变更）。使用 --specs 列出规范。')
-  .option('--specs', '列出规范而非变更')
-  .option('--changes', '明确列出变更（默认）')
+  .description('列出项目（默认显示更改）。使用 --specs 列出规范。')
+  .option('--specs', '列出规范而非更改')
+  .option('--changes', '明确列出更改（默认）')
   .option('--sort <order>', '排序方式："recent"（默认）或 "name"', 'recent')
   .option('--json', '以 JSON 格式输出（供程序使用）')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
@@ -252,7 +253,7 @@ program
 
 program
   .command('view')
-  .description('显示规范和变更的交互式仪表板')
+  .description('显示规范和更改的交互式仪表板')
   .action(async () => {
     try {
       const viewCommand = new ViewCommand();
@@ -270,38 +271,38 @@ const changeCmd = program
 
 // Deprecation notice for noun-based commands
 changeCmd.hook('preAction', () => {
-  console.error('警告："openspec-cn change ..." 命令已弃用。请改用动词优先的命令（例如 "openspec-cn list", "openspec-cn validate --changes"）。');
+  console.error('警告："openspec-cn change ..." 命令已弃用。请优先使用动词前置命令（例如 "openspec-cn list"、"openspec-cn validate --changes"）。');
 });
 
 changeCmd
   .command('show [change-name]')
-  .description('以JSON或markdown格式显示变更提案')
-  .option('--json', '以JSON格式输出')
-  .option('--deltas-only', '仅显示增量 (仅JSON)')
-  .option('--requirements-only', 'deltas-only 的别名 (已弃用)')
+  .description('以 JSON 或 Markdown 格式显示变更提案')
+  .option('--json', '以 JSON 格式输出')
+  .option('--deltas-only', '仅显示 deltas（仅 JSON）')
+  .option('--requirements-only', '--deltas-only 的别名（已弃用）')
   .option('--no-interactive', '禁用交互式提示')
   .action(async (changeName?: string, options?: { json?: boolean; requirementsOnly?: boolean; deltasOnly?: boolean; noInteractive?: boolean }) => {
     try {
       const changeCommand = new ChangeCommand();
       await changeCommand.show(changeName, options);
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
 
 changeCmd
   .command('list')
-  .description('列出所有活动变更（已弃用：请使用 "openspec-cn list"）')
-  .option('--json', '以JSON格式输出')
-  .option('--long', '显示ID、标题和计数')
+  .description('列出所有活跃变更（已弃用：请使用 "openspec-cn list"）')
+  .option('--json', '以 JSON 格式输出')
+  .option('--long', '显示 id 和 title 及计数')
   .action(async (options?: { json?: boolean; long?: boolean }) => {
     try {
       console.error('警告："openspec-cn change list" 已弃用。请使用 "openspec-cn list"。');
       const changeCommand = new ChangeCommand();
       await changeCommand.list(options);
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
@@ -310,7 +311,7 @@ changeCmd
   .command('validate [change-name]')
   .description('验证变更提案')
   .option('--strict', '启用严格验证模式')
-  .option('--json', '以JSON格式输出验证报告')
+  .option('--json', '以 JSON 格式输出验证报告')
   .option('--no-interactive', '禁用交互式提示')
   .action(async (changeName?: string, options?: { strict?: boolean; json?: boolean; noInteractive?: boolean }) => {
     try {
@@ -320,7 +321,7 @@ changeCmd
         process.exit(process.exitCode);
       }
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
@@ -329,8 +330,8 @@ program
   .command('archive [change-name]')
   .description('归档已完成的变更并更新主规范')
   .option('-y, --yes', '跳过确认提示')
-  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或仅文档变更）')
-  .option('--no-validate', '跳过验证（不推荐，需要确认）')
+  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或纯文档变更）')
+  .option('--no-validate', '跳过验证（不推荐，需确认）')
   .option('--json', '以 JSON 格式输出（非交互式）')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
@@ -355,9 +356,9 @@ registerWorksetCommand(program);
 // Top-level validate command
 program
   .command('validate [item-name]')
-  .description('验证变更和规范')
-  .option('--all', '验证所有变更和规范')
-  .option('--changes', '验证所有变更')
+  .description('验证更改和规范')
+  .option('--all', '验证所有更改和规范')
+  .option('--changes', '验证所有更改')
   .option('--specs', '验证所有规范')
   .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
   .option('--strict', '启用严格验证模式')
@@ -379,17 +380,17 @@ program
 // Top-level show command
 program
   .command('show [item-name]')
-  .description('显示变更或规范')
+  .description('显示更改或规范')
   .option('--json', '以JSON格式输出')
   .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
   .option('--no-interactive', '禁用交互式提示')
   // change-only flags
-  .option('--deltas-only', '仅显示增量 (仅JSON, 变更)')
-  .option('--requirements-only', 'deltas-only 的别名 (已弃用, 变更)')
+  .option('--deltas-only', '仅显示 deltas（仅 JSON，change）')
+  .option('--requirements-only', '--deltas-only 的别名（已弃用，change）')
   // spec-only flags
-  .option('--requirements', '仅JSON: 仅显示需求 (排除场景)')
-  .option('--no-scenarios', '仅JSON: 排除场景内容')
-  .option('-r, --requirement <id>', '仅JSON: 按ID显示特定需求 (从1开始)')
+  .option('--requirements', '仅 JSON：仅显示需求（排除场景）')
+  .option('--no-scenarios', '仅 JSON：排除场景内容')
+  .option('-r, --requirement <id>', '仅 JSON：按 ID 显示特定需求（从 1 开始）')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   // Explicit registration required: allowUnknownOption would otherwise
   // silently swallow --store-path instead of rejecting it deliberately.
@@ -428,7 +429,7 @@ const completionCmd = program
 
 completionCmd
   .command('generate [shell]')
-  .description('为指定的 Shell 生成补全脚本（输出到 stdout）')
+  .description('为指定 Shell 生成补全脚本（输出到 stdout）')
   .action(async (shell?: string) => {
     try {
       const completionCommand = new CompletionCommand();
@@ -441,7 +442,7 @@ completionCmd
 
 completionCmd
   .command('install [shell]')
-  .description('安装指定 Shell 的补全脚本')
+  .description('为指定 Shell 安装补全脚本')
   .option('--verbose', '显示详细安装输出')
   .action(async (shell?: string, options?: { verbose?: boolean }) => {
     try {
@@ -562,15 +563,15 @@ newCmd
   .command('change <name>')
   .description('创建新的变更目录')
   .option('--description <text>', '添加到 README.md 的描述')
-  .option('--goal <text>', '变更的可选目标元数据')
+  .option('--goal <text>', '随变更存储的可选目标元数据')
   .option('--schema <name>', `要使用的工作流 Schema（默认：${DEFAULT_SCHEMA}）`)
   .option('--json', '以 JSON 格式输出')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   // Removed options kept registered (hidden) so users get a deliberate
   // explanation instead of a generic unknown-option error.
-  .addOption(new Option('--initiative <id>', '已不再支持').hideHelp())
-  .addOption(new Option('--areas <names>', '已不再支持').hideHelp())
+  .addOption(new Option('--initiative <id>', '不再支持').hideHelp())
+  .addOption(new Option('--areas <names>', '不再支持').hideHelp())
   .action(async (name: string, options: NewChangeOptions) => {
     try {
       await newChangeCommand(name, options);

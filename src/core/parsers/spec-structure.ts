@@ -1,6 +1,6 @@
-const REQUIREMENTS_SECTION_HEADER = /^##\s+(?:Requirements|需求)\s*$/i;
+﻿const REQUIREMENTS_SECTION_HEADER = /^##\s+Requirements\s*$/i;
 const TOP_LEVEL_SECTION_HEADER = /^##\s+/;
-const DELTA_HEADER = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED|新增|修改|移除|重命名)\s+(?:Requirements|需求)\s*$/i;
+const DELTA_HEADER = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$/i;
 const REQUIREMENT_HEADER = /^###\s+Requirement:\s*(.+)\s*$/i;
 
 export interface MainSpecStructureIssue {
@@ -41,9 +41,9 @@ export function findMainSpecStructureIssues(content: string): MainSpecStructureI
         line: i + 1,
         header: trimmed,
         message:
-          `主规范包含增量标题 "${trimmed}"。` +
-          '增量标题仅在 openspec/changes/<name>/specs/<capability>/spec.md 中有效，' +
-          '并且会截断已解析的 ## Requirements 部分。',
+          `主 spec 包含 delta 标题 "${trimmed}"。` +
+          'Delta 标题仅在 openspec/changes/<name>/specs/<capability>/spec.md 内有效，' +
+          '并会截断已解析的 ## Requirements 章节。',
       });
       continue;
     }
@@ -64,8 +64,8 @@ export function findMainSpecStructureIssues(content: string): MainSpecStructureI
         line: i + 1,
         header: trimmed,
         message:
-          `需求标题 "${trimmed}" 出现在主 ## Requirements 部分之外。` +
-          '主规范仅解析该部分内的需求，因此该需求当前对验证、列出和归档操作不可见。',
+          `需求标题 "${trimmed}" 出现在主 ## Requirements 章节之外。` +
+          '主 spec 仅解析该章节内的需求，因此该需求目前对 validate、list 和 archive 不可见。',
       });
     }
   }

@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+﻿import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as yaml from 'yaml';
 import { ChangeMetadataSchema, type ChangeMetadata } from '../core/change-metadata/index.js';
@@ -36,7 +36,7 @@ export function validateSchemaName(
   const availableSchemas = listSchemas(projectRoot);
   if (!availableSchemas.includes(schemaName)) {
     throw new Error(
-      `未知 Schema '${schemaName}'。可用的 Schema：${availableSchemas.join(', ')}`
+      `未知 schema '${schemaName}'。可用：${availableSchemas.join(', ')}`
     );
   }
   return schemaName;
@@ -138,7 +138,7 @@ export function readChangeMetadata(
   const availableSchemas = listSchemas(projectRoot);
   if (!availableSchemas.includes(parseResult.data.schema)) {
     throw new ChangeMetadataError(
-      `未知 Schema '${parseResult.data.schema}'。可选值：${availableSchemas.join(', ')}`,
+      `未知 schema '${parseResult.data.schema}'。可用：${availableSchemas.join(', ')}`,
       metaPath
     );
   }

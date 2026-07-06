@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -49,7 +49,7 @@ describe('diffProfileState workflow formatting', () => {
     );
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.lines).toEqual(['工作流：已移除 sync']);
+    expect(diff.lines).toEqual(['workflows: 移除 sync']);
   });
 
   it('uses explicit labels when workflows are added and removed', async () => {
@@ -61,7 +61,7 @@ describe('diffProfileState workflow formatting', () => {
     );
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.lines).toEqual(['工作流：已添加 verify；已移除 sync']);
+    expect(diff.lines).toEqual(['workflows: 新增 verify；移除 sync']);
   });
 });
 
@@ -193,11 +193,11 @@ describe('config profile interactive flow', () => {
     expect(firstCall.choices).toEqual(expect.arrayContaining([
       expect.objectContaining({
         value: 'delivery',
-        description: '变更工作流的安装位置',
+        description: '更改工作流的安装位置',
       }),
       expect.objectContaining({
         value: 'workflows',
-        description: '变更可用的工作流操作',
+        description: '更改可用的工作流动作',
       }),
       expect.objectContaining({
         value: 'keep',
@@ -294,7 +294,7 @@ describe('config profile interactive flow', () => {
     const afterContent = fs.readFileSync(configPath, 'utf-8');
     expect(afterContent).toBe(beforeContent);
     expect(confirm).not.toHaveBeenCalled();
-    expect(consoleLogSpy).toHaveBeenCalledWith('没有配置变更。');
+    expect(consoleLogSpy).toHaveBeenCalledWith('配置未变更。');
   });
 
   it('keep action should warn when project files drift from global config', async () => {
@@ -307,7 +307,7 @@ describe('config profile interactive flow', () => {
 
     await runConfigCommand(['profile']);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('没有配置变更。');
+    expect(consoleLogSpy).toHaveBeenCalledWith('配置未变更。');
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('警告：全局配置未应用于此项目。'));
   });
 
@@ -336,7 +336,7 @@ describe('config profile interactive flow', () => {
 
     await runConfigCommand(['profile']);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('没有配置变更。');
+    expect(consoleLogSpy).toHaveBeenCalledWith('配置未变更。');
     expect(confirm).not.toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('警告：全局配置未应用于此项目。'));
   });
@@ -352,7 +352,7 @@ describe('config profile interactive flow', () => {
 
     await runConfigCommand(['profile']);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('没有配置变更。');
+    expect(consoleLogSpy).toHaveBeenCalledWith('配置未变更。');
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('警告：全局配置未应用于此项目。'));
   });
 
@@ -371,7 +371,7 @@ describe('config profile interactive flow', () => {
 
     expect(getGlobalConfig().delivery).toBe('skills');
     expect(confirm).toHaveBeenCalledWith({
-      message: '立即将变更应用到此项目？',
+      message: '立即将更改应用到此项目？',
       default: true,
     });
   });
@@ -390,9 +390,10 @@ describe('config profile interactive flow', () => {
     await runConfigCommand(['profile']);
 
     expect(getGlobalConfig().delivery).toBe('skills');
-    expect(execSync).toHaveBeenCalledWith('npx openspec-cn update', expect.objectContaining({
+    expect(execSync).toHaveBeenCalledWith('npx openspec-cn update', {
       stdio: 'inherit',
-    }));
+      cwd: fs.realpathSync(tempDir),
+    });
   });
 
   it('core preset should preserve delivery setting', async () => {

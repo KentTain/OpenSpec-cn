@@ -1,4 +1,4 @@
-import { Spec, Change, Requirement, Scenario, Delta, DeltaOperation } from '../schemas/index.js';
+﻿import { Spec, Change, Requirement, Scenario, Delta, DeltaOperation } from '../schemas/index.js';
 
 export interface Section {
   level: number;
@@ -73,16 +73,16 @@ export class MarkdownParser {
 
   parseSpec(name: string): Spec {
     const sections = this.parseSections();
-    const purpose = this.findSection(sections, 'Purpose')?.content || this.findSection(sections, '目的')?.content || '';
+    const purpose = this.findSection(sections, 'Purpose')?.content || '';
     
-    const requirementsSection = this.findSection(sections, 'Requirements') || this.findSection(sections, '需求');
+    const requirementsSection = this.findSection(sections, 'Requirements');
     
     if (!purpose) {
-      throw new Error('规范必须有目的部分');
+      throw new Error('Spec 必须包含 Purpose 章节');
     }
     
     if (!requirementsSection) {
-      throw new Error('规范必须有需求部分');
+      throw new Error('Spec 必须包含 Requirements 章节');
     }
 
     const requirements = this.parseRequirements(requirementsSection);
@@ -100,15 +100,15 @@ export class MarkdownParser {
 
   parseChange(name: string): Change {
     const sections = this.parseSections();
-    const why = this.findSection(sections, 'Why')?.content || this.findSection(sections, '为什么')?.content || '';
-    const whatChanges = this.findSection(sections, 'What Changes')?.content || this.findSection(sections, '变更内容')?.content || '';
+    const why = this.findSection(sections, 'Why')?.content || '';
+    const whatChanges = this.findSection(sections, 'What Changes')?.content || '';
     
     if (!why) {
-      throw new Error('变更必须有为什么部分');
+      throw new Error('Change 必须包含 Why 章节');
     }
     
     if (!whatChanges) {
-      throw new Error('变更必须有变更内容部分');
+      throw new Error('Change 必须包含 What Changes 章节');
     }
 
     const deltas = this.parseDeltas(whatChanges);
@@ -269,11 +269,11 @@ export class MarkdownParser {
         
         // Use word boundaries to avoid false matches (e.g., "address" matching "add")
         // Check RENAMED first since it's more specific than patterns containing "new"
-        if (/\brename(s|d|ing)?\b/.test(lowerDesc) || /\brenamed\s+(to|from)\b/.test(lowerDesc) || /重命名/.test(description)) {
+        if (/\brename(s|d|ing)?\b/.test(lowerDesc) || /\brenamed\s+(to|from)\b/.test(lowerDesc)) {
           operation = 'RENAMED';
-        } else if (/\badd(s|ed|ing)?\b/.test(lowerDesc) || /\bcreate(s|d|ing)?\b/.test(lowerDesc) || /\bnew\b/.test(lowerDesc) || /新增|添加|创建|新/.test(description)) {
+        } else if (/\badd(s|ed|ing)?\b/.test(lowerDesc) || /\bcreate(s|d|ing)?\b/.test(lowerDesc) || /\bnew\b/.test(lowerDesc)) {
           operation = 'ADDED';
-        } else if (/\bremove(s|d|ing)?\b/.test(lowerDesc) || /\bdelete(s|d|ing)?\b/.test(lowerDesc) || /移除|删除/.test(description)) {
+        } else if (/\bremove(s|d|ing)?\b/.test(lowerDesc) || /\bdelete(s|d|ing)?\b/.test(lowerDesc)) {
           operation = 'REMOVED';
         }
         

@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+﻿import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { getSchemaDir, resolveSchema } from './resolver.js';
 import { ArtifactGraph } from './graph.js';
@@ -187,7 +187,7 @@ export function loadTemplate(
 
   if (!fs.existsSync(templatePathOnDisk)) {
     throw new TemplateLoadError(
-      `Template not found: ${templatePathOnDisk}`,
+      `未找到模板：${templatePathOnDisk}`,
       templatePathOnDisk
     );
   }
@@ -199,7 +199,7 @@ export function loadTemplate(
   } catch (err) {
     const ioError = err instanceof Error ? err : new Error(String(err));
     throw new TemplateLoadError(
-      `Failed to read template: ${ioError.message}`,
+      `读取模板失败：${ioError.message}`,
       fullPath
     );
   }
@@ -278,7 +278,7 @@ export function generateInstructions(
 ): ArtifactInstructions {
   const artifact = context.graph.getArtifact(artifactId);
   if (!artifact) {
-    throw new Error(`在 Schema '${context.schemaName}' 中未找到产出物 '${artifactId}'`);
+    throw new Error(`在 schema '${context.schemaName}' 中未找到产出物 '${artifactId}'`);
   }
 
   const templateContent = loadTemplate(context.schemaName, artifact.template, context.projectRoot);

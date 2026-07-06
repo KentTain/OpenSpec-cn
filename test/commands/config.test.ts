@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -113,7 +113,7 @@ describe('config command integration', () => {
 
     expect(config.workflows).toEqual(['new', 'ff', 'apply', 'archive']);
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      '设置 workflows = new,ff,apply,archive'
+      '已设置 workflows = new,ff,apply,archive'
     );
   });
 });
@@ -124,7 +124,7 @@ describe('config command shell completion registry', () => {
 
     const configCmd = COMMAND_REGISTRY.find((cmd) => cmd.name === 'config');
     expect(configCmd).toBeDefined();
-    expect(configCmd?.description).toBe('查看并修改全局 OpenSpec 配置');
+    expect(configCmd?.description).toBe('查看和修改全局 OpenSpec 配置');
   });
 
   it('should have all config subcommands in registry', async () => {

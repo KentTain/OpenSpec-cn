@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Command } from 'commander';
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
@@ -135,7 +135,7 @@ describe('store command', () => {
     );
 
     expect(result.exitCode).toBe(0);
-    expect(result.cleanStderr).toBe('');
+    expect(result.stderr).toBe('');
     const payload = parseJson(result);
     expect(payload.store).toEqual({
       id: 'team-context',
@@ -566,7 +566,7 @@ describe('store command', () => {
     await runStoreCommand(['register', storeRoot]);
 
     expect(confirm).toHaveBeenCalledWith({
-      message: `将此 OpenSpec 根目录变为 store 'team-context'？`,
+      message: "Turn this OpenSpec root into store 'team-context'?",
       default: false,
     });
     expect(fs.existsSync(getStoreMetadataPath(storeRoot))).toBe(false);
@@ -1036,7 +1036,7 @@ describe('store command', () => {
     expect(conflict.exitCode).toBe(1);
     const conflictStatus = parseJson(conflict).status[0];
     expect(conflictStatus.code).toBe('store_id_conflict');
-    expect(conflictStatus.message).toContain('每个 store id 只支持一个检出');
+    expect(conflictStatus.message).toContain('每个 store id 仅支持一个检出');
     expect(conflictStatus.message).toContain(expectedExistingPath(original));
     expect(conflictStatus.fix).toContain('openspec-cn store unregister team-context');
     expect(conflictStatus.fix).not.toContain('different store id');
@@ -1051,8 +1051,8 @@ describe('store command', () => {
     expect(mismatchRegistered.exitCode).toBe(1);
     const mismatchRegisteredStatus = parseJson(mismatchRegistered).status[0];
     expect(mismatchRegisteredStatus.code).toBe('store_metadata_id_mismatch');
-    expect(mismatchRegisteredStatus.fix).toContain('每个 store id 只支持一个检出');
-    expect(mismatchRegisteredStatus.fix).toContain('unregister team-context');
+    expect(mismatchRegisteredStatus.fix).toContain('每个 store id 仅支持一个检出');
+    expect(mismatchRegisteredStatus.fix).toContain('openspec-cn store unregister team-context');
     expect(mismatchRegisteredStatus.fix).not.toContain('Use --id team-context or');
 
     // Mismatched --id when the metadata id is free: the plain fix applies.
@@ -1066,7 +1066,7 @@ describe('store command', () => {
     expect(mismatchFree.exitCode).toBe(1);
     const mismatchFreeStatus = parseJson(mismatchFree).status[0];
     expect(mismatchFreeStatus.code).toBe('store_metadata_id_mismatch');
-    expect(mismatchFreeStatus.fix).toContain('使用 --id free-context');
+    expect(mismatchFreeStatus.fix).toContain('Use --id free-context');
   });
 
   // Built by concatenation so the vocabulary sweep never matches this file.
@@ -1145,7 +1145,7 @@ describe('store command', () => {
       });
 
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain("'openspec-cn store' 的未知子命令 'new'");
+      expect(result.stderr).toContain("错误: 'openspec-cn store' 的未知命令 'new'。");
       expect(result.stderr).toContain(
         'setup, register, unregister, remove, list (ls), doctor'
       );
@@ -1158,7 +1158,7 @@ describe('store command', () => {
       expect(result.exitCode).toBe(1);
       // 'new my-change' would be invalid; the hint falls back to the full form.
       expect(result.stderr).toContain('openspec-cn new change <change-id> --store <id>');
-      expect(result.stderr).not.toContain('openspec new my-change');
+      expect(result.stderr).not.toContain('openspec-cn new my-change');
     });
 
     it('falls back to the generic example when flags interleave operands', async () => {
@@ -1180,7 +1180,7 @@ describe('store command', () => {
       expect(payload.status[0]).toEqual(
         expect.objectContaining({
           code: 'unknown_store_subcommand',
-          message: expect.stringContaining("Unknown command 'bogus'"),
+          message: expect.stringContaining("未知命令 'bogus'"),
         })
       );
     });
@@ -1193,7 +1193,7 @@ describe('store command', () => {
       expect(payload.status[0]).toEqual(
         expect.objectContaining({
           code: 'unknown_store_subcommand',
-          message: expect.stringContaining('Missing subcommand'),
+          message: expect.stringContaining('缺少子命令'),
         })
       );
     });
@@ -1209,7 +1209,7 @@ describe('store command', () => {
       const result = await runCLI(['--help'], { cwd: tempDir, env });
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('创建和管理 Store');
+      expect(result.stdout).toContain('创建和管理 stores');
       expect(result.stdout).not.toContain(RETIRED_GROUP);
     });
   });

@@ -1,4 +1,4 @@
-import * as fs from 'node:fs/promises';
+﻿import * as fs from 'node:fs/promises';
 
 import {
   getStoreMetadataPath,
@@ -99,11 +99,11 @@ export function assertNoRegisteredStoreConflict(
 
     if (entry.id === id) {
       throw new StoreError(
-        `Store '${id}' 已注册在 ${getStoreRootForBackend(entry.backend)}。此机器上每个 store id 只支持一个检出。`,
+        `Store '${id}' 已在 ${getStoreRootForBackend(entry.backend)} 注册。此机器上每个 store id 仅支持一个检出。`,
         'store_id_conflict',
         {
           target: 'store.id',
-          fix: `使用现有注册，或先运行 openspec-cn store unregister ${id} 以将此 id 切换到其他检出。`,
+          fix: `使用现有注册，或先运行 openspec-cn store unregister ${id} 将此 id 切换到其他检出。`,
         }
       );
     }
@@ -114,7 +114,7 @@ export function assertNoRegisteredStoreConflict(
         'store_path_conflict',
         {
           target: 'store.root',
-          fix: `使用已有的 '${entry.id}' 注册，或选择其他路径。`,
+          fix: `使用现有的 '${entry.id}' 注册或选择其他路径。`,
         }
       );
     }
@@ -149,7 +149,7 @@ function getRegisteredStoreOrThrow(
 ): StoreRegistryEntry {
   const entry = registry?.stores[id];
   if (!entry) {
-    throw new StoreError(`未知 store '${id}'`, 'store_not_found', {
+    throw new StoreError(`未知的 store '${id}'`, 'store_not_found', {
       target: 'store.id',
       fix: '运行 openspec-cn store list 查看已注册的 store。',
     });
@@ -189,11 +189,11 @@ function assertExpectedRegisteredBackend(
   if (!expected || storeBackendsMatch(actual, expected)) return;
 
   throw new StoreError(
-    `Store '${id}' 在清理完成前发生了变更。`,
-    'store_registry_changed',
-    {
-      target: 'store.registry',
-      fix: '在检查当前 store 注册后重试清理命令。',
+      `Store '${id}' 在清理完成前已变更。`,
+      'store_registry_changed',
+      {
+        target: 'store.registry',
+        fix: '检查当前 store 注册后重试清理命令。',
     }
   );
 }
@@ -229,7 +229,7 @@ async function ensureStoreMetadata(
   if (!metadata) {
     if (!options.writeIfMissing) {
       throw new StoreError(
-        `已注册的 store '${id}' 在 ${getStoreMetadataPath(storeRoot)} 缺少元数据`,
+        `已注册的 store '${id}' 缺少元数据，位于 ${getStoreMetadataPath(storeRoot)}`,
         'store_metadata_missing',
         {
           target: 'store.metadata',
@@ -247,11 +247,11 @@ async function ensureStoreMetadata(
 
   if (metadata.id !== id) {
     throw new StoreError(
-      `Store 元数据 id '${metadata.id}' 与注册的 id '${id}' 不匹配`,
+      `Store 元数据 id '${metadata.id}' 与注册 id '${id}' 不匹配`,
       'store_metadata_id_mismatch',
       {
         target: 'store.metadata',
-        fix: '修复本地注册表或 store 元数据使 id 匹配。',
+        fix: '修复本地注册表或 store 元数据，使 id 匹配。',
       }
     );
   }
@@ -422,7 +422,7 @@ export async function unregisterStoreRegistration(
   );
 
   if (!removed) {
-    throw new StoreError(`未知 store '${id}'`, 'store_not_found', {
+    throw new StoreError(`未知的 store '${id}'`, 'store_not_found', {
       target: 'store.id',
       fix: '运行 openspec-cn store list 查看已注册的 store。',
     });
@@ -445,7 +445,7 @@ export async function resolveRegisteredStore(
   if (!registry) {
     throw new StoreError('未找到 store 注册表', 'no_store_registry', {
       target: 'store.id',
-      fix: '使用 openspec-cn store register <path> 注册一个 store，然后用 --store <id> 选择它。',
+      fix: '使用 openspec-cn store register <path> 注册 store，然后使用 --store <id> 选择。',
     });
   }
 

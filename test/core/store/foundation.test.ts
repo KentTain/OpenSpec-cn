@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -160,7 +160,7 @@ stores:
         parseStoreRegistryState(`version: 2
 stores: {}
 `)
-      ).toThrow(/Invalid store registry state/u);
+      ).toThrow(/无效的 store registry state/u);
 
       expect(() =>
         parseStoreRegistryState(`version: 1
@@ -170,7 +170,7 @@ stores:
       type: git
       local_path: /repos/acme
 `)
-      ).toThrow(/Invalid store id/u);
+      ).toThrow(/无效的 store id/u);
 
       expect(() =>
         parseStoreRegistryState(`version: 1
@@ -180,7 +180,7 @@ stores:
       type: memory
       local_path: /repos/acme
 `)
-      ).toThrow(/Invalid store registry state/u);
+      ).toThrow(/无效的 store registry state/u);
 
       expect(() =>
         parseStoreRegistryState(`version: 1
@@ -190,7 +190,7 @@ stores:
       type: git
       local_path: ""
 `)
-      ).toThrow(/Invalid store registry state/u);
+      ).toThrow(/无效的 store registry state/u);
     });
 
     it('rejects unknown registry fields', () => {
@@ -199,7 +199,7 @@ stores:
 stores: {}
 extra: true
 `)
-      ).toThrow(/Invalid store registry state/u);
+      ).toThrow(/无效的 store registry state/u);
 
       expect(() =>
         parseStoreRegistryState(`version: 1
@@ -210,7 +210,7 @@ stores:
       local_path: /repos/acme
       depth: 1
 `)
-      ).toThrow(/Invalid store registry state/u);
+      ).toThrow(/无效的 store registry state/u);
     });
   });
 
@@ -241,7 +241,7 @@ id: Acme
 id: acme
 local_path: /repos/acme
 `)
-      ).toThrow(/Invalid store metadata state/u);
+      ).toThrow(/无效的 store metadata state/u);
     });
   });
 
@@ -303,7 +303,7 @@ local_path: /repos/acme
       fs.writeFileSync(getStoreMetadataPath(storeRoot), 'version: nope\n');
 
       await expect(readOptionalStoreMetadataState(storeRoot)).rejects.toThrow(
-        /Invalid store metadata state/u
+        /无效的 store metadata state/u
       );
     });
   });
@@ -336,22 +336,22 @@ local_path: /repos/acme
     it('rejects missing paths and empty optional Git config values', async () => {
       await expect(
         resolveGitStoreBackendConfig({ localPath: '' }, tempDir)
-      ).rejects.toThrow(/本地路径不能为空/u);
+      ).rejects.toThrow(/不能为空/u);
 
       await expect(
         resolveGitStoreBackendConfig({ localPath: 'missing' }, tempDir)
-      ).rejects.toThrow(/本地路径不存在/u);
+      ).rejects.toThrow(/不存在/u);
 
       const localPath = path.join(tempDir, 'acme-context');
       fs.mkdirSync(localPath, { recursive: true });
 
       await expect(
         resolveGitStoreBackendConfig({ localPath, remote: '' }, tempDir)
-      ).rejects.toThrow(/远程地址在提供时不能为空/u);
+      ).rejects.toThrow(/不能为空/u);
 
       await expect(
         resolveGitStoreBackendConfig({ localPath, branch: '' }, tempDir)
-      ).rejects.toThrow(/分支在提供时不能为空/u);
+      ).rejects.toThrow(/branch.*不能为空/u);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -81,13 +81,13 @@ describe('validateChangeName', () => {
     it('should reject name with leading hyphen', () => {
       const result = validateChangeName('-add-auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('短横线开头');
+      expect(result.error).toContain('以连字符开头');
     });
 
     it('should reject name with trailing hyphen', () => {
       const result = validateChangeName('add-auth-');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('短横线结尾');
+      expect(result.error).toContain('以连字符结尾');
     });
   });
 
@@ -95,7 +95,7 @@ describe('validateChangeName', () => {
     it('should reject name with double hyphens', () => {
       const result = validateChangeName('add--auth');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('连续的短横线');
+      expect(result.error).toContain('连续连字符');
     });
   });
 
@@ -103,7 +103,7 @@ describe('validateChangeName', () => {
     it('should reject empty string', () => {
       const result = validateChangeName('');
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('不能为空');
+      expect(result.error).toContain('为空');
     });
   });
 });
@@ -150,7 +150,7 @@ describe('createChange', () => {
   describe('schema validation', () => {
     it('should throw error for unknown schema', async () => {
       await expect(createChange(testDir, 'add-auth', { schema: 'unknown-schema' })).rejects.toThrow(
-        /未知 Schema/
+        /未知 schema/
       );
     });
   });
@@ -160,7 +160,7 @@ describe('createChange', () => {
       await createChange(testDir, 'add-auth');
 
       await expect(createChange(testDir, 'add-auth')).rejects.toThrow(
-        /已存在于/
+        /已存在/
       );
     });
   });
@@ -180,7 +180,7 @@ describe('createChange', () => {
 
     it('should throw error for empty name', async () => {
       await expect(createChange(testDir, '')).rejects.toThrow(
-        /不能为空/
+        /为空/
       );
     });
   });

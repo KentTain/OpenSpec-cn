@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Animated welcome screen for the experimental artifact workflow setup.
  * Shows side-by-side layout with animated ASCII art on left and welcome text on right.
  */
@@ -17,14 +17,14 @@ const ART_COLUMN_WIDTH = 24;
  */
 function getWelcomeText(): string[] {
   return [
-    chalk.white.bold('欢迎使用 OpenSpec-cn'),
-    chalk.dim('一个轻量级的规范驱动框架'),
+    chalk.white.bold('欢迎使用 OpenSpec'),
+    chalk.dim('轻量级规范驱动框架'),
     '',
-    chalk.white('此设置将配置:'),
-    chalk.dim('  • AI 工具的代理技能'),
+    chalk.white('此设置将配置：'),
+    chalk.dim('  • AI 工具的 Agent Skills'),
     chalk.dim('  • /opsx:* 斜杠命令'),
     '',
-    chalk.white('设置后快速开始:'),
+    chalk.white('设置后的快速开始：'),
     `  ${chalk.yellow('/opsx:new')}      ${chalk.dim('创建变更')}`,
     `  ${chalk.yellow('/opsx:continue')} ${chalk.dim('下一个产出物')}`,
     `  ${chalk.yellow('/opsx:apply')}    ${chalk.dim('实现任务')}`,

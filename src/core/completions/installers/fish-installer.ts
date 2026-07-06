@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+﻿import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { FileSystemUtils } from '../../../utils/file-system.js';
@@ -6,7 +6,7 @@ import { InstallationResult } from '../factory.js';
 
 /**
  * Installer for Fish completion scripts.
- * Fish automatically loads completions from ~/.config/fish/completions/
+ * Fish 会自动从 ~/.config/fish/completions/ 加载补全
  */
 export class FishInstaller {
   private readonly homeDir: string;
@@ -63,10 +63,10 @@ export class FishInstaller {
           return {
             success: true,
             installedPath: targetPath,
-            message: '补全脚本已安装（已是最新版本）',
+            message: '补全脚本已安装（已是最新）',
             instructions: [
-              '补全脚本已安装，且已是最新版本。',
-              'Fish 会自动加载补全脚本 —— 它们应当立即可用。',
+              '补全脚本已安装且是最新版本。',
+              'Fish 会自动加载补全 - 应立即可用。',
             ],
           };
         }
@@ -74,11 +74,11 @@ export class FishInstaller {
         isUpdate = true;
       } catch (error: any) {
         // File doesn't exist or can't be read, proceed with installation
-        console.debug(`无法在 ${targetPath} 读取现有的补全文件: ${error.message}`);
+        console.debug(`无法读取已存在的补全文件：${targetPath}: ${error.message}`);
       }
 
       if (!(await FileSystemUtils.canWriteFile(targetPath))) {
-        throw new Error(`Path is not writable: ${targetPath}`);
+        throw new Error(`路径不可写：${targetPath}`);
       }
 
       // Ensure the directory exists
@@ -98,7 +98,7 @@ export class FishInstaller {
           ? '补全脚本更新成功（已备份旧版本）'
           : '补全脚本更新成功';
       } else {
-        message = '已成功为 Fish 安装补全脚本';
+        message = 'Fish 补全脚本安装成功';
       }
 
       return {
@@ -107,8 +107,8 @@ export class FishInstaller {
         backupPath,
         message,
         instructions: [
-          'Fish 会从 ~/.config/fish/completions/ 自动加载补全脚本',
-          '补全脚本立即可用 —— 无需重启 Shell。',
+          'Fish 会自动从 ~/.config/fish/completions/ 加载补全',
+          '补全立即可用 - 无需重启 shell。',
         ],
       };
     } catch (error) {
@@ -142,7 +142,7 @@ export class FishInstaller {
 
       const targetDir = path.dirname(targetPath);
       if (!(await FileSystemUtils.canWriteFile(targetDir))) {
-        throw new Error(`Path is not writable: ${targetDir}`);
+        throw new Error(`路径不可写：${targetDir}`);
       }
 
       // Remove the completion script
@@ -150,7 +150,7 @@ export class FishInstaller {
 
       return {
         success: true,
-        message: '补全脚本已成功卸载',
+        message: '补全脚本卸载成功',
       };
     } catch (error) {
       return {

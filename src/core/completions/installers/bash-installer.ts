@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+﻿import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { FileSystemUtils } from '../../../utils/file-system.js';
@@ -101,7 +101,7 @@ export class BashInstaller {
    */
   private generateBashrcConfig(completionsDir: string): string {
     return [
-      '# OpenSpec-cn shell 补全配置',
+      '# OpenSpec shell completions configuration',
       `if [ -d "${completionsDir}" ]; then`,
       `  for f in "${completionsDir}"/*; do`,
       '    [ -f "$f" ] && . "$f"',
@@ -143,7 +143,7 @@ export class BashInstaller {
       return true;
     } catch (error: any) {
       // Fail gracefully - don't break installation
-      console.debug(`无法为补全配置 .bashrc: ${error.message}`);
+      console.debug(`无法为补全配置 .bashrc：${error.message}`);
       return false;
     }
   }
@@ -199,7 +199,7 @@ export class BashInstaller {
       return true;
     } catch (error: any) {
       // Fail gracefully
-      console.debug(`无法移除 .bashrc 配置: ${error.message}`);
+      console.debug(`无法移除 .bashrc 配置：${error.message}`);
       return false;
     }
   }
@@ -226,10 +226,10 @@ export class BashInstaller {
           return {
             success: true,
             installedPath: targetPath,
-            message: '补全脚本已安装（已是最新版本）',
+            message: '补全脚本已安装（已是最新）',
             instructions: [
-              '补全脚本已安装，且已是最新版本。',
-              '如果补全未生效，请尝试运行：exec bash',
+              '补全脚本已安装且是最新版本。',
+              '如果补全不工作，尝试：exec bash',
             ],
           };
         }
@@ -237,11 +237,11 @@ export class BashInstaller {
         isUpdate = true;
       } catch (error: any) {
         // File doesn't exist or can't be read, proceed with installation
-        console.debug(`无法在 ${targetPath} 读取现有的补全文件: ${error.message}`);
+        console.debug(`无法读取已存在的补全文件：${targetPath}: ${error.message}`);
       }
 
       if (!(await FileSystemUtils.canWriteFile(targetPath))) {
-        throw new Error(`Path is not writable: ${targetPath}`);
+        throw new Error(`路径不可写：${targetPath}`);
       }
 
       // Ensure the directory exists
@@ -264,13 +264,13 @@ export class BashInstaller {
       const warnings: string[] = [];
       if (!hasBashCompletion) {
         warnings.push(
-          '⚠️  警告：未检测到 bash-completion 包',
+          '⚠️  Warning: bash-completion package not detected',
           '',
-          '补全脚本需要 bash-completion 才能运行。',
-          '请使用以下命令安装：',
+          '此补全脚本需要 bash-completion 才能工作。',
+          '安装方式：',
           '  brew install bash-completion@2',
           '',
-          '然后添加以下内容到您的 ~/.bash_profile：',
+          '然后添加到你的 ~/.bash_profile：',
           '  [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"'
         );
       }
@@ -283,8 +283,8 @@ export class BashInstaller {
           : '补全脚本更新成功';
       } else {
         message = bashrcConfigured
-          ? '补全脚本安装成功，并已自动配置 .bashrc'
-          : '已成功为 Bash 安装补全脚本';
+          ? '补全脚本安装成功且 .bashrc 已配置'
+          : 'Bash 补全脚本安装成功';
       }
 
       return {
@@ -316,16 +316,16 @@ export class BashInstaller {
     return [
       '补全脚本安装成功。',
       '',
-      '如需启用补全，请在您的 ~/.bashrc 文件中添加以下内容：',
+      '要启用补全，请将以下内容添加到你的 ~/.bashrc 文件：',
       '',
-      `  # 加载 OpenSpec-cn 补全`,
+      `  # Source OpenSpec completions`,
       `  if [ -d "${completionsDir}" ]; then`,
       `    for f in "${completionsDir}"/*; do`,
       '      [ -f "$f" ] && . "$f"',
       '    done',
       '  fi',
       '',
-      '然后重启 Shell 或运行：exec bash',
+      '然后重启 shell 或运行：exec bash',
     ];
   }
 
@@ -358,7 +358,7 @@ export class BashInstaller {
 
       return {
         success: true,
-        message: '补全脚本已成功卸载',
+        message: '补全脚本卸载成功',
       };
     } catch (error) {
       return {

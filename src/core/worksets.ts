@@ -1,4 +1,4 @@
-import * as nodeFs from 'node:fs';
+﻿import * as nodeFs from 'node:fs';
 import * as path from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { z } from 'zod';
@@ -103,7 +103,7 @@ export function validateWorksetName(name: string): string {
  */
 export function memberListProblem(members: WorksetMember[]): string | null {
   if (members.length === 0) {
-    return 'members must not be empty';
+    return '成员不能为空';
   }
 
   const seen = new Set<string>();
@@ -114,12 +114,12 @@ export function memberListProblem(members: WorksetMember[]): string | null {
     }
 
     if (seen.has(member.name)) {
-      return `duplicate member name '${member.name}' (use the name=path form to label members distinctly)`;
+      return `重复的成员名称 '${member.name}'（使用 name=path 形式以区分成员标签）`;
     }
     seen.add(member.name);
 
     if (!path.isAbsolute(member.path)) {
-      return `member path '${member.path}' must be absolute`;
+      return `成员路径 '${member.path}' 必须为绝对路径`;
     }
   }
 
@@ -156,11 +156,11 @@ function invalidWorksetsFileError(
   options: WorksetPathOptions
 ): StoreError {
   return new StoreError(
-    `Invalid worksets file: ${message}`,
+    `无效的工作集文件：${message}`,
     'invalid_workset_file',
     {
       target: 'workset.file',
-      fix: `Repair or remove ${getWorksetsFilePath(options)}.`,
+      fix: `修复或删除 ${getWorksetsFilePath(options)}。`,
     }
   );
 }
@@ -234,8 +234,8 @@ export async function readWorksetsState(
 }
 
 const worksetsLockError = makeLockErrorFactory({
-  createSubject: 'the worksets lock file',
-  busyMessage: '工作集文件正忙。',
+  createSubject: 'worksets 锁文件',
+  busyMessage: 'Worksets 文件正忙。',
   code: 'workset_file_busy',
   target: 'workset.file',
 });
@@ -284,14 +284,14 @@ export function worksetNotFoundError(
     a.localeCompare(b)
   );
   return new StoreError(
-    `Workset '${name}' is not saved on this machine.`,
+    `Workset '${name}' 在此机器上未保存。`,
     'workset_not_found',
     {
       target: 'workset.name',
       fix:
         savedNames.length > 0
-          ? `已保存的工作集：${savedNames.join(', ')}。使用以下命令查看：openspec-cn workset list`
-          : `先创建它：openspec-cn workset create ${name}`,
+          ? `已保存的 worksets：${savedNames.join(', ')}。使用以下命令查看：openspec-cn workset list`
+          : `先创建：openspec-cn workset create ${name}`,
     }
   );
 }
@@ -302,7 +302,7 @@ export function withWorkset(
 ): WorksetsState {
   if (state.worksets[workset.name] !== undefined) {
     throw new StoreError(
-      `Workset '${workset.name}' already exists.`,
+      `Workset '${workset.name}' 已存在。`,
       'workset_exists',
       {
         target: 'workset.name',

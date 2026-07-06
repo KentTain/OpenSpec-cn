@@ -1,183 +1,183 @@
-# 自定义
+﻿# Customization
 
-OpenSpec 提供三个级别的自定义：
+OpenSpec provides three levels of customization:
 
-| 级别 | 功能 | 最适合 |
+| Level | What it does | Best for |
 |-------|--------------|----------|
-| **项目配置** | 设置默认值，注入上下文/规则 | 大多数团队 |
-| **自定义模式** | 定义自己的工作流制品 | 有独特流程的团队 |
-| **全局覆盖** | 在所有项目间共享模式 | 高级用户 |
+| **Project Config** | Set defaults, inject context/rules | Most teams |
+| **Custom Schemas** | Define your own workflow artifacts | Teams with unique processes |
+| **Global Overrides** | Share schemas across all projects | Power users |
 
 ---
 
-## 项目配置
+## Project Configuration
 
-`openspec/config.yaml` 文件是为团队自定义 OpenSpec 的最简单方法。它允许你：
+The `openspec/config.yaml` file is the easiest way to customize OpenSpec for your team. It lets you:
 
-- **设置默认模式** - 在每个命令上跳过 `--schema`
-- **注入项目上下文** - AI 看到你的技术栈、约定等
-- **添加每个制品的规则** - 特定制品的自定义规则
+- **Set a default schema** - Skip `--schema` on every command
+- **Inject project context** - AI sees your tech stack, conventions, etc.
+- **Add per-artifact rules** - Custom rules for specific artifacts
 
-### 快速设置
+### Quick Setup
 
 ```bash
 openspec-cn init
 ```
 
-这会引导你交互式创建配置。或者手动创建一个：
+This walks you through creating a config interactively. Or create one manually:
 
 ```yaml
 # openspec/config.yaml
 schema: spec-driven
 
 context: |
-  技术栈：TypeScript、React、Node.js、PostgreSQL
-  API 风格：RESTful，在 docs/api.md 中记录
-  测试：Jest + React Testing Library
-  我们重视所有公共 API 的向后兼容性
+  Tech stack: TypeScript, React, Node.js, PostgreSQL
+  API style: RESTful, documented in docs/api.md
+  Testing: Jest + React Testing Library
+  We value backwards compatibility for all public APIs
 
 rules:
   proposal:
-    - 包含回滚计划
-    - 识别受影响的团队
+    - Include rollback plan
+    - Identify affected teams
   specs:
-    - 使用 Given/When/Then 格式
-    - 在发明新模式前参考现有模式
+    - Use Given/When/Then format
+    - Reference existing patterns before inventing new ones
 ```
 
-### 工作原理
+### How It Works
 
-**默认模式：**
+**Default schema:**
 
 ```bash
-# 无配置
+# Without config
 openspec-cn new change my-feature --schema spec-driven
 
-# 有配置 - 模式自动应用
+# With config - schema is automatic
 openspec-cn new change my-feature
 ```
 
-**上下文和规则注入：**
+**Context and rules injection:**
 
-当生成任何制品时，你的上下文和规则会注入到 AI 提示中：
+When generating any artifact, your context and rules are injected into the AI prompt:
 
 ```xml
 <context>
-技术栈：TypeScript、React、Node.js、PostgreSQL
+Tech stack: TypeScript, React, Node.js, PostgreSQL
 ...
 </context>
 
 <rules>
-- 包含回滚计划
-- 识别受影响的团队
+- Include rollback plan
+- Identify affected teams
 </rules>
 
 <template>
-[模式的内置模板]
+[Schema's built-in template]
 </template>
 ```
 
-- **上下文** 出现在所有制品中
-- **规则** 仅出现在匹配的制品中
+- **Context** appears in ALL artifacts
+- **Rules** ONLY appear for the matching artifact
 
-### 模式解析顺序
+### Schema Resolution Order
 
-当 OpenSpec 需要模式时，按此顺序检查：
+When OpenSpec needs a schema, it checks in this order:
 
-1. CLI 标志：`--schema <name>`
-2. 变更元数据（变更文件夹中的 `.openspec.yaml`）
-3. 项目配置（`openspec/config.yaml`）
-4. 默认（`spec-driven`）
+1. CLI flag: `--schema <name>`
+2. Change metadata (`.openspec.yaml` in the change folder)
+3. Project config (`openspec/config.yaml`)
+4. Default (`spec-driven`)
 
 ---
 
-## 自定义模式
+## Custom Schemas
 
-当项目配置不够时，创建具有完全自定义工作流的模式。自定义模式位于项目的 `openspec/schemas/` 目录中，并与代码一起进行版本控制。
+When project config isn't enough, create your own schema with a completely custom workflow. Custom schemas live in your project's `openspec/schemas/` directory and are version-controlled with your code.
 
 ```text
 your-project/
 ├── openspec/
-│   ├── config.yaml        # 项目配置
-│   ├── schemas/           # 自定义模式在此
+│   ├── config.yaml        # Project config
+│   ├── schemas/           # Custom schemas live here
 │   │   └── my-workflow/
 │   │       ├── schema.yaml
 │   │       └── templates/
-│   └── changes/           # 你的变更
+│   └── changes/           # Your changes
 └── src/
 ```
 
-### 派生现有模式
+### Fork an Existing Schema
 
-自定义的最快方法是派生内置模式：
+The fastest way to customize is to fork a built-in schema:
 
 ```bash
 openspec-cn schema fork spec-driven my-workflow
 ```
 
-这将整个 `spec-driven` 模式复制到 `openspec/schemas/my-workflow/`，你可以在那里自由编辑。
+This copies the entire `spec-driven` schema to `openspec/schemas/my-workflow/` where you can edit it freely.
 
-**你会得到：**
+**What you get:**
 
 ```text
 openspec/schemas/my-workflow/
-├── schema.yaml           # 工作流定义
+├── schema.yaml           # Workflow definition
 └── templates/
-    ├── proposal.md       # 提案制品的模板
-    ├── spec.md           # 规范的模板
-    ├── design.md         # 设计的模板
-    └── tasks.md          # 任务的模板
+    ├── proposal.md       # Template for proposal artifact
+    ├── spec.md           # Template for specs
+    ├── design.md         # Template for design
+    └── tasks.md          # Template for tasks
 ```
 
-现在编辑 `schema.yaml` 来更改工作流，或编辑模板来更改 AI 生成的内容。
+Now edit `schema.yaml` to change the workflow, or edit templates to change what AI generates.
 
-### 从零创建模式
+### Create a Schema from Scratch
 
-对于全新的工作流：
+For a completely fresh workflow:
 
 ```bash
-# 交互式
+# Interactive
 openspec-cn schema init research-first
 
-# 非交互式
+# Non-interactive
 openspec-cn schema init rapid \
-  --description "快速迭代工作流" \
+  --description "Rapid iteration workflow" \
   --artifacts "proposal,tasks" \
   --default
 ```
 
-### 模式结构
+### Schema Structure
 
-模式定义工作流中的制品及其依赖关系：
+A schema defines the artifacts in your workflow and how they depend on each other:
 
 ```yaml
 # openspec/schemas/my-workflow/schema.yaml
 name: my-workflow
 version: 1
-description: 我团队的自定义工作流
+description: My team's custom workflow
 
 artifacts:
   - id: proposal
     generates: proposal.md
-    description: 初始提案文档
+    description: Initial proposal document
     template: proposal.md
     instruction: |
-      创建解释为什么需要此变更的提案。
-      专注于问题，而不是解决方案。
+      Create a proposal that explains WHY this change is needed.
+      Focus on the problem, not the solution.
     requires: []
 
   - id: design
     generates: design.md
-    description: 技术设计
+    description: Technical design
     template: design.md
     instruction: |
-      创建解释如何实施的设计文档。
+      Create a design document explaining HOW to implement.
     requires:
-      - proposal    # 提案存在后才能创建设计
+      - proposal    # Can't create design until proposal exists
 
   - id: tasks
     generates: tasks.md
-    description: 实施清单
+    description: Implementation checklist
     template: tasks.md
     requires:
       - design
@@ -187,117 +187,117 @@ apply:
   tracks: tasks.md
 ```
 
-**关键字段：**
+**Key fields:**
 
-| 字段 | 目的 |
+| Field | Purpose |
 |-------|---------|
-| `id` | 唯一标识符，用于命令和规则 |
-| `generates` | 输出文件名（支持通配符如 `specs/**/*.md`） |
-| `template` | `templates/` 目录中的模板文件 |
-| `instruction` | AI 创建此制品的指令 |
-| `requires` | 依赖项 - 哪些制品必须先存在 |
+| `id` | Unique identifier, used in commands and rules |
+| `generates` | Output filename (supports globs like `specs/**/*.md`) |
+| `template` | Template file in `templates/` directory |
+| `instruction` | AI instructions for creating this artifact |
+| `requires` | Dependencies - which artifacts must exist first |
 
-### 模板
+### Templates
 
-模板是指导 AI 的 Markdown 文件。在创建制品时，它们会注入到提示中。
+Templates are markdown files that guide the AI. They're injected into the prompt when creating that artifact.
 
 ```markdown
 <!-- templates/proposal.md -->
-## 为什么
+## Why
 
-<!-- 解释此变更的动机。解决了什么问题？ -->
+<!-- Explain the motivation for this change. What problem does this solve? -->
 
-## 改变什么
+## What Changes
 
-<!-- 描述将改变什么。具体说明新功能或修改。 -->
+<!-- Describe what will change. Be specific about new capabilities or modifications. -->
 
-## 影响
+## Impact
 
-<!-- 受影响的代码、API、依赖项、系统 -->
+<!-- Affected code, APIs, dependencies, systems -->
 ```
 
-模板可以包含：
-- AI 应填写的章节标题
-- 为 AI 提供指导的 HTML 注释
-- 显示预期结构的示例格式
+Templates can include:
+- Section headers the AI should fill in
+- HTML comments with guidance for the AI
+- Example formats showing expected structure
 
-### 验证你的 Schema
+### Validate Your Schema
 
-在使用自定义 schema 之前，先验证它：
+Before using a custom schema, validate it:
 
 ```bash
 openspec-cn schema validate my-workflow
 ```
 
-这会检查：
-- `schema.yaml` 语法是否正确
-- 所有引用的模板是否存在
-- 是否有循环依赖
-- 制品 ID 是否有效
+This checks:
+- `schema.yaml` syntax is correct
+- All referenced templates exist
+- No circular dependencies
+- Artifact IDs are valid
 
-### 使用你的自定义 Schema
+### Use Your Custom Schema
 
-创建后，使用你的 schema：
+Once created, use your schema with:
 
 ```bash
-# 在命令上指定
+# Specify on command
 openspec-cn new change feature --schema my-workflow
 
-# 或者在 config.yaml 中设为默认值
+# Or set as default in config.yaml
 schema: my-workflow
 ```
 
-### 调试 Schema 解析
+### Debug Schema Resolution
 
-不确定正在使用哪个 schema？检查：
+Not sure which schema is being used? Check with:
 
 ```bash
-# 查看特定 schema 的解析来源
+# See where a specific schema resolves from
 openspec-cn schema which my-workflow
 
-# 列出所有可用 schema
+# List all available schemas
 openspec-cn schema which --all
 ```
 
-输出显示它来自你的项目、用户目录还是包：
+Output shows whether it's from your project, user directory, or the package:
 
 ```text
 Schema: my-workflow
-来源: project
-路径: /path/to/project/openspec/schemas/my-workflow
+Source: project
+Path: /path/to/project/openspec/schemas/my-workflow
 ```
 
 ---
 
-> **注意：** OpenSpec 也支持用户级 schema，位于 `~/.local/share/openspec/schemas/`，用于跨项目共享，但推荐使用项目级 schema，位于 `openspec/schemas/`，因为它们与你的代码一起进行版本控制。
+> **Note:** OpenSpec also supports user-level schemas at `~/.local/share/openspec/schemas/` for sharing across projects, but project-level schemas in `openspec/schemas/` are recommended since they're version-controlled with your code.
 
 ---
 
-## 示例
+## Examples
 
-### 快速迭代工作流
+### Rapid Iteration Workflow
 
-一个用于快速迭代的最小工作流：
+A minimal workflow for quick iterations:
 
 ```yaml
 # openspec/schemas/rapid/schema.yaml
 name: rapid
 version: 1
-description: 最小开销的快速迭代
+description: Fast iteration with minimal overhead
 
 artifacts:
   - id: proposal
     generates: proposal.md
-    description: 快速 proposal
+    description: Quick proposal
     template: proposal.md
     instruction: |
-      为这个变更创建一份简短的 proposal。
-      聚焦于做什么和为什么，跳过详细 spec。
+      Create a brief proposal for this change.
+      Focus on what and why, skip detailed specs.
     requires: []
 
   - id: tasks
     generates: tasks.md
-    description: 实现清单
+    description: Implementation checklist
     template: tasks.md
     requires: [proposal]
 
@@ -306,51 +306,51 @@ apply:
   tracks: tasks.md
 ```
 
-### 添加审查制品
+### Adding a Review Artifact
 
-派生默认配置并添加审查步骤：
+Fork the default and add a review step:
 
 ```bash
 openspec-cn schema fork spec-driven with-review
 ```
 
-然后编辑 `schema.yaml` 添加：
+Then edit `schema.yaml` to add:
 
 ```yaml
   - id: review
     generates: review.md
-    description: 实现前的审查清单
+    description: Pre-implementation review checklist
     template: review.md
     instruction: |
-      基于 design 创建一份审查清单。
-      包含安全、性能和测试方面的考量。
+      Create a review checklist based on the design.
+      Include security, performance, and testing considerations.
     requires:
       - design
 
   - id: tasks
-    # ... 现有 tasks 配置 ...
+    # ... existing tasks config ...
     requires:
       - specs
       - design
-      - review    # 现在 tasks 也依赖 review
+      - review    # Now tasks require review too
 ```
 
 ---
 
-## 社区 Schema
+## Community Schemas
 
-OpenSpec 还支持通过独立仓库分发的社区维护 schema。这些 schema 提供了与其他工具或系统集成 OpenSpec 的定制化工作流，类似于 [github/spec-kit 的社区扩展目录](https://github.com/github/spec-kit/tree/main/extensions) 为 spec-kit 所做的事情。
+OpenSpec also supports community-maintained schemas distributed via standalone repositories. These provide opinionated workflows that integrate OpenSpec with other tools or systems, similar to how [github/spec-kit's community extension catalog](https://github.com/github/spec-kit/tree/main/extensions) works for spec-kit.
 
-社区 schema 不会内置到 OpenSpec 核心中——它们存在于各自的仓库中，有各自的发布节奏。要使用某个社区 schema，将 schema 包复制到项目的 `openspec/schemas/<schema-name>/` 目录中（每个仓库的 README 有安装说明）。
+Community schemas are not vendored into OpenSpec core — they live in their own repositories with their own release cadence. To use one, copy the schema bundle into your project's `openspec/schemas/<schema-name>/` directory (each repo's README has install instructions).
 
-| Schema | 维护者 | 仓库 | 描述 |
+| Schema | Maintainer | Repository | Description |
 |--------|-----------|-----------|-------------|
-| `superpowers-bridge` | @JiangWay | [JiangWay/openspec-schemas](https://github.com/JiangWay/openspec-schemas/tree/main/superpowers-bridge) | 将 OpenSpec 的制品治理与 [obra/superpowers](https://github.com/obra/superpowers) 执行技能（头脑风暴、编写计划、通过子 Agent 的 TDD、代码审查、收尾）集成。添加了 Superpowers 原生不覆盖的证据优先 `retrospective` 制品。 |
+| `superpowers-bridge` | @JiangWay | [JiangWay/openspec-schemas](https://github.com/JiangWay/openspec-schemas/tree/main/superpowers-bridge) | Integrates OpenSpec's artifact governance with [obra/superpowers](https://github.com/obra/superpowers) execution skills (brainstorming, writing-plans, TDD via subagents, code review, finishing). Adds an evidence-first `retrospective` artifact filling a gap Superpowers does not natively cover. |
 
-> 想要贡献社区 schema？请提交 issue 并附上仓库链接，或提交 PR 在此表格中添加一行。
+> Want to contribute a community schema? Open an issue with a link to your repository, or submit a PR adding a row to this table.
 
 ---
 
-## 另请参阅
+## See Also
 
-- [CLI 参考：Schema 命令](cli.md#schema-commands) - 终端命令
+- [CLI Reference: Schema Commands](cli.md#schema-commands) - Full command documentation

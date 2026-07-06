@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -162,7 +162,7 @@ describe('store canonical remote (3.3)', () => {
         { cwd: tempDir, env }
       );
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain(`分享它：团队成员克隆 ${TEST_NET_URL}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${TEST_NET_URL} 然后运行 openspec-cn store register <path>。`);
     });
   });
 
@@ -248,7 +248,7 @@ describe('store canonical remote (3.3)', () => {
       const storeRoot = makeUnregisteredStore('origin-only-context', { origin: TEST_NET_URL });
       const result = await runCLI(['store', 'register', storeRoot], { cwd: tempDir, env });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain(`分享它：团队成员克隆 ${TEST_NET_URL}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${TEST_NET_URL} 然后运行 openspec-cn store register <path>。`);
     });
 
     it('prefers the canonical remote over the origin in sharing guidance', async () => {
@@ -258,7 +258,7 @@ describe('store canonical remote (3.3)', () => {
         metadataRemote: canonical,
       });
       const result = await runCLI(['store', 'register', storeRoot], { cwd: tempDir, env });
-      expect(result.stdout).toContain(`分享它：团队成员克隆 ${canonical}`);
+      expect(result.stdout).toContain(`分享方式: 团队成员克隆 ${canonical} 然后运行 openspec-cn store register <path>。`);
     });
   });
 
@@ -452,7 +452,7 @@ describe('store canonical remote (3.3)', () => {
       expect(store.status).toEqual([]);
 
       const human = await runCLI(['store', 'doctor', 'doc-context'], { cwd: tempDir, env });
-      expect(human.stdout).toContain(`  远程：${canonical}`);
+      expect(human.stdout).toContain(`  远程: ${canonical}`);
       expect(human.stdout).not.toContain(TEST_NET_URL);
 
       // The remote-bearing store.yaml resolves normally with --store.
@@ -472,7 +472,7 @@ describe('store canonical remote (3.3)', () => {
       });
       const human = await runCLI(['store', 'doctor', 'quiet-context'], { cwd: tempDir, env });
       expect(human.exitCode).toBe(0);
-      expect(human.stdout).not.toContain('  远程：');
+      expect(human.stdout).not.toContain('Remote:');
     });
   });
 });

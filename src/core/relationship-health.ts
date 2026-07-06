@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Relationship health composition (slice 3.6).
  *
  * One read-only answer to "are the roots this work relates to available
@@ -63,8 +63,8 @@ export function inspectRelationships(input: InspectRelationshipsInput): Relation
     status.push(
       warning(
         'relationship_registry_unreadable',
-        'The store registry is unreadable; reference health cannot be checked.',
-        '运行：openspec-cn store doctor'
+        'Store 注册表不可读；无法检查引用健康状况。',
+        '运行: openspec-cn store doctor'
       )
     );
   }
@@ -73,8 +73,8 @@ export function inspectRelationships(input: InspectRelationshipsInput): Relation
     status.push(
       warning(
         'root_pointer_ignored',
-        `${input.bothShapesPointer.filePath} declares store '${input.bothShapesPointer.value}', but this directory is a real OpenSpec root; the declaration is ignored.`,
-        `Remove the store: line from ${input.bothShapesPointer.filePath}, or move the planning files into the store.`
+        `${input.bothShapesPointer.filePath} 声明了 store '${input.bothShapesPointer.value}'，但此目录是真正的 OpenSpec 根目录；声明已忽略。`,
+        `从 ${input.bothShapesPointer.filePath} 移除 store: 行，或将规划文件移动到 store 中。`
       )
     );
   }
@@ -83,8 +83,8 @@ export function inspectRelationships(input: InspectRelationshipsInput): Relation
     status.push(
       warning(
         'root_pointer_invalid',
-        `${input.malformedPointer.filePath} declares a store: pointer that cannot be used (${storePointerProblem(input.malformedPointer.reason)}).`,
-        `Fix or remove the store: line in ${input.malformedPointer.filePath}.`
+        `${input.malformedPointer.filePath} 声明了一个无法使用的 store: 指针（${storePointerProblem(input.malformedPointer.reason)}）。`,
+        `请修复或移除 ${input.malformedPointer.filePath} 中的 store: 行。`
       )
     );
   }

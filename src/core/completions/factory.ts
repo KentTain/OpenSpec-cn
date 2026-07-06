@@ -1,4 +1,4 @@
-import { CompletionGenerator } from './types.js';
+﻿import { CompletionGenerator } from './types.js';
 import { ZshGenerator } from './generators/zsh-generator.js';
 import { BashGenerator } from './generators/bash-generator.js';
 import { FishGenerator } from './generators/fish-generator.js';
@@ -59,7 +59,7 @@ export class CompletionFactory {
       case 'powershell':
         return new PowerShellGenerator();
       default:
-        throw new Error(`不支持的 Shell: ${shell}`);
+        throw new Error(`不支持的 shell：${shell}`);
     }
   }
 
@@ -81,7 +81,7 @@ export class CompletionFactory {
       case 'powershell':
         return new PowerShellInstaller();
       default:
-        throw new Error(`不支持的 Shell: ${shell}`);
+        throw new Error(`不支持的 shell：${shell}`);
     }
   }
 

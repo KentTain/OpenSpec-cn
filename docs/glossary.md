@@ -1,91 +1,91 @@
-# 术语表
+﻿# Glossary
 
-OpenSpec 的所有术语集中一处，用平实的语言定义。通读一遍，剩下的文档就读得更快了。
+Every OpenSpec term in one place, defined in plain language. Skim it once and the rest of the docs read faster.
 
-术语按主题分组，组内按字母序排列。
+Terms are grouped by topic, then alphabetized within each group.
 
-## 核心名词
+## The core nouns
 
-**Spec（规范）。** 一份描述你系统某部分如何运转的文档。Specs 存放在 `openspec/specs/`，按 domain 组织，由 requirement 和 scenario 构成。spec 是"这份软件做什么"的公认答案。见 [概念](concepts.md#specs)。
+**Spec.** A document describing how part of your system behaves. Specs live in `openspec/specs/`, are organized by domain, and are made of requirements and scenarios. The spec is the agreed-upon answer to "what does this software do?" See [Concepts](concepts.md#specs).
 
-**Source of truth（真相源）。** 整个 `openspec/specs/` 目录。它持有系统当前、公认的行为。变更提议对它的编辑；归档应用这些编辑。
+**Source of truth.** The `openspec/specs/` directory as a whole. It holds the current, agreed-upon behavior of your system. Changes propose edits to it; archiving applies them.
 
-**Change（变更）。** 一个工作单元，打包为 `openspec/changes/<name>/` 下的一个文件夹。一个 change 容纳关于那件工作的全部内容：proposal、design、tasks，以及它引入的 spec 编辑。一个 change，一个 feature 或 fix。
+**Change.** One unit of work, packaged as a folder under `openspec/changes/<name>/`. A change holds everything about that work: its proposal, design, tasks, and the spec edits it introduces. One change, one feature or fix.
 
-**Artifact（制品）。** change 内部的一份文档。标准制品是 proposal、delta spec、design 和 tasks。它们按依赖顺序创建，并互相喂养。
+**Artifact.** A document inside a change. The standard artifacts are the proposal, the delta specs, the design, and the tasks. They're created in dependency order and feed into each other.
 
-**Delta spec（增量 spec）。** change 内部的一种 spec，只描述变化，使用 `ADDED`、`MODIFIED`、`REMOVED` 段落，而不重述整份 spec。这是 OpenSpec 干净编辑已有系统的方式。见 [概念](concepts.md#delta-specs)。
+**Delta spec.** A spec inside a change that describes only what's changing, using `ADDED`, `MODIFIED`, and `REMOVED` sections, rather than restating the entire spec. This is what lets OpenSpec edit existing systems cleanly. See [Concepts](concepts.md#delta-specs).
 
-**Domain（领域）。** specs 的一种逻辑分组，如 `auth/`、`payments/` 或 `ui/`。你按自己思考系统的方式选择 domain。
+**Domain.** A logical grouping for specs, like `auth/`, `payments/`, or `ui/`. You choose domains that match how you think about your system.
 
-## spec 内部
+## Inside a spec
 
-**Requirement（需求）。** 系统必须具备的一条行为，通常用 RFC 2119 关键字书写："The system SHALL expire sessions after 30 minutes." Requirement 说的是 *what*，不是 *how*。
+**Requirement.** A single behavior the system must have, usually written with an RFC 2119 keyword: "The system SHALL expire sessions after 30 minutes." Requirements state the *what*, not the *how*.
 
-**Scenario（场景）。** 一条 requirement 的具体、可测试示例，通常以 Given/When/Then 形式书写。Scenario 让 requirement 可验证：你可以从一条 scenario 写出自动化测试。
+**Scenario.** A concrete, testable example of a requirement in action, typically in Given/When/Then form. Scenarios make a requirement verifiable: you could write an automated test from one.
 
-**RFC 2119 关键字。** MUST、SHALL、SHOULD、MAY 这几个词，它们带有关于 requirement 严格程度的标准含义。MUST 和 SHALL 是绝对的。SHOULD 是推荐的，允许例外。MAY 是可选的。这个名称来自定义它们的互联网标准文档。
+**RFC 2119 keywords.** The words MUST, SHALL, SHOULD, and MAY, which carry standardized meaning about how strict a requirement is. MUST and SHALL are absolute. SHOULD is recommended with room for exceptions. MAY is optional. The name comes from the internet standards document that defined them.
 
-## 制品
+## The artifacts
 
-**Proposal（`proposal.md`）。** 一个 change 的 *why* 和 *what*：意图、范围、高层方案。你创建的第一份制品。
+**Proposal (`proposal.md`).** The *why* and *what* of a change: its intent, scope, and high-level approach. The first artifact you create.
 
-**Design（`design.md`）。** *how*：技术方案、架构决策、你预期会触及的文件。对于简单 change 可选。
+**Design (`design.md`).** The *how*: technical approach, architecture decisions, and the files you expect to touch. Optional for simple changes.
 
-**Tasks（`tasks.md`）。** 实现清单，带复选框。AI 在 `/opsx:apply` 期间逐项处理并勾掉。
+**Tasks (`tasks.md`).** The implementation checklist, with checkboxes. The AI works through it during `/opsx:apply` and checks items off as it goes.
 
-## 生命周期
+## The lifecycle
 
-**Archive（归档）。** 完成一个 change 的动作。它的 delta spec 合并进主 spec，change 文件夹移到 `openspec/changes/archive/YYYY-MM-DD-<name>/`。归档后，你的 spec 描述新的现实。见 [概念](concepts.md#archive)。
+**Archive.** The act of finishing a change. Its delta specs merge into the main specs, and the change folder moves to `openspec/changes/archive/YYYY-MM-DD-<name>/`. After archiving, your specs describe the new reality. See [Concepts](concepts.md#archive).
 
-**Sync（同步）。** 把一个 change 的 delta spec 合并进主 spec，但 *不* 归档该 change。通常是自动的（archive 会主动提出做这件事），但也可单独用 `/opsx:sync` 处理长期运行的变更。见 [命令](commands.md#opsxsync)。
+**Sync.** Merging a change's delta specs into the main specs *without* archiving the change. Usually automatic (archive offers to do it), but available on its own as `/opsx:sync` for long-running changes. See [Commands](commands.md#opsxsync).
 
-## 工作流与命令
+## Workflow and commands
 
-**OPSX。** OpenSpec 当前的标准工作流，围绕流式动作而非僵硬阶段构建。它的斜杠命令都以 `/opsx:` 开头。见 [OPSX 工作流](opsx.md)。
+**OPSX.** The current standard OpenSpec workflow, built around fluid actions instead of rigid phases. Its slash commands all start with `/opsx:`. See [OPSX Workflow](opsx.md).
 
-**Slash command（斜杠命令）。** 你在 AI 助手聊天里输入的命令，如 `/opsx:propose`。斜杠命令驱动工作流。它们不是终端命令。见 [命令是如何工作的](how-commands-work.md)。
+**Slash command.** A command you type into your AI assistant's chat, like `/opsx:propose`. Slash commands drive the workflow. They are not terminal commands. See [How Commands Work](how-commands-work.md).
 
-**Explore（`/opsx:explore`）。** 思考伙伴命令。它读你的代码库、比较选项，把模糊想法厘清成具体计划，不创建任何制品、不写任何代码。当你有问题但还没有方案时，这是推荐的起点。见 [先做探索](explore.md)。
+**Explore (`/opsx:explore`).** The thinking-partner command. It reads your codebase, compares options, and clarifies a fuzzy idea into a concrete plan, creating no artifacts and writing no code. The recommended starting point whenever you have a problem but not yet a plan. See [Explore First](explore.md).
 
-**CLI。** 你在终端里运行的 `openspec` 程序。它设置项目、列出与校验 change、打开仪表盘、归档。OpenSpec 的终端那一半。见 [CLI](cli.md)。
+**CLI.** The `openspec` program you run in your terminal. It sets up projects, lists and validates changes, opens the dashboard, and archives. The terminal half of OpenSpec. See [CLI](cli.md).
 
-**Skill。** 一组指令文件夹（`.../skills/openspec-*/SKILL.md`），你的 AI 助手会自动探测并遵循。Skills 是把 OpenSpec 工作流交付给助手的、正在成形的跨工具标准。
+**Skill.** A folder of instructions (`.../skills/openspec-*/SKILL.md`) that your AI assistant auto-detects and follows. Skills are the emerging cross-tool standard for delivering the OpenSpec workflow to your assistant.
 
-**Command file（命令文件）。** 按工具分的斜杠命令文件（`.../commands/opsx-*`）。较老的交付机制，仍与 skills 并行支持。你很少需要直接动它。
+**Command file.** A per-tool slash command file (`.../commands/opsx-*`). The older delivery mechanism, still supported alongside skills. You rarely touch these directly.
 
-**Profile。** 安装到你项目的斜杠命令集合。**Core**（默认）是 `propose`、`explore`、`apply`、`sync`、`archive`。**Expanded** 额外提供 `new`、`continue`、`ff`、`verify`、`bulk-archive`、`onboard`。用 `openspec config profile` 切换。
+**Profile.** The set of slash commands installed in your project. **Core** (the default) is `propose`, `explore`, `apply`, `sync`, `archive`. The **expanded** set adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, `onboard`. Change it with `openspec-cn config profile`.
 
-**Delivery（交付方式）。** OpenSpec 为你的工具安装 skill、命令文件，还是两者都装。全局配置，用 `openspec update` 应用。
+**Delivery.** Whether OpenSpec installs skills, command files, or both for your tools. Configured globally and applied with `openspec-cn update`.
 
-## 自定义
+## Customization
 
-**Schema。** 一个工作流拥有哪些制品、它们如何互相依赖的定义。内置默认是 `spec-driven`（proposal → specs → design → tasks）。你可以复制或自写。见 [自定义](customization.md#custom-schemas)。
+**Schema.** The definition of which artifacts a workflow has and how they depend on one another. The built-in default is `spec-driven` (proposal → specs → design → tasks). You can fork it or write your own. See [Customization](customization.md#custom-schemas).
 
-**Template（模板）。** schema 内部的一份 Markdown 文件，塑造 AI 为某制品生成什么。编辑模板会立即改变 AI 的输出，无需重新构建。
+**Template.** A Markdown file inside a schema that shapes what the AI generates for a given artifact. Editing a template changes the AI's output immediately, with no rebuild.
 
-**Project config（`openspec/config.yaml`）。** 按项目的设置：默认 schema、注入每个规划请求的 `context:`、按制品的 `rules:`。教会 OpenSpec 你的技术栈和约定的最简单方式。见 [自定义](customization.md#project-configuration)。
+**Project config (`openspec/config.yaml`).** Per-project settings: the default schema, the `context:` injected into every planning request, and per-artifact `rules:`. The easiest way to teach OpenSpec about your stack and conventions. See [Customization](customization.md#project-configuration).
 
-**Context injection（上下文注入）。** 把项目背景放进 `config.yaml` 的 `context:` 字段，让它自动加到 AI 生成的每份制品里。比指望 AI 去读另一份文件更可靠。
+**Context injection.** Putting project background in `config.yaml`'s `context:` field so it's automatically added to every artifact the AI generates. More reliable than hoping the AI reads a separate file.
 
-**Dependency graph（依赖图）。** 由制品 `requires:` 关系形成的有向图。它是一个 DAG（有向无环图：箭头只向前指，绝不成环），OpenSpec 用它知道你接下来可以创建什么。
+**Dependency graph.** The directed graph formed by artifact `requires:` relationships. It's a DAG (directed acyclic graph: arrows only point forward, never in a loop), and OpenSpec uses it to know what you can create next.
 
-**Enablers, not gates（是 enabler 不是 gate）。** 关于制品依赖的原则：依赖表示接下来什么变 *可能*，而不是接下来 *必须* 做什么。你随时可以回头编辑任何制品。见 [核心概念一览](overview.md#enablers-not-gates)。
+**Enablers, not gates.** The principle that artifact dependencies show what becomes *possible* next, not what's *required* next. You can revisit and edit any artifact at any time. See [Core Concepts at a Glance](overview.md#enablers-not-gates).
 
-## 跨仓库协作（beta）
+## Coordination across repos (beta)
 
-下面这些术语只在你跨多个仓库规划时才适用。它们是 beta。大多数用户可以忽略。见 [Stores 用户指南](stores-beta/user-guide.md)。
+These terms apply only if your planning spans more than one repo. They're in beta. Most users can ignore them. See the [Stores User Guide](stores-beta/user-guide.md).
 
-**Store。** 一个独立仓库，唯一职责是规划。它拥有你已熟悉的 `openspec/` 形态（specs 和 changes），加一份小小的身份文件。你在自己机器上按名字注册一次，之后任何 OpenSpec 命令都能在任何位置工作于它。
+**Store.** A standalone repo whose whole job is planning. It has the same `openspec/` shape you already know (specs and changes) plus a small identity file. You register it on your machine once, by name, and then any OpenSpec command can work in it from anywhere.
 
-**Reference。** 代码仓库的 `openspec/config.yaml` 里对某个 store 的声明，表示该仓库依赖它。Reference 是只读的：仓库保留自己的根，`openspec instructions` 会获得一份被引用 store 的 spec 索引，每条带精确的获取命令。
+**Reference.** A declaration, in a code repo's `openspec/config.yaml`, of a store that repo draws on. References are read-only: the repo keeps its own root, and `openspec-cn instructions` gains an index of the referenced store's specs, each with the exact command to fetch it.
 
-**Working context（工作上下文）。** `openspec context` 为当前仓库组装出的东西：它的 OpenSpec 根加上它引用的每个 store，以及如何获取它们。这是"我在和什么一起工作？"的答案。
+**Working context.** What `openspec-cn context` assembles for the current repo: its OpenSpec root plus every store it references, each with how to fetch it. The answer to "what am I working with?"
 
-**Workset（工作集）。** 你个人、机器本地一组一起打开的文件夹（一个 store 加上你工作的代码仓库）。用 `openspec workset create` 显式创建；这些本地路径不会被提交到共享的规划仓库。
+**Workset.** A personal, machine-local set of folders you open together (a store alongside the code repos you work on). Created explicitly with `openspec-cn workset create`; nothing about those local paths is committed to the shared planning repo.
 
-## 另见
+## See also
 
-- [核心概念一览](overview.md)：五个 idea，一页纸
-- [概念](concepts.md)：长文解释
-- [命令是如何工作的](how-commands-work.md)：斜杠命令 vs CLI
+- [Core Concepts at a Glance](overview.md): the five ideas, on one page
+- [Concepts](concepts.md): the long-form explanation
+- [How Commands Work](how-commands-work.md): slash commands versus the CLI

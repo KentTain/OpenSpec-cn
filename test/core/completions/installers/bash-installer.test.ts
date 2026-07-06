@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -117,7 +117,7 @@ describe('BashInstaller', () => {
 
       expect(content).toContain('# OPENSPEC:START');
       expect(content).toContain('# OPENSPEC:END');
-      expect(content).toContain('OpenSpec-cn shell 补全配置');
+      expect(content).toContain('OpenSpec shell completions configuration');
     });
 
     it('should include instructions when auto-config is disabled', async () => {
@@ -166,7 +166,7 @@ describe('BashInstaller', () => {
 
       expect(result?.success).toBe(false);
       expect(result?.message).toContain('安装补全脚本失败');
-      expect(result?.message).toContain(`Path is not writable: ${targetPath}`);
+      expect(result?.message).toContain(`路径不可写：${targetPath}`);
     });
 
     it('should detect already-installed completion with identical content', async () => {
@@ -178,8 +178,8 @@ describe('BashInstaller', () => {
       const secondResult = await installer.install(testScript);
 
       expect(secondResult.success).toBe(true);
-      expect(secondResult.message).toContain('补全脚本已安装');
-      expect(secondResult.message).toContain('最新版本');
+      expect(secondResult.message).toContain('已安装');
+      expect(secondResult.message).toContain('已是最新');
       expect(secondResult.backupPath).toBeUndefined();
     });
 
@@ -194,7 +194,7 @@ describe('BashInstaller', () => {
       const secondResult = await installer.install(secondScript);
 
       expect(secondResult.success).toBe(true);
-      expect(secondResult.message).toContain('补全脚本更新成功');
+      expect(secondResult.message).toContain('更新成功');
       expect(secondResult.backupPath).toBeDefined();
 
       // Verify new content was written
@@ -244,7 +244,7 @@ describe('BashInstaller', () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('已成功卸载');
+      expect(result.message).toContain('卸载成功');
 
       // Verify file is gone
       const targetPath = await installer.getInstallationPath();
@@ -252,7 +252,7 @@ describe('BashInstaller', () => {
       expect(exists).toBe(false);
     });
 
-    it('should return failure when not installed', async () => {
+    it('should return failure when 未安装', async () => {
       const result = await installer.uninstall();
 
       expect(result.success).toBe(false);
@@ -291,7 +291,7 @@ describe('BashInstaller', () => {
 
       expect(content).toContain('# OPENSPEC:START');
       expect(content).toContain('# OPENSPEC:END');
-      expect(content).toContain('OpenSpec-cn shell 补全配置');
+      expect(content).toContain('# OpenSpec shell completions configuration');
       expect(content).toContain(completionsDir);
     });
 
@@ -450,7 +450,7 @@ describe('BashInstaller', () => {
 
       expect(newContent).not.toContain('# OPENSPEC:START');
       expect(newContent).not.toContain('# OPENSPEC:END');
-      expect(newContent).not.toContain('OpenSpec shell 补全配置');
+      expect(newContent).not.toContain('OpenSpec shell completions configuration');
       expect(newContent).toContain('# My config');
       expect(newContent).toContain('alias ll="ls -la"');
     });

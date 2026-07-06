@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Migration Utilities
  *
  * One-time migration logic for existing projects when profile system is introduced.
@@ -126,6 +126,6 @@ export function migrateIfNeeded(projectPath: string, tools: AIToolOption[]): voi
   }
   saveGlobalConfig(config);
 
-  console.log(`已迁移：自定义配置，共 ${installedWorkflows.length} 个工作流程`);
-  console.log("本版本新增：/opsx:propose。尝试 'openspec-cn config profile core' 获得精简体验。");
+  console.log(`已迁移：自定义 profile，包含 ${installedWorkflows.length} 个工作流`);
+  console.log("此版本新增：/opsx:propose。试试 'openspec-cn config profile core' 获取精简体验。");
 }

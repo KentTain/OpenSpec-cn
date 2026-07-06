@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+﻿import { promises as fs } from 'fs';
 import path from 'path';
 import { getTaskProgressForChange, formatTaskStatus } from '../utils/task-progress.js';
 import { readFileSync } from 'fs';
@@ -66,11 +66,11 @@ function formatRelativeTime(date: Date): string {
   if (diffDays > 30) {
     return date.toLocaleDateString();
   } else if (diffDays > 0) {
-    return `${diffDays}天前`;
+    return `${diffDays} 天前`;
   } else if (diffHours > 0) {
-    return `${diffHours}小时前`;
+    return `${diffHours} 小时前`;
   } else if (diffMins > 0) {
-    return `${diffMins}分钟前`;
+    return `${diffMins} 分钟前`;
   } else {
     return '刚刚';
   }
@@ -87,7 +87,7 @@ export class ListCommand {
       try {
         await fs.access(changesDir);
       } catch {
-        throw new Error("未找到OpenSpec变更目录。请先运行 'openspec-cn init'。");
+        throw new Error("未找到 OpenSpec changes 目录。请先运行 'openspec-cn init'。");
       }
 
       // Get all directories in changes (excluding archive)
@@ -100,7 +100,7 @@ export class ListCommand {
         if (json) {
           console.log(JSON.stringify({ changes: [], ...(root ? { root } : {}) }, null, 2));
         } else {
-          console.log('未找到活动的变更。');
+          console.log('未找到活跃的变更。');
         }
         return;
       }
@@ -204,7 +204,7 @@ export class ListCommand {
     const nameWidth = Math.max(...specs.map(s => s.id.length));
     for (const spec of specs) {
       const padded = spec.id.padEnd(nameWidth);
-      console.log(`${padding}${padded}     需求 ${spec.requirementCount}`);
+      console.log(`${padding}${padded}     需求数 ${spec.requirementCount}`);
     }
   }
 }

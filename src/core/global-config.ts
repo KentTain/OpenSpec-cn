@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+﻿import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
@@ -149,7 +149,7 @@ export function getGlobalConfig(): GlobalConfig {
   } catch (error) {
     // Log warning for parse errors, but not for missing files
     if (error instanceof SyntaxError) {
-      console.error(`警告：${configPath} 中的 JSON 无效，将使用默认配置`);
+      console.error(`警告：${configPath} 中的 JSON 无效，使用默认值`);
     }
     return { ...DEFAULT_CONFIG };
   }

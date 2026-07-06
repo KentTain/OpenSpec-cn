@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PowerShellInstaller } from '../../../../src/core/completions/installers/powershell-installer.js';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -187,7 +187,7 @@ describe('PowerShellInstaller', () => {
       await fs.mkdir(path.dirname(profilePath), { recursive: true });
 
       const initialContent = [
-        '# OPENSPEC:START - OpenSpec 补全（管理块，请勿手动编辑）',
+        '# OPENSPEC:START - OpenSpec completion (managed block, do not edit manually)',
         `. "${mockScriptPath}"`,
         '# OPENSPEC:END',
         '',
@@ -353,8 +353,7 @@ describe('PowerShellInstaller', () => {
 
       expect(result).toBe(true);
       const content = await fs.readFile(profilePath, 'utf-8');
-      // UTF-8 BOM should be present for Windows PowerShell 5.1 compatibility
-      expect(content).toBe('\uFEFF# User config\n');
+      expect(content).toBe('# User config\n');
     });
 
     it('should preserve user content outside markers', async () => {
@@ -411,7 +410,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       const result = await installer.install(mockCompletionScript);
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('补全脚本安装成功');
+      expect(result.message).toContain('安装成功');
       expect(result.installedPath).toContain('OpenSpecCompletion.ps1');
       expect(result.backupPath).toBeUndefined();
     });
@@ -432,18 +431,17 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
 
       const targetPath = installer.getInstallationPath();
       const content = await fs.readFile(targetPath, 'utf-8');
-      // UTF-8 BOM should be prepended for Windows PowerShell 5.1 compatibility
-      expect(content).toBe('\uFEFF' + mockCompletionScript);
+      expect(content).toBe(mockCompletionScript);
     });
 
-    it('should detect when already installed with same content', async () => {
+    it('should detect when 已安装 with same content', async () => {
       delete process.env.OPENSPEC_NO_AUTO_CONFIG;
       await installer.install(mockCompletionScript);
 
       const result = await installer.install(mockCompletionScript);
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('补全脚本已安装（已是最新版本）');
+      expect(result.message).toBe('补全脚本已安装（已是最新）');
       expect(result.backupPath).toBeUndefined();
     });
 
@@ -455,7 +453,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       const result = await installer.install(updatedScript);
 
       expect(result.success).toBe(true);
-      expect(result.message).toContain('补全脚本更新成功');
+      expect(result.message).toContain('更新成功');
       expect(result.backupPath).toBeDefined();
     });
 
@@ -469,9 +467,9 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(result.success).toBe(true);
       expect(result.backupPath).toBeDefined();
 
-      // Verify backup contains original content with BOM
+      // Verify backup contains original content
       const backupContent = await fs.readFile(result.backupPath!, 'utf-8');
-      expect(backupContent).toBe('\uFEFF' + mockCompletionScript);
+      expect(backupContent).toBe(mockCompletionScript);
     });
 
     it('should configure PowerShell profile when not disabled', async () => {
@@ -480,11 +478,11 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
 
       expect(result.success).toBe(true);
       expect(result.profileConfigured).toBe(true);
-      expect(result.message).toContain('已自动配置 PowerShell 配置文件');
+      expect(result.message).toContain('profile 已配置');
       expect(result.instructions).toBeUndefined();
     });
 
-    // Note: OPENSPEC_NO_AUTO_CONFIG support was removed from PowerShell installer
+    // Note: OPENSPEC_NO_AUTO_CONFIG support was 已移除 from PowerShell installer
     // Profile is now always auto-configured if possible
 
     // Skip on Windows: fs.chmod() doesn't reliably restrict write access on Windows
@@ -560,8 +558,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(result.success).toBe(true);
       const targetPath = installer.getInstallationPath();
       const content = await fs.readFile(targetPath, 'utf-8');
-      // UTF-8 BOM should be present for Windows PowerShell 5.1 compatibility
-      expect(content).toBe('\uFEFF');
+      expect(content).toBe('');
     });
 
     it('should handle completion script with special characters', async () => {
@@ -573,8 +570,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(result.success).toBe(true);
       const targetPath = installer.getInstallationPath();
       const content = await fs.readFile(targetPath, 'utf-8');
-      // UTF-8 BOM should be prepended for Windows PowerShell 5.1 compatibility
-      expect(content).toBe('\uFEFF' + specialScript);
+      expect(content).toBe(specialScript);
     });
   });
 
@@ -645,7 +641,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(raw[0]).toBe(0xff);
       expect(raw[1]).toBe(0xfe);
 
-      // Verify content: original line kept, OpenSpec block removed
+      // Verify content: original line kept, OpenSpec block 已移除
       const content = raw.subarray(2).toString('utf16le');
       expect(content).toContain('. "C:\\Code\\profile.ps1"');
       expect(content).not.toContain('# OPENSPEC:START');
@@ -703,10 +699,10 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(result).toBe(true);
 
       const raw = await fs.readFile(profilePath);
-      // configureProfile adds UTF-8 BOM for Windows PowerShell 5.1 compatibility
-      expect(raw[0]).toBe(0xef);
-      expect(raw[1]).toBe(0xbb);
-      expect(raw[2]).toBe(0xbf);
+      // Should NOT have any BOM
+      expect(raw[0]).not.toBe(0xff);
+      expect(raw[0]).not.toBe(0xfe);
+      expect(raw[0]).not.toBe(0xef);
 
       const content = raw.toString('utf-8');
       expect(content).toContain('# Plain UTF-8');
@@ -758,7 +754,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       const result = await installer.uninstall();
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('补全脚本已成功卸载');
+      expect(result.message).toBe('补全脚本卸载成功');
     });
 
     it('should remove the completion file', async () => {
@@ -798,7 +794,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       const result = await installer.uninstall({ yes: true });
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('补全脚本已成功卸载');
+      expect(result.message).toBe('补全脚本卸载成功');
     });
 
     it.skipIf(process.platform === 'win32')('should uninstall read-only completion script when parent directory is writable', async () => {
@@ -836,7 +832,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
 
       await installer.uninstall();
 
-      // Verify both are removed/cleaned
+      // Verify both are 已移除/cleaned
       const scriptExistsAfter = await fs.access(targetPath).then(() => true).catch(() => false);
       const profileContentAfter = await fs.readFile(profilePath, 'utf-8');
       expect(scriptExistsAfter).toBe(false);
@@ -863,7 +859,7 @@ Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
       expect(result.success).toBe(false);
       expect(
         result.message === '补全脚本未安装' ||
-        result.message.includes('卸载补全脚本失败')
+        result.message.includes('Failed to uninstall completion script')
       ).toBe(true);
     });
 

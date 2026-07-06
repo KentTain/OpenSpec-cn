@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ArchiveCommand } from '../../src/core/archive.js';
 import { Validator } from '../../src/core/validation/validator.js';
 import { promises as fs } from 'fs';
@@ -19,7 +19,7 @@ describe('ArchiveCommand', () => {
 
   beforeEach(async () => {
     // Create temp directory
-  tempDir = path.join(os.tmpdir(), `openspec-archive-test-${Date.now()}`);
+    tempDir = path.join(os.tmpdir(), `openspec-archive-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
 
     // Change to temp directory
@@ -30,10 +30,11 @@ describe('ArchiveCommand', () => {
     process.env.XDG_DATA_HOME = path.join(tempDir, 'xdg-data');
 
     // Create OpenSpec structure
-  const openspecDir = path.join(tempDir, 'openspec');
-  await fs.mkdir(path.join(openspecDir, 'changes'), { recursive: true });
-  await fs.mkdir(path.join(openspecDir, 'specs'), { recursive: true });
-  await fs.mkdir(path.join(openspecDir, 'changes', 'archive'), { recursive: true });
+    const openspecDir = path.join(tempDir, 'openspec');
+    await fs.mkdir(path.join(openspecDir, 'changes'), { recursive: true });
+    await fs.mkdir(path.join(openspecDir, 'specs'), { recursive: true });
+    await fs.mkdir(path.join(openspecDir, 'changes', 'archive'), { recursive: true });
+
     // Suppress console.log during tests
     console.log = vi.fn();
 
@@ -100,7 +101,7 @@ describe('ArchiveCommand', () => {
       
       // Verify warning was logged
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('警告：发现 2 个未完成任务')
+        expect.stringContaining('警告：发现 2 个未完成的任务')
       );
     });
 
@@ -113,9 +114,9 @@ describe('ArchiveCommand', () => {
       // Create delta-based change spec (ADDED requirement)
       const specContent = `# Test Capability Spec - Changes
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: The system SHALL provide test capability
+### Requirement: The system SHALL provide test capability
 
 #### Scenario: Basic test
 Given a test condition
@@ -129,11 +130,11 @@ Then expected result happens`;
       // Verify spec was created from skeleton and ADDED requirement applied
       const mainSpecPath = path.join(tempDir, 'openspec', 'specs', 'test-capability', 'spec.md');
       const updatedContent = await fs.readFile(mainSpecPath, 'utf-8');
-      expect(updatedContent).toContain('# test-capability 规范');
-      expect(updatedContent).toContain('## 目的');
-      expect(updatedContent).toContain(`由归档变更 ${changeName} 创建`);
-      expect(updatedContent).toContain('## 需求');
-      expect(updatedContent).toContain('### 需求: The system SHALL provide test capability');
+      expect(updatedContent).toContain('# test-capability Specification');
+      expect(updatedContent).toContain('## Purpose');
+      expect(updatedContent).toContain(`created by archiving change ${changeName}`);
+      expect(updatedContent).toContain('## Requirements');
+      expect(updatedContent).toContain('### Requirement: The system SHALL provide test capability');
       expect(updatedContent).toContain('#### Scenario: Basic test');
     });
 
@@ -167,13 +168,13 @@ The system SHALL support logo and backgroundColor fields for gift cards.
       
       // Verify warning was logged about REMOVED requirements being ignored
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('警告：gift-card - 2 条“移除需求”操作已被忽略（无内容可删除）。')
+        expect.stringContaining('Warning: gift-card - 2 REMOVED requirement(s) ignored for new spec (nothing to remove).')
       );
       
       // Verify spec was created with only ADDED requirements
       const mainSpecPath = path.join(tempDir, 'openspec', 'specs', 'gift-card', 'spec.md');
       const updatedContent = await fs.readFile(mainSpecPath, 'utf-8');
-      expect(updatedContent).toContain('# gift-card 规范');
+      expect(updatedContent).toContain('# gift-card Specification');
       expect(updatedContent).toContain('### Requirement: Logo and Background Color');
       expect(updatedContent).toContain('#### Scenario: Display gift card with logo');
       // REMOVED requirements should not be in the final spec
@@ -212,7 +213,7 @@ Modified content.`;
       
       // Verify error message mentions MODIFIED not allowed for new specs
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('new-capability：目标规范不存在；新规范仅允许“新增需求”操作。“修改需求”和“重命名需求”操作需要现有规范。')
+        expect.stringContaining('new-capability: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.')
       );
       expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
       
@@ -250,7 +251,7 @@ New feature description.
       
       // Verify error message mentions RENAMED not allowed for new specs
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('another-capability：目标规范不存在；新规范仅允许“新增需求”操作。“修改需求”和“重命名需求”操作需要现有规范。')
+        expect.stringContaining('another-capability: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.')
       );
       expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
       
@@ -283,7 +284,7 @@ New feature description.
       // Try to archive
       await expect(
         archiveCommand.execute(changeName, { yes: true })
-      ).rejects.toThrow(`归档 '${date}-${changeName}' 已存在。`);
+      ).rejects.toThrow(`Archive '${date}-${changeName}' already exists.`);
     });
 
     it('should handle changes without tasks.md', async () => {
@@ -296,7 +297,7 @@ New feature description.
       
       // Should complete without warnings
       expect(console.log).not.toHaveBeenCalledWith(
-        expect.stringContaining('未完成任务')
+        expect.stringContaining('未完成的任务')
       );
       
       // Verify change was archived
@@ -315,7 +316,7 @@ New feature description.
       
       // Should complete without spec updates
       expect(console.log).not.toHaveBeenCalledWith(
-        expect.stringContaining('Specs to update')
+        expect.stringContaining('要更新的 specs')
       );
       
       // Verify change was archived
@@ -339,7 +340,7 @@ New feature description.
       
       // Verify skip message was logged
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('跳过验证')
+        '跳过 spec 更新（提供了 --skip-specs 标志）。'
       );
       
       // Verify spec was NOT copied to main specs
@@ -361,9 +362,9 @@ New feature description.
 
       const deltaSpec = `# Unstable Capability
 
-## 新增需求
+## ADDED Requirements
 
-### 需求: Logging Feature
+### Requirement: Logging Feature
 **ID**: REQ-LOG-001
 
 The system will log all events.
@@ -408,7 +409,7 @@ The system will log all events.
 ## Purpose
 This is a test capability specification.
 
-## 需求
+## Requirements
 
 ### The system SHALL provide test capability
 
@@ -426,13 +427,13 @@ Then expected result happens`;
       
       // Verify user was prompted about specs
       expect(mockConfirm).toHaveBeenCalledWith({
-        message: '继续执行规范更新吗？',
+        message: '是否继续更新 specs？',
         default: true
       });
       
       // Verify skip message was logged
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('跳过规范更新')
+        '跳过 spec 更新。继续归档。'
       );
       
       // Verify spec was NOT copied to main specs
@@ -460,25 +461,25 @@ Then expected result happens`;
 ## Purpose
 Alpha purpose.
 
-## 需求
+## Requirements
 
-### 需求: Important Rule
+### Requirement: Important Rule
 Some details.`;
       await fs.writeFile(path.join(mainSpecDir, 'spec.md'), mainContent);
 
       // Change attempts to modify the same requirement but with trailing spaces after the name
       const deltaContent = `# Alpha - Changes
 
-## 修改需求
+## MODIFIED Requirements
 
-### 需求: Important Rule   
+### Requirement: Important Rule   
 Updated details.`;
       await fs.writeFile(path.join(changeSpecDir, 'spec.md'), deltaContent);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       const updated = await fs.readFile(path.join(mainSpecDir, 'spec.md'), 'utf-8');
-      expect(updated).toContain('### 需求: Important Rule');
+      expect(updated).toContain('### Requirement: Important Rule');
       expect(updated).toContain('Updated details.');
     });
 
@@ -496,42 +497,42 @@ Updated details.`;
 ## Purpose
 Beta purpose.
 
-## 需求
+## Requirements
 
-### 需求: A
+### Requirement: A
 content A
 
-### 需求: B
+### Requirement: B
 content B`;
       await fs.writeFile(path.join(mainSpecDir, 'spec.md'), mainContent);
 
       // Rename A->C, Remove B, Modify C, Add D
       const deltaContent = `# Beta - Changes
 
-## 重命名需求
-- FROM: \`### 需求: A\`
-- TO: \`### 需求: C\`
+## RENAMED Requirements
+- FROM: \`### Requirement: A\`
+- TO: \`### Requirement: C\`
 
-## 移除需求
-### 需求: B
+## REMOVED Requirements
+### Requirement: B
 
-## 修改需求
-### 需求: C
+## MODIFIED Requirements
+### Requirement: C
 updated C
 
-## 新增需求
-### 需求: D
+## ADDED Requirements
+### Requirement: D
 content D`;
       await fs.writeFile(path.join(changeSpecDir, 'spec.md'), deltaContent);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       const updated = await fs.readFile(path.join(mainSpecDir, 'spec.md'), 'utf-8');
-      expect(updated).toContain('### 需求: C');
+      expect(updated).toContain('### Requirement: C');
       expect(updated).toContain('updated C');
-      expect(updated).toContain('### 需求: D');
-      expect(updated).not.toContain('### 需求: A');
-      expect(updated).not.toContain('### 需求: B');
+      expect(updated).toContain('### Requirement: D');
+      expect(updated).not.toContain('### Requirement: A');
+      expect(updated).not.toContain('### Requirement: B');
     });
 
     it('should abort with error when MODIFIED/REMOVED reference non-existent requirements', async () => {
@@ -548,18 +549,18 @@ content D`;
 ## Purpose
 Gamma purpose.
 
-## 需求`;
+## Requirements`;
       await fs.writeFile(path.join(mainSpecDir, 'spec.md'), mainContent);
 
       // Delta tries to modify and remove non-existent requirement
       const deltaContent = `# Gamma - Changes
 
-## 修改需求
-### 需求: Missing
+## MODIFIED Requirements
+### Requirement: Missing
 new text
 
-## 移除需求
-### 需求: Another Missing`;
+## REMOVED Requirements
+### Requirement: Another Missing`;
       await fs.writeFile(path.join(changeSpecDir, 'spec.md'), deltaContent);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
@@ -618,10 +619,10 @@ The system SHALL do B differently.
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('delta-target：目标规范结构无效，修复前无法更新：')
+        expect.stringContaining('delta-target: target spec is structurally invalid and cannot be updated until fixed:')
       );
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('需求标题 "### Requirement: B" 出现在主 ## Requirements 部分之外。')
+        expect.stringContaining('需求标题 "### Requirement: B" 出现在主 ## Requirements 章节之外。')
       );
       expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
 
@@ -647,21 +648,21 @@ The system SHALL do B differently.
 ## Purpose
 Delta purpose.
 
-## 需求
+## Requirements
 
-### 需求: Old
+### Requirement: Old
 old body`;
       await fs.writeFile(path.join(mainSpecDir, 'spec.md'), mainContent);
 
       // Delta: rename Old->New, but MODIFIED references Old (should abort)
       const badDelta = `# Delta - Changes
 
-## 重命名需求
-- FROM: \`### 需求: Old\`
-- TO: \`### 需求: New\`
+## RENAMED Requirements
+- FROM: \`### Requirement: Old\`
+- TO: \`### Requirement: New\`
 
-## 修改需求
-### 需求: Old
+## MODIFIED Requirements
+### Requirement: Old
 new body`;
       await fs.writeFile(path.join(changeSpecDir, 'spec.md'), badDelta);
 
@@ -670,7 +671,7 @@ new body`;
       expect(unchanged).toBe(mainContent);
       // Assert error message format and abort notice
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('验证失败 - 当存在重命名时，"修改需求"必须引用新标题')
+        expect.stringContaining('delta validation failed')
       );
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('已中止。未更改任何文件。')
@@ -679,20 +680,20 @@ new body`;
       // Fix MODIFIED to reference New (should succeed)
       const goodDelta = `# Delta - Changes
 
-## 重命名需求
-- FROM: \`### 需求: Old\`
-- TO: \`### 需求: New\`
+## RENAMED Requirements
+- FROM: \`### Requirement: Old\`
+- TO: \`### Requirement: New\`
 
-## 修改需求
-### 需求: New
+## MODIFIED Requirements
+### Requirement: New
 new body`;
       await fs.writeFile(path.join(changeSpecDir, 'spec.md'), goodDelta);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
       const updated = await fs.readFile(path.join(mainSpecDir, 'spec.md'), 'utf-8');
-      expect(updated).toContain('### 需求: New');
+      expect(updated).toContain('### Requirement: New');
       expect(updated).toContain('new body');
-      expect(updated).not.toContain('### 需求: Old');
+      expect(updated).not.toContain('### Requirement: Old');
     });
 
     it('should process multiple specs atomically (any failure aborts all)', async () => {
@@ -711,9 +712,9 @@ new body`;
 ## Purpose
 Epsilon purpose.
 
-## 需求
+## Requirements
 
-### 需求: E1
+### Requirement: E1
 e1`);
 
       const zetaMain = path.join(tempDir, 'openspec', 'specs', 'zeta', 'spec.md');
@@ -723,30 +724,30 @@ e1`);
 ## Purpose
 Zeta purpose.
 
-## 需求
+## Requirements
 
-### 需求: Z1
+### Requirement: Z1
 z1`);
 
       // Delta: epsilon is valid modification; zeta tries to remove non-existent -> should abort both
       await fs.writeFile(path.join(spec1Dir, 'spec.md'), `# Epsilon - Changes
 
-## 修改需求
-### 需求: E1
+## MODIFIED Requirements
+### Requirement: E1
 E1 updated`);
 
       await fs.writeFile(path.join(spec2Dir, 'spec.md'), `# Zeta - Changes
 
-## 移除需求
-### 需求: Missing`);
+## REMOVED Requirements
+### Requirement: Missing`);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       const e1 = await fs.readFile(epsilonMain, 'utf-8');
       const z1 = await fs.readFile(zetaMain, 'utf-8');
-      expect(e1).toContain('### 需求: E1');
+      expect(e1).toContain('### Requirement: E1');
       expect(e1).not.toContain('E1 updated');
-      expect(z1).toContain('### 需求: Z1');
+      expect(z1).toContain('### Requirement: Z1');
       // changeDir should still exist
       await expect(fs.access(changeDir)).resolves.not.toThrow();
     });
@@ -762,21 +763,21 @@ E1 updated`);
       // Existing main specs
       const omegaMain = path.join(tempDir, 'openspec', 'specs', 'omega', 'spec.md');
       await fs.mkdir(path.dirname(omegaMain), { recursive: true });
-      await fs.writeFile(omegaMain, `# omega Specification\n\n## Purpose\nOmega purpose.\n\n## 需求\n\n### 需求: O1\no1`);
+      await fs.writeFile(omegaMain, `# omega Specification\n\n## Purpose\nOmega purpose.\n\n## Requirements\n\n### Requirement: O1\no1`);
 
       const psiMain = path.join(tempDir, 'openspec', 'specs', 'psi', 'spec.md');
       await fs.mkdir(path.dirname(psiMain), { recursive: true });
-      await fs.writeFile(psiMain, `# psi Specification\n\n## Purpose\nPsi purpose.\n\n## 需求\n\n### 需求: P1\np1`);
+      await fs.writeFile(psiMain, `# psi Specification\n\n## Purpose\nPsi purpose.\n\n## Requirements\n\n### Requirement: P1\np1`);
 
       // Deltas: omega add one, psi rename and modify -> totals: +1, ~1, -0, →1
-      await fs.writeFile(path.join(spec1Dir, 'spec.md'), `# Omega - Changes\n\n## 新增需求\n\n### 需求: O2\nnew`);
-      await fs.writeFile(path.join(spec2Dir, 'spec.md'), `# Psi - Changes\n\n## 重命名需求\n- FROM: \`### 需求: P1\`\n- TO: \`### 需求: P2\`\n\n## 修改需求\n### 需求: P2\nupdated`);
+      await fs.writeFile(path.join(spec1Dir, 'spec.md'), `# Omega - Changes\n\n## ADDED Requirements\n\n### Requirement: O2\nnew`);
+      await fs.writeFile(path.join(spec2Dir, 'spec.md'), `# Psi - Changes\n\n## RENAMED Requirements\n- FROM: \`### Requirement: P1\`\n- TO: \`### Requirement: P2\`\n\n## MODIFIED Requirements\n### Requirement: P2\nupdated`);
 
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       // Verify aggregated totals line was printed
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('总计：+ 1 新增，~ 1 修改，- 0 删除，→ 1 重命名')
+        expect.stringContaining('总计：+ 1, ~ 1, - 0, → 1')
       );
     });
   });
@@ -788,7 +789,7 @@ E1 updated`);
       
       await expect(
         archiveCommand.execute('any-change', { yes: true })
-      ).rejects.toThrow("未找到OpenSpec变更目录。请先运行 'openspec-cn init'。");
+      ).rejects.toThrow("未找到 OpenSpec changes 目录。请先运行 'openspec-cn init'。");
     });
   });
 
@@ -844,7 +845,7 @@ E1 updated`);
       
       // Verify confirm was called
       expect(mockConfirm).toHaveBeenCalledWith({
-        message: expect.stringContaining('未完成任务'),
+        message: '警告：发现 1 个未完成的任务。是否继续？',
         default: false
       });
     });
@@ -870,7 +871,7 @@ E1 updated`);
       await archiveCommand.execute(changeName, { noValidate: true });
       
       // Verify archive was cancelled
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('已取消'));
+      expect(console.log).toHaveBeenCalledWith('归档已取消。');
       
       // Verify change was not archived
       await expect(fs.access(changeDir)).resolves.not.toThrow();

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Static template strings for Zsh completion scripts.
  * These are Zsh-specific helper functions that never change.
  */
@@ -35,7 +35,7 @@ _openspec_complete_items() {
   _describe "item" items
 }
 
-# 使用 openspec-cn __complete 获取可用的 Schema
+# Use openspec-cn __complete to get available schemas
 _openspec_complete_schemas() {
   local -a schemas
   while IFS=$'\\t' read -r id desc; do

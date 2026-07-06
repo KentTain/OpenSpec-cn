@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 import type { Command } from 'commander';
 
 import { COMMAND_REGISTRY } from '../../../src/core/completions/command-registry.js';
@@ -191,7 +191,7 @@ describe('command completion registry', () => {
     expect(storeGroup).toBeDefined();
     const setup = storeGroup?.commands.find((child) => child.name() === 'setup');
     expect(setup).toBeDefined();
-    expect(getCommandPath(setup as Command)).toBe('openspec-cn:store:setup');
+    expect(getCommandPath(setup as Command)).toBe('store:setup');
   });
 
   it('tracks top-level workflow commands', () => {
@@ -211,7 +211,7 @@ describe('command completion registry', () => {
     ]);
 
     const storeFlag = newChange?.flags.find((flag) => flag.name === 'store');
-    expect(storeFlag?.description).toContain('用作 OpenSpec 根目录');
+    expect(storeFlag?.description).toContain('OpenSpec 根目录');
     expect(newChange?.flags.map((flag) => flag.name)).not.toContain('initiative');
     expect(newChange?.flags.map((flag) => flag.name)).not.toContain('areas');
     expect(newChange?.flags.map((flag) => flag.name)).not.toContain('store-path');
@@ -222,7 +222,7 @@ describe('command completion registry', () => {
       const entry = command(name);
       const store = entry?.flags.find((flag) => flag.name === 'store');
       expect(store, `${name} --store flag`).toBeDefined();
-      expect(store?.description).toContain('用作 OpenSpec 根目录');
+      expect(store?.description).toContain('OpenSpec 根目录');
       expect(entry?.flags.map((flag) => flag.name)).not.toContain('store-path');
     }
   });

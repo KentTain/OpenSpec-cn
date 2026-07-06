@@ -1,4 +1,4 @@
-import path from 'path';
+﻿import path from 'path';
 import { FileSystemUtils } from './file-system.js';
 import { writeChangeMetadata, validateSchemaName } from './change-metadata.js';
 import { readProjectConfig } from '../core/project-config.js';
@@ -66,31 +66,31 @@ export function validateChangeName(name: string): ValidationResult {
   if (!kebabCasePattern.test(name)) {
     // Provide specific error messages for common mistakes
     if (/[A-Z]/.test(name)) {
-      return { valid: false, error: '变更名称必须小写（使用 kebab-case，即短横线分隔）' };
+      return { valid: false, error: '变更名称必须为小写（使用 kebab-case）' };
     }
     if (/\s/.test(name)) {
-      return { valid: false, error: '变更名称不能包含空格（请使用短横线代替）' };
+      return { valid: false, error: '变更名称不能包含空格（改用连字符）' };
     }
     if (/_/.test(name)) {
-      return { valid: false, error: '变更名称不能包含下划线（请使用短横线代替）' };
+      return { valid: false, error: '变更名称不能包含下划线（改用连字符）' };
     }
     if (name.startsWith('-')) {
-      return { valid: false, error: '变更名称不能以短横线开头' };
+      return { valid: false, error: '变更名称不能以连字符开头' };
     }
     if (name.endsWith('-')) {
-      return { valid: false, error: '变更名称不能以短横线结尾' };
+      return { valid: false, error: '变更名称不能以连字符结尾' };
     }
     if (/--/.test(name)) {
-      return { valid: false, error: '变更名称不能包含连续的短横线' };
+      return { valid: false, error: '变更名称不能包含连续连字符' };
     }
     if (/[^a-z0-9-]/.test(name)) {
-      return { valid: false, error: '变更名称只能包含小写字母、数字和短横线' };
+      return { valid: false, error: '变更名称只能包含小写字母、数字和连字符' };
     }
     if (/^[0-9]/.test(name)) {
       return { valid: false, error: '变更名称必须以字母开头' };
     }
 
-    return { valid: false, error: '变更名称必须符合 kebab-case 规范（例如：add-auth, refactor-db）' };
+    return { valid: false, error: '变更名称必须遵循 kebab-case 约定（例如 add-auth、refactor-db）' };
   }
 
   return { valid: true };
@@ -154,7 +154,7 @@ export async function createChange(
 
   // Check if change already exists
   if (await FileSystemUtils.directoryExists(changeDir)) {
-    throw new Error(`变更 '${name}' 已存在于 ${changeDir}`);
+    throw new Error(`Change '${name}' 已存在：${changeDir}`);
   }
 
   // Creating a change may scaffold or complete the root itself (an

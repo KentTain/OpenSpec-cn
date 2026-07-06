@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+﻿import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { FileSystemUtils } from '../utils/file-system.js';
@@ -83,7 +83,7 @@ export function resolveCurrentPlanningHomeSync(
   }
 
   if (options.allowImplicitRepoRoot === false) {
-    throw new Error('从当前目录未找到 OpenSpec 规划主目录。');
+    throw new Error('在当前目录中未找到 OpenSpec 规划主目录。');
   }
 
   return repoPlanningHome(FileSystemUtils.canonicalizeExistingPath(searchStart));

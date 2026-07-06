@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Validator } from '../../src/core/validation/validator.js';
@@ -29,9 +29,9 @@ There are changes proposed, but no delta specs provided yet.`;
     const report = await validator.validateChange(changePath);
     expect(report.valid).toBe(false);
     const msg = report.issues.map(i => i.message).join('\n');
-    expect(msg).toContain('变更必须至少有一个增量');
-    expect(msg).toContain('请确认 specs/ 目录下存在功能文件夹');
-    expect(msg).toContain('## 新增需求/修改需求/移除需求/重命名需求');
+    expect(msg).toContain('Change 必须至少有一个 delta');
+    expect(msg).toContain('确保你的 change 有 specs/ 目录');
+    expect(msg).toContain('## ADDED/MODIFIED/REMOVED/RENAMED Requirements');
   });
 
   it('adds guidance when spec missing Purpose/Requirements', async () => {
@@ -43,8 +43,8 @@ There are changes proposed, but no delta specs provided yet.`;
     const report = await validator.validateSpec(specPath);
     expect(report.valid).toBe(false);
     const msg = report.issues.map(i => i.message).join('\n');
-    expect(msg).toContain('规范必须有目的部分');
-    expect(msg).toContain('预期标题："## 目的"和"## 需求"');
+    expect(msg).toContain('Spec 必须包含 Purpose 章节');
+    expect(msg).toContain('期望标题："## Purpose" 和 "## Requirements"');
   });
 
   it('warns with scenario conversion template when missing scenarios', async () => {
@@ -66,8 +66,8 @@ Text of requirement
     expect(report.valid).toBe(false);
     const warn = report.issues.find(i => i.path.includes('requirements[0].scenarios'));
     expect(warn?.message).toContain('需求必须至少有一个场景');
-    expect(warn?.message).toContain('场景必须使用四级标题');
-    expect(warn?.message).toContain('#### 场景:');
+    expect(warn?.message).toContain('场景必须使用 4 级标题');
+    expect(warn?.message).toContain('#### Scenario:');
   });
 });
 

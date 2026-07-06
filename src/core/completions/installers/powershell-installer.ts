@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+﻿import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { FileSystemUtils } from '../../../utils/file-system.js';
@@ -35,7 +35,8 @@ export class PowerShellInstaller {
     // UTF-16 BE BOM: FE FF — not natively supported by Node
     if (buffer.length >= 2 && buffer[0] === 0xfe && buffer[1] === 0xff) {
       throw new Error(
-        '文件编码为 UTF-16 BE，不受支持。请将文件重新保存为 UTF-8 或 UTF-16 LE 编码后重试。',
+        '文件编码为 UTF-16 BE，不支持。' +
+          '请重新保存为 UTF-8 或 UTF-16 LE，然后重试。',
       );
     }
     // UTF-8 BOM: EF BB BF
@@ -58,20 +59,11 @@ export class PowerShellInstaller {
   }
 
   /**
-   * Write a profile file, preserving UTF-16 LE encoding.
-   * For UTF-8 files, always adds BOM for Windows PowerShell 5.1 compatibility.
+   * Write a profile file, preserving the original BOM and encoding.
    */
   private async writeProfileFile(filePath: string, content: string, encoding: BufferEncoding, bom: Buffer): Promise<void> {
-    if (encoding === 'utf16le') {
-      // Preserve UTF-16 LE with its BOM
-      const body = Buffer.from(content, 'utf16le');
-      await fs.writeFile(filePath, Buffer.concat([bom, body]));
-    } else {
-      // Always write UTF-8 with BOM for Windows PowerShell 5.1 compatibility
-      const utf8Bom = Buffer.from([0xef, 0xbb, 0xbf]);
-      const body = Buffer.from(content, 'utf-8');
-      await fs.writeFile(filePath, Buffer.concat([utf8Bom, body]));
-    }
+    const body = Buffer.from(content, encoding);
+    await fs.writeFile(filePath, Buffer.concat([bom, body]));
   }
 
   /**
@@ -159,7 +151,7 @@ export class PowerShellInstaller {
    */
   private generateProfileConfig(scriptPath: string): string {
     return [
-      '# OpenSpec-cn shell 补全配置',
+      '# OpenSpec shell completions configuration',
       `if (Test-Path "${scriptPath}") {`,
       `    . "${scriptPath}"`,
       '}',
@@ -191,7 +183,7 @@ export class PowerShellInstaller {
 
         if (!profileExists) {
           if (!(await FileSystemUtils.canWriteFile(profilePath))) {
-            throw new Error(`Path is not writable: ${profilePath}`);
+            throw new Error(`路径不可写：${profilePath}`);
           }
           await fs.mkdir(profileDir, { recursive: true });
         }
@@ -224,7 +216,7 @@ export class PowerShellInstaller {
         // Add OpenSpec completion configuration with markers
         const openspecBlock = [
           '',
-          '# OPENSPEC:START - OpenSpec-cn 补全（管理块，请勿手动编辑）',
+          '# OPENSPEC:START - OpenSpec completion (managed block, do not edit manually)',
           scriptLine,
           '# OPENSPEC:END',
           '',
@@ -232,13 +224,13 @@ export class PowerShellInstaller {
 
         const newContent = profileContent + openspecBlock;
         if (!(await FileSystemUtils.canWriteFile(profilePath))) {
-          throw new Error(`Path is not writable: ${profilePath}`);
+          throw new Error(`路径不可写：${profilePath}`);
         }
         await this.writeProfileFile(profilePath, newContent, fileEncoding, fileBom);
         anyConfigured = true;
       } catch (error) {
         // Continue to next profile if this one fails
-        console.warn(`警告：无法配置 ${profilePath}: ${error}`);
+        console.warn(`警告：无法配置 ${profilePath}：${error}`);
       }
     }
 
@@ -285,7 +277,7 @@ export class PowerShellInstaller {
 
         const endIndex = profileContent.indexOf(endMarker, startIndex);
         if (endIndex === -1) {
-          console.warn(`警告：在 ${profilePath} 中找到开始标记但未找到结束标记`);
+          console.warn(`警告：在 ${profilePath} 中找到起始标记但未找到结束标记`);
           continue;
         }
 
@@ -297,12 +289,12 @@ export class PowerShellInstaller {
         const newContent = (beforeBlock.trimEnd() + '\n' + afterBlock.trimStart()).trim() + '\n';
 
         if (!(await FileSystemUtils.canWriteFile(profilePath))) {
-          throw new Error(`Path is not writable: ${profilePath}`);
+          throw new Error(`路径不可写：${profilePath}`);
         }
         await this.writeProfileFile(profilePath, newContent, fileEncoding, fileBom);
         anyRemoved = true;
       } catch (error) {
-        console.warn(`警告：无法清理 ${profilePath}: ${error}`);
+        console.warn(`警告：无法清理 ${profilePath}：${error}`);
       }
     }
 
@@ -322,20 +314,16 @@ export class PowerShellInstaller {
       // Check if already installed with same content
       let isUpdate = false;
       try {
-        let existingContent = await fs.readFile(targetPath, 'utf-8');
-        // Remove BOM if present for comparison (BOM is added on write for Windows compatibility)
-        if (existingContent.charCodeAt(0) === 0xfeff) {
-          existingContent = existingContent.slice(1);
-        }
+        const existingContent = await fs.readFile(targetPath, 'utf-8');
         if (existingContent === completionScript) {
           // Already installed and up to date
           return {
             success: true,
             installedPath: targetPath,
-            message: '补全脚本已安装（已是最新版本）',
+            message: '补全脚本已安装（已是最新）',
             instructions: [
-              '补全脚本已安装，且已是最新版本。',
-              '如果补全未生效，请尝试重启 PowerShell 或运行：. $PROFILE',
+              '补全脚本已安装且是最新版本。',
+              '如果补全不工作，尝试重启 PowerShell 或运行：. $PROFILE',
             ],
           };
         }
@@ -343,11 +331,11 @@ export class PowerShellInstaller {
         isUpdate = true;
       } catch (error: any) {
         // File doesn't exist or can't be read, proceed with installation
-        console.debug(`无法在 ${targetPath} 读取现有的补全文件: ${error.message}`);
+        console.debug(`无法读取已存在的补全文件：${targetPath}: ${error.message}`);
       }
 
       if (!(await FileSystemUtils.canWriteFile(targetPath))) {
-        throw new Error(`Path is not writable: ${targetPath}`);
+        throw new Error(`路径不可写：${targetPath}`);
       }
 
       // Ensure the directory exists
@@ -357,9 +345,8 @@ export class PowerShellInstaller {
       // Backup existing file if updating
       const backupPath = isUpdate ? await this.backupExistingFile(targetPath) : undefined;
 
-      // Write the completion script with UTF-8 BOM for Windows PowerShell 5.1 compatibility
-      const bomCompletionScript = '\uFEFF' + completionScript;
-      await fs.writeFile(targetPath, bomCompletionScript, 'utf-8');
+      // Write the completion script
+      await fs.writeFile(targetPath, completionScript, 'utf-8');
 
       // Auto-configure PowerShell profile
       const profileConfigured = await this.configureProfile(targetPath);
@@ -375,8 +362,8 @@ export class PowerShellInstaller {
           : '补全脚本更新成功';
       } else {
         message = profileConfigured
-          ? '补全脚本安装成功，并已自动配置 PowerShell 配置文件'
-          : '已成功为 PowerShell 安装补全脚本';
+          ? '补全脚本安装成功且 PowerShell profile 已配置'
+          : 'PowerShell 补全脚本安装成功';
       }
 
       return {
@@ -407,9 +394,9 @@ export class PowerShellInstaller {
     return [
       '补全脚本安装成功。',
       '',
-      `如需启用补全，请在您的 PowerShell 配置文件 (${profilePath}) 中添加以下内容：`,
+      `要启用补全，请将以下内容添加到你的 PowerShell profile（${profilePath}）：`,
       '',
-      '  # 加载 OpenSpec-cn 补全',
+      '  # Source OpenSpec completions',
       `  if (Test-Path "${installedPath}") {`,
       `      . "${installedPath}"`,
       '  }',
@@ -441,7 +428,7 @@ export class PowerShellInstaller {
 
       const targetDir = path.dirname(targetPath);
       if (!(await FileSystemUtils.canWriteFile(targetDir))) {
-        throw new Error(`Path is not writable: ${targetDir}`);
+        throw new Error(`路径不可写：${targetDir}`);
       }
 
       // Remove the completion script
@@ -452,7 +439,7 @@ export class PowerShellInstaller {
 
       return {
         success: true,
-        message: '补全脚本已成功卸载',
+        message: '补全脚本卸载成功',
       };
     } catch (error) {
       return {

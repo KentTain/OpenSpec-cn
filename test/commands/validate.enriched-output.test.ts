@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
@@ -9,8 +9,6 @@ describe('validate command enriched human output', () => {
   const changesDir = path.join(testDir, 'openspec', 'changes');
   const bin = path.join(projectRoot, 'bin', 'openspec.js');
 
-  // threads pool 不支持 process.chdir()，用 cwd 参数替代
-  const cwd = testDir;
 
   beforeEach(async () => {
     await fs.mkdir(changesDir, { recursive: true });
@@ -27,17 +25,25 @@ describe('validate command enriched human output', () => {
     await fs.mkdir(changePath, { recursive: true });
     await fs.writeFile(path.join(changePath, 'proposal.md'), changeContent);
 
-    let code = 0;
-    let stderr = '';
+    const originalCwd = process.cwd();
     try {
-      execSync(`node ${bin} change validate ${changeId}`, { encoding: 'utf-8', stdio: 'pipe', cwd });
-    } catch (e: any) {
-      code = e?.status ?? 1;
-      stderr = e?.stderr?.toString?.() ?? '';
+      process.chdir(testDir);
+      let code = 0;
+      let stderr = '';
+      try {
+        execSync(`node ${bin} change validate ${changeId}`, { encoding: 'utf-8', stdio: 'pipe' });
+      } catch (e: any) {
+        code = e?.status ?? 1;
+        stderr = e?.stderr?.toString?.() ?? '';
+      }
+      expect(code).not.toBe(0);
+      expect(stderr).toContain('存在问题');
+      expect(stderr).toContain('后续步骤：');
+      expect(stderr).toContain('openspec-cn change show');
+    } finally {
+      process.chdir(originalCwd);
     }
-    expect(code).not.toBe(0);
-    expect(stderr).toContain('存在问题');
-    expect(stderr).toContain('后续步骤：');
-    expect(stderr).toContain('openspec-cn change show');
   });
 });
+
+

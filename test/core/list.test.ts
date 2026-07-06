@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -35,7 +35,7 @@ describe('ListCommand', () => {
       const listCommand = new ListCommand();
       
       await expect(listCommand.execute(tempDir, 'changes')).rejects.toThrow(
-        "未找到OpenSpec变更目录。请先运行 'openspec-cn init'。"
+        "未找到 OpenSpec changes 目录。请先运行 'openspec-cn init'。"
       );
     });
 
@@ -46,7 +46,7 @@ describe('ListCommand', () => {
       const listCommand = new ListCommand();
       await listCommand.execute(tempDir, 'changes');
 
-      expect(logOutput).toEqual(['未找到活动的变更。']);
+      expect(logOutput).toEqual(['未找到活跃的变更。']);
     });
 
     it('should exclude archive directory', async () => {
@@ -87,7 +87,7 @@ Regular text that should be ignored
       const listCommand = new ListCommand();
       await listCommand.execute(tempDir, 'changes');
 
-      expect(logOutput.some(line => line.includes('2/5 个任务'))).toBe(true);
+      expect(logOutput.some(line => line.includes('2/5 任务'))).toBe(true);
     });
 
     it('should show complete status for fully completed changes', async () => {
@@ -158,7 +158,7 @@ Regular text that should be ignored
 
       expect(logOutput).toContain('变更：');
       expect(logOutput.some(line => line.includes('completed') && line.includes('✓ 完成'))).toBe(true);
-      expect(logOutput.some(line => line.includes('partial') && line.includes('1/3 个任务'))).toBe(true);
+      expect(logOutput.some(line => line.includes('partial') && line.includes('1/3 任务'))).toBe(true);
       expect(logOutput.some(line => line.includes('no-tasks') && line.includes('无任务'))).toBe(true);
     });
   });

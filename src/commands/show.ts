@@ -1,4 +1,4 @@
-import { isInteractive } from '../utils/interactive.js';
+﻿import { isInteractive } from '../utils/interactive.js';
 import { getActiveChangeIds, getSpecIds } from '../utils/item-discovery.js';
 import {
   resolveRootForCommand,
@@ -92,11 +92,11 @@ export class ShowCommand {
 
     const specs = await getSpecIds(root.path);
     if (specs.length === 0) {
-      console.error('未找到规范。');
-      process.exitCode = 1;
-      return;
-    }
-    const picked = await select<string>({ message: '选择一个规范', choices: specs.map(id => ({ name: id, value: id })) });
+        console.error('未找到规范。');
+        process.exitCode = 1;
+        return;
+      }
+      const picked = await select<string>({ message: '选择一个规范', choices: specs.map(id => ({ name: id, value: id })) });
     const cmd = new SpecCommand(root.path);
     await cmd.show(picked, this.delegateOptions(root, options) as any);
   }
@@ -128,7 +128,7 @@ export class ShowCommand {
     if (!resolvedType) {
       const suggestions = nearestMatches(itemName, [...changes, ...specs]);
       const message = suggestions.length
-        ? `未知项目 '${itemName}'。你是否想输入：${suggestions.join(', ')}？`
+        ? `未知项目 '${itemName}'。您是否想要：${suggestions.join(', ')}?`
         : `未知项目 '${itemName}'。`;
       if (params.options.json) {
         console.log(
@@ -155,7 +155,7 @@ export class ShowCommand {
                   severity: 'error',
                   code: 'ambiguous_item',
                   message: `模糊的项目 '${itemName}' 同时匹配变更和规范。`,
-                  fix: '请传递 --type change|spec。',
+                  fix: '传递 --type change|spec。',
                 },
               ],
             },
@@ -169,7 +169,7 @@ export class ShowCommand {
       console.error(`模糊的项目 '${itemName}' 同时匹配变更和规范。`);
       // The noun-form commands are cwd-based and cannot reach a selected store.
       if (isStoreSelectedRoot(root)) {
-        console.error('请传递 --type change|spec。');
+        console.error('传递 --type change|spec。');
       } else {
         console.error('传递 --type change|spec，或使用：openspec-cn change show / openspec-cn spec show');
       }
@@ -204,16 +204,7 @@ export class ShowCommand {
   private warnIrrelevantFlags(type: ItemType, options: { [k: string]: any }): boolean {
     const irrelevant: string[] = [];
     if (type === 'change') {
-      for (const k of SPEC_FLAG_KEYS) {
-        if (k in options) {
-          // Special handling for --no-scenarios which defaults to true in Commander
-          // We only want to warn if the user explicitly passed --no-scenarios (value is false)
-          if (k === 'scenarios' && options[k] === true) {
-            continue;
-          }
-          irrelevant.push(k);
-        }
-      }
+      for (const k of SPEC_FLAG_KEYS) if (k in options) irrelevant.push(k);
     } else {
       for (const k of CHANGE_FLAG_KEYS) if (k in options) irrelevant.push(k);
     }

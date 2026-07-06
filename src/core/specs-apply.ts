@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Spec Application Logic
  *
  * Extracted from ArchiveCommand to enable standalone spec application.
@@ -117,7 +117,7 @@ export async function buildUpdatedSpec(
     const name = normalizeRequirementName(add.name);
     if (addedNames.has(name)) {
       throw new Error(
-        `${specName} 验证失败 - "新增需求"部分存在重复需求： "### 需求: ${add.name}"`
+        `${specName} validation failed - duplicate requirement in ADDED for header "### Requirement: ${add.name}"`
       );
     }
     addedNames.add(name);
@@ -127,7 +127,7 @@ export async function buildUpdatedSpec(
     const name = normalizeRequirementName(mod.name);
     if (modifiedNames.has(name)) {
       throw new Error(
-        `${specName} 验证失败 - "修改需求"部分存在重复需求： "### 需求: ${mod.name}"`
+        `${specName} validation failed - duplicate requirement in MODIFIED for header "### Requirement: ${mod.name}"`
       );
     }
     modifiedNames.add(name);
@@ -137,7 +137,7 @@ export async function buildUpdatedSpec(
     const name = normalizeRequirementName(rem);
     if (removedNamesSet.has(name)) {
       throw new Error(
-        `${specName} 验证失败 - "移除需求"部分存在重复需求： "### 需求: ${rem}"`
+        `${specName} validation failed - duplicate requirement in REMOVED for header "### Requirement: ${rem}"`
       );
     }
     removedNamesSet.add(name);
@@ -149,12 +149,12 @@ export async function buildUpdatedSpec(
     const toNorm = normalizeRequirementName(to);
     if (renamedFromSet.has(fromNorm)) {
       throw new Error(
-        `${specName} 验证失败 - "重命名需求"部分的 FROM 存在重复： "### 需求: ${from}"`
+        `${specName} validation failed - duplicate FROM in RENAMED for header "### Requirement: ${from}"`
       );
     }
     if (renamedToSet.has(toNorm)) {
       throw new Error(
-        `${specName} 验证失败 - "重命名需求"部分的 TO 存在重复： "### 需求: ${to}"`
+        `${specName} validation failed - duplicate TO in RENAMED for header "### Requirement: ${to}"`
       );
     }
     renamedFromSet.add(fromNorm);
@@ -176,27 +176,27 @@ export async function buildUpdatedSpec(
     const toNorm = normalizeRequirementName(to);
     if (modifiedNames.has(fromNorm)) {
       throw new Error(
-        `${specName} 验证失败 - 当存在重命名时，"修改需求"必须引用新标题 "### 需求: ${to}"`
+        `${specName} validation failed - when a rename exists, MODIFIED must reference the NEW header "### Requirement: ${to}"`
       );
     }
     // Detect ADDED colliding with a RENAMED TO
     if (addedNames.has(toNorm)) {
       throw new Error(
-        `${specName} 验证失败 - "重命名需求"中的 TO 标题与"新增需求"冲突： "### 需求: ${to}"`
+        `${specName} validation failed - RENAMED TO header collides with ADDED for "### Requirement: ${to}"`
       );
     }
   }
   if (conflicts.length > 0) {
     const c = conflicts[0];
     throw new Error(
-      `${specName} 验证失败 - 需求在多个部分（${c.a} 和 ${c.b}）同时出现： "### 需求: ${c.name}"`
+      `${specName} validation failed - requirement present in multiple sections (${c.a} and ${c.b}) for header "### Requirement: ${c.name}"`
     );
   }
   const hasAnyDelta = plan.added.length + plan.modified.length + plan.removed.length + plan.renamed.length > 0;
   if (!hasAnyDelta) {
     throw new Error(
-      `增量解析未在 ${path.basename(path.dirname(update.source))} 中发现任何操作。` +
-        `请在变更规范中提供“新增需求”、“修改需求”、“移除需求”或“重命名需求”部分。`
+      `Delta 解析未找到 ${path.basename(path.dirname(update.source))} 的操作。` +
+        `请在 change spec 中提供 ADDED/MODIFIED/REMOVED/RENAMED 章节。`
     );
   }
 
@@ -210,14 +210,14 @@ export async function buildUpdatedSpec(
     // REMOVED will be ignored with a warning since there's nothing to remove
     if (plan.modified.length > 0 || plan.renamed.length > 0) {
       throw new Error(
-        `${specName}：目标规范不存在；新规范仅允许“新增需求”操作。“修改需求”和“重命名需求”操作需要现有规范。`
+        `${specName}: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.`
       );
     }
     // Warn about REMOVED requirements being ignored for new specs
     if (plan.removed.length > 0 && !options.silent) {
       console.log(
         chalk.yellow(
-          `⚠️  警告：${specName} - ${plan.removed.length} 条“移除需求”操作已被忽略（无内容可删除）。`
+          `⚠️  Warning: ${specName} - ${plan.removed.length} REMOVED requirement(s) ignored for new spec (nothing to remove).`
         )
       );
     }
@@ -231,7 +231,7 @@ export async function buildUpdatedSpec(
       .map(issue => `line ${issue.line}: ${issue.message}`)
       .join('\n');
     throw new Error(
-      `${specName}：目标规范结构无效，修复前无法更新：\n${details}`
+      `${specName}: target spec is structurally invalid and cannot be updated until fixed:\n${details}`
     );
   }
 
@@ -248,10 +248,10 @@ export async function buildUpdatedSpec(
     const from = normalizeRequirementName(r.from);
     const to = normalizeRequirementName(r.to);
     if (!nameToBlock.has(from)) {
-      throw new Error(`${specName} 重命名失败：未找到源需求 "### 需求: ${r.from}"`);
+      throw new Error(`${specName} RENAMED failed for header "### Requirement: ${r.from}" - source not found`);
     }
     if (nameToBlock.has(to)) {
-      throw new Error(`${specName} 重命名失败：目标需求已存在 "### 需求: ${r.to}"`);
+      throw new Error(`${specName} RENAMED failed for header "### Requirement: ${r.to}" - target already exists`);
     }
     const block = nameToBlock.get(from)!;
     const newHeader = `### Requirement: ${to}`;
@@ -273,7 +273,7 @@ export async function buildUpdatedSpec(
       // For new specs, REMOVED requirements are already warned about and ignored
       // For existing specs, missing requirements are an error
       if (!isNewSpec) {
-        throw new Error(`${specName} 移除失败：未找到需求 "### 需求: ${name}"`);
+        throw new Error(`${specName} REMOVED failed for header "### Requirement: ${name}" - not found`);
       }
       // Skip removal for new specs (already warned above)
       continue;
@@ -285,13 +285,13 @@ export async function buildUpdatedSpec(
   for (const mod of plan.modified) {
     const key = normalizeRequirementName(mod.name);
     if (!nameToBlock.has(key)) {
-      throw new Error(`${specName} 修改失败：未找到需求 "### 需求: ${mod.name}"`);
+      throw new Error(`${specName} MODIFIED failed for header "### Requirement: ${mod.name}" - not found`);
     }
     // Replace block with provided raw (ensure header line matches key)
-    const modHeaderMatch = mod.raw.split('\n')[0].match(new RegExp(`^###\\s*(?:Requirement|需求)[:：]\\s*(.+)\\s*$`, 'i'));
+    const modHeaderMatch = mod.raw.split('\n')[0].match(/^###\s*Requirement:\s*(.+)\s*$/i);
     if (!modHeaderMatch || normalizeRequirementName(modHeaderMatch[1]) !== key) {
       throw new Error(
-        `${specName} 修改失败：内容中的标题不匹配 "### 需求: ${mod.name}"`
+        `${specName} MODIFIED failed for header "### Requirement: ${mod.name}" - header mismatch in content`
       );
     }
     nameToBlock.set(key, mod);
@@ -301,7 +301,7 @@ export async function buildUpdatedSpec(
   for (const add of plan.added) {
     const key = normalizeRequirementName(add.name);
     if (nameToBlock.has(key)) {
-      throw new Error(`${specName} 新增失败：需求已存在 "### 需求: ${add.name}"`);
+      throw new Error(`${specName} ADDED failed for header "### Requirement: ${add.name}" - already exists`);
     }
     nameToBlock.set(key, add);
   }
@@ -365,7 +365,7 @@ export async function writeUpdatedSpec(
   if (options.silent) return;
 
   const specName = path.basename(path.dirname(update.target));
-  console.log(`Applying changes to ${options.displayPath ?? `openspec/specs/${specName}/spec.md`}:`);
+  console.log(`正在应用变更到 ${options.displayPath ?? `openspec/specs/${specName}/spec.md`}：`);
   if (counts.added) console.log(`  + ${counts.added} added`);
   if (counts.modified) console.log(`  ~ ${counts.modified} modified`);
   if (counts.removed) console.log(`  - ${counts.removed} removed`);
@@ -377,7 +377,7 @@ export async function writeUpdatedSpec(
  */
 export function buildSpecSkeleton(specFolderName: string, changeName: string): string {
   const titleBase = specFolderName;
-  return `# ${titleBase} 规范\n\n## 目的\n待定 - 由归档变更 ${changeName} 创建。归档后请更新目的。\n\n## 需求\n`;
+  return `# ${titleBase} Specification\n\n## Purpose\nTBD - created by archiving change ${changeName}. Update Purpose after archive.\n\n## Requirements\n`;
 }
 
 /**
@@ -445,7 +445,7 @@ export async function applySpecs(
           .filter((i) => i.level === 'ERROR')
           .map((i) => `  ✗ ${i.message}`)
           .join('\n');
-        throw new Error(`${specName} 重建规范中的验证错误：\n${errors}`);
+        throw new Error(`重建 spec ${specName} 时出现验证错误：\n${errors}`);
       }
     }
   }
@@ -464,18 +464,18 @@ export async function applySpecs(
       await fs.writeFile(p.update.target, p.rebuilt);
 
       if (!options.silent) {
-        console.log(`应用变更到 openspec/specs/${capability}/spec.md:`);
-        if (p.counts.added) console.log(`  + 新增 ${p.counts.added} 条`);
-        if (p.counts.modified) console.log(`  ~ 修改 ${p.counts.modified} 条`);
-        if (p.counts.removed) console.log(`  - 删除 ${p.counts.removed} 条`);
-        if (p.counts.renamed) console.log(`  → 重命名 ${p.counts.renamed} 条`);
+        console.log(`正在应用变更到 openspec/specs/${capability}/spec.md：`);
+        if (p.counts.added) console.log(`  + ${p.counts.added} added`);
+        if (p.counts.modified) console.log(`  ~ ${p.counts.modified} modified`);
+        if (p.counts.removed) console.log(`  - ${p.counts.removed} removed`);
+        if (p.counts.renamed) console.log(`  → ${p.counts.renamed} renamed`);
       }
     } else if (!options.silent) {
-      console.log(`将应用变更到 openspec/specs/${capability}/spec.md:`);
-      if (p.counts.added) console.log(`  + 新增 ${p.counts.added} 条`);
-      if (p.counts.modified) console.log(`  ~ 修改 ${p.counts.modified} 条`);
-      if (p.counts.removed) console.log(`  - 删除 ${p.counts.removed} 条`);
-      if (p.counts.renamed) console.log(`  → 重命名 ${p.counts.renamed} 条`);
+      console.log(`将应用变更到 openspec/specs/${capability}/spec.md：`);
+      if (p.counts.added) console.log(`  + ${p.counts.added} added`);
+      if (p.counts.modified) console.log(`  ~ ${p.counts.modified} modified`);
+      if (p.counts.removed) console.log(`  - ${p.counts.removed} removed`);
+      if (p.counts.renamed) console.log(`  → ${p.counts.renamed} renamed`);
     }
 
     capabilities.push({

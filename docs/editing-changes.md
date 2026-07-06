@@ -1,90 +1,90 @@
-# 编辑与迭代变更
+﻿# Editing & Iterating on a Change
 
-**一个 change 里的每个制品都是一份你随时可以编辑的 Markdown 文件。** 没有锁定的"规划阶段"、没有审批门槛、也没有需要进入的特殊编辑模式。开始构建后想改 proposal？打开 `proposal.md` 改就行。实现到一半发现 design 错了？修 `design.md` 然后继续。这就是全部答案，也是刻意为之的。
+**Every artifact in a change is just a Markdown file you can edit at any time.** There is no locked "planning phase," no approval gate, no special edit mode to enter. Want to change the proposal after you've started building? Open `proposal.md` and change it. Realized the design is wrong mid-implementation? Fix `design.md` and keep going. That's the whole answer, and it's by design.
 
-本页是给那个"等等，我能回去改吗？"时刻的。能。下面针对每种常见情况说明怎么改。
+This page is for the moment you think "wait, can I go back and change that?" Yes. Here's how, for each common case.
 
-## 改任何东西的两种方式
+## Two ways to edit anything
 
-两种方式一直都在：
+You always have both:
 
-1. **直接编辑文件。** 制品是 `openspec/changes/<name>/` 下的纯 Markdown。在编辑器里打开 `proposal.md`、`design.md`、`tasks.md` 或 `specs/` 下的 delta spec，改即可。不需要别的。
+1. **Edit the file directly.** Artifacts are plain Markdown in `openspec/changes/<name>/`. Open `proposal.md`, `design.md`, `tasks.md`, or a delta spec under `specs/` in your editor and change it. Nothing else is required.
 
-2. **让 AI 修订。** 在聊天里直接说要什么："把 proposal 里缓存那段去掉，加一节限流"，或"design 应该用队列，而不是轮询"。AI 会用 change 的其余部分作为上下文，替你编辑制品。
+2. **Ask your AI to revise it.** In chat, just say what you want: "Update the proposal to drop the caching idea and add a rate-limit section," or "the design should use a queue, not polling." The AI edits the artifact for you, using the rest of the change as context.
 
-按当下的情境选。小到改措辞？编辑文件。实质性重想？让 AI 带着完整上下文修订。
+Use whichever fits the moment. Small wording tweak? Edit the file. Substantive rethink? Let the AI revise with full context.
 
-## "开始之后，我还能更新 proposal（或 specs）吗？"
+## "How do I update the proposal (or specs) after I've started?"
 
-直接更新就好。同一个 change，做了一次细化。
+Just update it. Same change, refined.
 
-如果你用扩展命令，自然的流程是：编辑制品，然后运行 `/opsx:continue` 从新状态接续，或 `/opsx:apply` 按更新后的计划继续实现。如果你用默认 `core` 命令，编辑制品后运行 `/opsx:apply`；它读当前文件，所以会按制品现在的说法构建。
+If you're using the expanded commands, the natural flow is: edit the artifact, then run `/opsx:continue` to pick up from the new state, or `/opsx:apply` to keep implementing against the updated plan. If you're on the default `core` commands, edit the artifact and run `/opsx:apply`; it reads the current files, so it builds against whatever the artifacts now say.
 
-心智模型：制品是活计划，不是签了字的合同。AI 总是从它们的当前内容工作，所以编辑它们就是在给工作转向。
+The mental model: artifacts are the live plan, not a signed contract. The AI always works from their current contents, so editing them steers the work.
 
 ```text
-You: 我想改这个 change 的方案。
+You: I want to change the approach in this change.
 
-You: [编辑 design.md，或告诉 AI:]
-     更新 design.md，用后台任务替代同步调用。
+You: [edit design.md, or tell the AI:]
+     Update design.md to use a background job instead of a synchronous call.
 
-AI:  已更新 design.md。任务清单仍然适用；要我继续 apply 吗？
+AI:  Updated design.md. The task list still fits; want me to continue applying?
 
 You: /opsx:apply
 ```
 
-这回答了一个非常常见的问题：没有单独的"更新 proposal"命令，因为你不需要。文件就是真相源，编辑它（手动或通过 AI）就是更新。
+This answers a very common question: there's no separate "update proposal" command because you don't need one. The file is the source of truth, and editing it (by hand or via the AI) is the update.
 
-## "实现之后，我怎么回去审查？"
+## "How do I go back to review after implementing?"
 
-你不必"回去"，因为你从没离开过。工作流是流式的：审查、编辑、实现不是你被关在里面的顺序阶段。
+You don't have to "go back," because you never left. The workflow is fluid: review, edit, and implementation aren't sequential phases you're trapped in.
 
-具体来说，跑完一些 `/opsx:apply` 之后：
+Concretely, after some `/opsx:apply` work:
 
-- 想重新审视计划？打开制品读，或在终端运行 `openspec-cn show <change>` 看汇总视图。
-- 发现要改的？编辑制品（或让 AI 改），然后继续。
-- 想要结构化地检查代码是否匹配计划？运行 `/opsx:verify`（扩展命令）。它会报告完整性、正确性、一致性，但不会阻塞任何东西。见 [工作流：Verify](workflows.md#verify-check-your-work)。
+- Want to re-examine the plan? Open the artifacts and read them, or run `openspec-cn show <change>` in your terminal for a consolidated view.
+- Found something to change? Edit the artifact (or ask the AI to), then continue.
+- Want a structured check that the code matches the plan? Run `/opsx:verify` (expanded command). It reports completeness, correctness, and coherence without blocking anything. See [Workflows: Verify](workflows.md#verify-check-your-work).
 
-没有"审查阶段"可以回去，因为审查是任何时候都能做的事，实现之后也行。
+There's no "review phase" to return to, because review is something you can do at any point, including after implementation.
 
-## "我手动改了代码。怎么和 OpenSpec 调和？"
+## "I edited the code by hand. How do I reconcile that with OpenSpec?"
 
-这种事经常发生，没关系。你在编辑器里顺手改了点东西，现在代码和制品对不上。按真实的那一边把它们重新对齐：
+This happens constantly and it's fine. You tweaked something in your editor, and now the code and the artifacts disagree. Bring them back in sync in whichever direction is true:
 
-- **代码是对的，spec 过期了。** 更新 delta spec（以及相关的话 tasks），让它描述你实际交付的行为。归档前 spec 应该匹配现实，因为归档会把 spec 合并进真相源。
-- **spec 是对的，代码跑偏了。** 继续构建或修复，直到代码匹配 spec。
+- **The code is now correct, the spec is stale.** Update the delta spec (and tasks, if relevant) to describe the behavior you actually shipped. The spec should match reality before you archive, because archiving merges the spec into your source of truth.
+- **The spec is correct, the code drifted.** Keep building or fixing until the code matches the spec.
 
-快速暴露不匹配的方法是 `/opsx:verify`：它读你的制品和代码，告诉你哪里分叉。把它的输出当作调和的待办清单，等它们一致后归档。
+A fast way to surface mismatches is `/opsx:verify`: it reads your artifacts and your code and tells you where they diverge. Treat its output as a to-do list for reconciliation, then archive once they agree.
 
-原则：归档时，specs 成为真相记录。所以归档前让 specs 诚实反映代码做什么。欢迎手动编辑；只是别让它们悄悄让 spec 失同步。
+The principle: at archive time, your specs become the truth of record. So before you archive, make the specs honest about what the code does. Manual edits are welcome; just don't let them quietly desync the spec.
 
-## 修改一份你不满意的 proposal
+## Refining a proposal you're not happy with
 
-如果生成的 proposal 不达标，你有三个好招：
+If a generated proposal misses the mark, you have three good moves:
 
-- **就地迭代。** 告诉 AI 哪里不对（"范围太大，去掉 admin 相关功能"）让它修订。最便宜，通常也对。
-- **先探索再重新提案。** 如果问题在于想法本身不清晰，退回 `/opsx:explore`，想清楚，让更锋利的 proposal 从中产生。见 [先做探索](explore.md)。
-- **重开一个。** 如果意图根本变了，新开一个 change 可能比打补丁更清楚。
+- **Iterate in place.** Tell the AI what's off ("the scope is too broad, drop the admin features") and let it revise. Cheapest and usually right.
+- **Explore first, then re-propose.** If the problem is that the idea itself is unclear, step back to `/opsx:explore`, think it through, and let a sharper proposal come out of that. See [Explore First](explore.md).
+- **Start fresh.** If the intent has fundamentally changed, a new change can be clearer than patching the old one.
 
-最后一招有它自己的决策指南，下面就是。
+That last move has its own decision guide, next.
 
-## 何时更新 vs. 新开 change
+## When to update vs. start a new change
 
-简短版：**同一件工作的细化就更新；意图根本改变或范围爆炸成不同工作就新开。**
+Short version: **update when it's the same work refined; start new when the intent fundamentally changed or the scope exploded into different work.**
 
-- 同一个目标、更好的方案？更新。
-- 范围收窄（先发 MVP，后续再说）？更新，然后归档，再为新阶段开新 change。
-- 问题本身变了（"加深色模式"变成"做一整套主题系统"）？新开。
+- Same goal, better approach? Update.
+- Scope narrowing (ship the MVP now, more later)? Update, then archive, then a new change for phase two.
+- The problem itself changed ("add dark mode" became "build a full theming system")? New change.
 
-[Workflows：何时更新 vs. 新开](workflows.md#when-to-update-vs-start-fresh) 有完整流程图和示例，[OPSX：何时更新 vs. 新开](opsx.md#when-to-update-vs-start-fresh) 有更深入的处理。
+There's a full flowchart and worked examples in [Workflows: When to Update vs Start Fresh](workflows.md#when-to-update-vs-start-fresh) and a deeper treatment in [OPSX: When to Update vs. Start Fresh](opsx.md#when-to-update-vs-start-fresh).
 
-## 关于 tasks 的说明
+## A note on tasks
 
-`tasks.md` 是一份活清单，不是冻结的计划。实现过程中，你可以加新发现的 task、删掉其实不需要的、或重新排序。AI 在 `/opsx:apply` 期间完成一项就勾掉一项，如果你之后回来，它从第一个未勾选项恢复。中途改清单是预期内的。
+`tasks.md` is a living checklist, not a frozen plan. As you implement, you can add tasks you discover, remove ones that turned out unnecessary, or reorder them. The AI checks items off as it completes them during `/opsx:apply`, and it resumes from the first unchecked task if you come back later. Editing the list mid-flight is expected.
 
-## 接下来去哪儿
+## Where to go next
 
-- [Workflows](workflows.md) —— 模式，加上"更新 vs 新开"的决策指南
-- [先做探索](explore.md) —— 想法需要重想时退回去的地方
-- [命令](commands.md) —— `/opsx:continue`、`/opsx:apply`、`/opsx:verify` 的详细说明
-- [概念：制品](concepts.md#artifacts) —— 每个制品的用途
+- [Workflows](workflows.md) - patterns, plus the update-vs-new decision guide
+- [Explore First](explore.md) - the place to step back to when an idea needs rethinking
+- [Commands](commands.md) - `/opsx:continue`, `/opsx:apply`, and `/opsx:verify` in detail
+- [Concepts: Artifacts](concepts.md#artifacts) - what each artifact is for

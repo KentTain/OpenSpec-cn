@@ -1,4 +1,4 @@
-import { program } from 'commander';
+﻿import { program } from 'commander';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { MarkdownParser } from '../core/parsers/markdown-parser.js';
@@ -97,7 +97,7 @@ export class SpecCommand {
       // Root-aware callers get the absolute path; the cwd-based noun form
       // keeps its historical forward-slash relative message on all platforms.
       const displayPath = this.rootPath ? specPath : `openspec/specs/${specId}/spec.md`;
-      throw new Error(`在 ${displayPath} 未找到规范 '${specId}'`);
+      throw new Error(`未找到规范 '${specId}'，路径：${displayPath}`);
     }
 
     if (options.json) {
@@ -169,7 +169,7 @@ export function registerSpecCommand(rootProgram: typeof program) {
             if (existsSync(specPath)) {
               try {
                 const spec = parseSpecFromFile(specPath, dirent.name);
-                
+
                 return {
                   id: dirent.name,
                   title: spec.name,
@@ -232,9 +232,9 @@ export function registerSpecCommand(rootProgram: typeof program) {
         }
 
         const specPath = join(SPECS_DIR, specId, 'spec.md');
-        
+
         if (!existsSync(specPath)) {
-          throw new Error(`未找到规范 '${specId}'，路径：${SPECS_DIR}/${specId}/spec.md`);
+          throw new Error(`未找到规范 '${specId}'，路径：openspec/specs/${specId}/spec.md`);
         }
 
         const validator = new Validator(options.strict);

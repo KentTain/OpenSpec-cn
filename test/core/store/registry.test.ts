@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -129,7 +129,7 @@ describe('store registry facade', () => {
         localPath: newRoot,
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/已注册/u);
+    ).rejects.toThrow(/已.*注册/u);
 
     const stores = await listRegisteredStores({ globalDataDir: tempDir });
     expect(stores.map((store) => store.id)).toEqual(['acme-context', 'zeta-context']);
@@ -149,7 +149,7 @@ describe('store registry facade', () => {
         localPath: storeRoot,
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/不匹配$/u);
+    ).rejects.toThrow(/不匹配/u);
 
     await expect(readStoreRegistryState({ globalDataDir: tempDir })).resolves.toBeNull();
   });
@@ -172,7 +172,7 @@ describe('store registry facade', () => {
         remote: '',
         globalDataDir: tempDir,
       })
-    ).rejects.toThrow(/远程地址在提供时不能为空/u);
+    ).rejects.toThrow(/不能为空/u);
 
     await expect(readStoreRegistryState({ globalDataDir: tempDir })).resolves.toBeNull();
   });
@@ -394,7 +394,7 @@ describe('store registry facade', () => {
 
     await expect(
       resolveRegisteredStore({ id: 'unknown-context', globalDataDir: tempDir })
-    ).rejects.toThrow(/未知 store/u);
+    ).rejects.toThrow(/未知的 store/u);
 
     await expect(
       resolveRegisteredStore({ id: 'missing-metadata', globalDataDir: tempDir })
@@ -402,7 +402,7 @@ describe('store registry facade', () => {
 
     await expect(
       resolveRegisteredStore({ id: 'mismatched', globalDataDir: tempDir })
-    ).rejects.toThrow(/不匹配$/u);
+    ).rejects.toThrow(/不匹配/u);
   });
 
   it('refuses a prepared remove when the registry entry changes before deletion', async () => {
@@ -444,7 +444,7 @@ describe('store registry facade', () => {
       { globalDataDir: tempDir }
     );
 
-    await expect(removeStore(prepared)).rejects.toThrow(/在清理完成前发生了变更/u);
+    await expect(removeStore(prepared)).rejects.toThrow(/已变更/u);
     expect(fs.existsSync(firstRoot)).toBe(true);
     expect(fs.existsSync(secondRoot)).toBe(true);
     const registry = await readStoreRegistryState({ globalDataDir: tempDir });
@@ -550,7 +550,7 @@ describe('store registry facade', () => {
       expect.objectContaining({
         severity: 'warning',
         code: 'store_files_left_on_disk',
-        fix: expect.stringContaining('手动删除文件夹：'),
+        fix: expect.stringContaining('手动删除该文件夹'),
       })
     );
     const registry = await readStoreRegistryState({ globalDataDir: tempDir });

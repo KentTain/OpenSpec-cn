@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Instructions Command
  *
  * Generates enriched instructions for creating artifacts or applying tasks.
@@ -134,7 +134,7 @@ export async function instructionsCommand(
       spinner?.stop();
       const validIds = context.graph.getAllArtifacts().map((a) => a.id);
       throw new Error(
-        `缺少必需参数 <artifact>。有效的产出物:\n  ${validIds.join('\n  ')}`
+        `缺少必要参数 <artifact>。可用产出物：\n  ${validIds.join('\n  ')}`
       );
     }
 
@@ -144,7 +144,7 @@ export async function instructionsCommand(
       spinner?.stop();
       const validIds = context.graph.getAllArtifacts().map((a) => a.id);
       throw new Error(
-        `在 Schema '${context.schemaName}' 中未找到产出物 '${artifactId}'。有效的产出物:\n  ${validIds.join('\n  ')}`
+        `在 schema '${context.schemaName}' 中未找到产出物 '${artifactId}'。可用产出物：\n  ${validIds.join('\n  ')}`
       );
     }
 
@@ -193,8 +193,8 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   if (isBlocked) {
     const missing = dependencies.filter((d) => !d.done).map((d) => d.id);
     console.log('<warning>');
-    console.log('此产出物有未满足的依赖项。请先完成它们或谨慎继续。');
-    console.log(`缺失: ${missing.join(', ')}`);
+    console.log('此产出物有未满足的依赖。请先完成它们，或谨慎继续。');
+    console.log(`缺失：${missing.join(', ')}`);
     console.log('</warning>');
     console.log();
   }
@@ -209,7 +209,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Project context (AI constraint - do not include in output)
   if (context) {
     console.log('<project_context>');
-    console.log('<!-- 这是给你的背景信息。不要将其包含在你的输出中。 -->');
+    console.log('<!-- This is background information for you. Do NOT include this in your output. -->');
     console.log(context);
     console.log('</project_context>');
     console.log();
@@ -224,7 +224,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Rules (AI constraint - do not include in output)
   if (rules && rules.length > 0) {
     console.log('<rules>');
-    console.log('<!-- 这些是你需要遵循的约束。不要将其包含在你的输出中。 -->');
+    console.log('<!-- These are constraints for you to follow. Do NOT include this in your output. -->');
     for (const rule of rules) {
       console.log(`- ${rule}`);
     }
@@ -235,7 +235,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Dependencies (files to read for context)
   if (dependencies.length > 0) {
     console.log('<dependencies>');
-    console.log('在创建此产出物之前,请阅读以下文件以获取上下文:');
+    console.log('创建此产出物前请阅读以下文件以获取上下文：');
     console.log();
     for (const dep of dependencies) {
       const status = dep.done ? 'done' : 'missing';
@@ -251,7 +251,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 
   // Output location
   console.log('<output>');
-  console.log(`写入到: ${resolvedOutputPath}`);
+  console.log(`写入：${resolvedOutputPath}`);
   console.log('</output>');
   console.log();
 
@@ -265,21 +265,21 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 
   // Template
   console.log('<template>');
-  console.log('<!-- 使用此作为输出文件的结构。填入各个部分。 -->');
+  console.log('<!-- Use this as the structure for your output file. Fill in the sections. -->');
   console.log(template.trim());
   console.log('</template>');
   console.log();
 
   // Success criteria placeholder
   console.log('<success_criteria>');
-  console.log('<!-- 在 Schema 校验规则中定义 -->');
+  console.log('<!-- To be defined in schema validation rules -->');
   console.log('</success_criteria>');
   console.log();
 
   // Unlocks
   if (unlocks.length > 0) {
     console.log('<unlocks>');
-    console.log(`完成此产出物将启用: ${unlocks.join(', ')}`);
+    console.log(`完成此产出物后将启用：${unlocks.join(', ')}`);
     console.log('</unlocks>');
     console.log();
   }
@@ -395,27 +395,27 @@ export async function generateApplyInstructions(
 
   if (missingArtifacts.length > 0) {
     state = 'blocked';
-    instruction = `尚无法应用此变更。缺失的产出物: ${missingArtifacts.join(', ')}。\n请使用 openspec-continue-change 技能首先创建缺失的产出物。`;
+    instruction = `暂时无法应用此变更。缺少产出物：${missingArtifacts.join(', ')}。\n请先使用 openspec-continue-change skill 创建缺失的产出物。`;
   } else if (tracksFile && !tracksFileExists) {
     // Tracking file configured but doesn't exist yet
     const tracksFilename = path.basename(tracksFile);
     state = 'blocked';
-    instruction = `${tracksFilename} 文件缺失,必须创建。\n请使用 openspec-continue-change 生成跟踪文件。`;
+    instruction = `The ${tracksFilename} file is missing and must be created.\nUse openspec-continue-change to generate the tracking file.`;
   } else if (tracksFile && tracksFileExists && total === 0) {
     // Tracking file exists but contains no tasks
     const tracksFilename = path.basename(tracksFile);
     state = 'blocked';
-    instruction = `${tracksFilename} 文件存在但不包含任何任务。\n请向 ${tracksFilename} 添加任务或使用 openspec-continue-change 重新生成它。`;
+    instruction = `The ${tracksFilename} file exists but contains no tasks.\nAdd tasks to ${tracksFilename} or regenerate it with openspec-continue-change.`;
   } else if (tracksFile && remaining === 0 && total > 0) {
     state = 'all_done';
-    instruction = '所有任务已完成!此变更已准备好归档。\n建议在归档之前运行测试并审查变更。';
+    instruction = '所有任务已完成！此变更可以归档了。\n归档前请考虑运行测试并审查变更。';
   } else if (!tracksFile) {
     // No tracking file configured in schema - ready to apply
     state = 'ready';
-    instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。继续实现。';
+    instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。可以开始实现。';
   } else {
     state = 'ready';
-    instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。继续实现。';
+    instruction = schemaInstruction?.trim() ?? '阅读上下文文件，按顺序处理待办任务，完成一项就标记一项。\n遇到阻塞或需要澄清时暂停。';
   }
 
   return {
@@ -480,7 +480,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
 export function printApplyInstructionsText(instructions: ApplyInstructions): void {
   const { changeName, schemaName, contextFiles, progress, tasks, state, missingArtifacts, instruction } = instructions;
 
-  console.log(`## 应用：${changeName}`);
+  console.log(`## Apply: ${changeName}`);
   console.log(`Schema：${schemaName}`);
   console.log();
 
@@ -491,17 +491,17 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Warning for blocked state
   if (state === 'blocked' && missingArtifacts) {
-    console.log('⚠️ 被阻塞');
+    console.log('### ⚠️ 已阻塞');
     console.log();
-    console.log(`缺失的产出物： ${missingArtifacts.join(', ')}`);
-    console.log('请使用 openspec-continue-change 技能首先创建这些产出物。');
+    console.log(`缺失的产出物：${missingArtifacts.join(', ')}`);
+    console.log('使用 openspec-continue-change 技能先创建这些产出物。');
     console.log();
   }
 
   // Context files (dynamically from schema)
   const contextFileEntries = Object.entries(contextFiles);
   if (contextFileEntries.length > 0) {
-    console.log('上下文文件：');
+    console.log('### 上下文文件');
     for (const [artifactId, filePaths] of contextFileEntries) {
       for (const filePath of filePaths) {
         console.log(`- ${artifactId}: ${filePath}`);
@@ -512,18 +512,18 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Progress (only show if we have tracking)
   if (progress.total > 0 || tasks.length > 0) {
-    console.log('进度：');
+    console.log('### 进度');
     if (state === 'all_done') {
-      console.log(`${progress.complete}/${progress.total} 已完成 ✓`);
+      console.log(`${progress.complete}/${progress.total} complete ✓`);
     } else {
-      console.log(`${progress.complete}/${progress.total} 已完成`);
+      console.log(`${progress.complete}/${progress.total} complete`);
     }
     console.log();
   }
 
   // Tasks
   if (tasks.length > 0) {
-    console.log('任务：');
+    console.log('### 任务');
     for (const task of tasks) {
       const checkbox = task.done ? '[x]' : '[ ]';
       console.log(`- ${checkbox} ${task.description}`);
@@ -532,6 +532,6 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   }
 
   // Instruction
-  console.log('指令：');
+  console.log('### 指令');
   console.log(instruction);
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared OpenSpec root resolution for normal commands.
  *
  * Normal commands (`new change`, `status`, `instructions`, `list`, `show`,
@@ -156,23 +156,23 @@ async function resolveStoreRoot(
   if (!entry) {
     if (entries.length === 0) {
       throw new RootSelectionError(
-        `Unknown store '${id}'. No stores are registered.`,
+        `未知的 store '${id}'。没有注册任何 store。`,
         'no_registered_stores',
         {
           target: 'store.id',
-          fix: `运行 openspec-cn store setup ${id} 或 openspec-cn store register <path>。`,
+          fix: `先运行 openspec-cn store setup ${id} 或 openspec-cn store register <path>。`,
         }
       );
     }
 
     throw new RootSelectionError(
-      `Unknown store '${id}'. Registered stores: ${entries
+      `未知的 store '${id}'。已注册的 store: ${entries
         .map((candidate) => candidate.id)
-        .join(', ')}.`,
+        .join(', ')}。`,
       'unknown_store',
       {
         target: 'store.id',
-        fix: '传递已注册的 store id，或运行 openspec-cn store list。',
+        fix: '传入已注册的 store id，或运行 openspec-cn store list。',
       }
     );
   }
@@ -187,19 +187,19 @@ async function resolveStoreRoot(
       // The doctor pointer lives in the message because human-mode command
       // wrappers print only the message, not the fix field.
       throw new RootSelectionError(
-        `Store '${id}' is missing identity metadata at ${inspection.metadataPath}. ${doctorFix(id)}`,
+        `Store '${id}' 缺少身份元数据，位于 ${inspection.metadataPath}。${doctorFix(id)}`,
         'store_identity_mismatch',
         { target: 'store.metadata', fix: doctorFix(id) }
       );
     case 'metadata_id_mismatch':
       throw new RootSelectionError(
-        `Store '${id}' metadata id '${inspection.actualId}' does not match its registered id. ${doctorFix(id)}`,
+        `Store '${id}' 元数据 id '${inspection.actualId}' 与其注册 id 不匹配。${doctorFix(id)}`,
         'store_identity_mismatch',
         { target: 'store.metadata', fix: doctorFix(id) }
       );
     case 'unhealthy_root':
       throw new RootSelectionError(
-        `Store '${id}' does not have a healthy OpenSpec root at ${storeRoot}: ${inspection.problems} ${doctorFix(id)}`,
+        `Store '${id}' 在 ${storeRoot} 没有健康的 OpenSpec 根目录: ${inspection.problems} ${doctorFix(id)}`,
         'unhealthy_store_root',
         { target: 'openspec.root', fix: doctorFix(id) }
       );
@@ -209,7 +209,7 @@ async function resolveStoreRoot(
       // Exhaustiveness guard: a new inspection kind must be handled
       // here explicitly, not fall through to an undefined root.
       const unhandled: never = inspection;
-      throw new Error(`未处理的 store 检查类型：${JSON.stringify(unhandled)}`);
+      throw new Error(`未处理的 store 检查类型: ${JSON.stringify(unhandled)}`);
     }
   }
 }
@@ -251,7 +251,7 @@ export async function inspectRegisteredStore(
   if (!inspection.healthy) {
     const problems =
       inspection.diagnostics.map((diagnostic) => diagnostic.message).join(' ') ||
-      'OpenSpec root is missing or incomplete.';
+      'OpenSpec 根目录缺失或不完整。';
     return { kind: 'unhealthy_root', problems };
   }
 
@@ -297,7 +297,7 @@ async function resolveNearestOrDeclaredRoot(
   if (hasPlanningShape) {
     if (pointer.value !== undefined) {
       console.error(
-        `Warning: ${pointer.filePath} declares store '${pointer.value}', but this directory is a real OpenSpec root; the declaration is ignored.`
+        `警告: ${pointer.filePath} 声明了 store '${pointer.value}'，但此目录是真正的 OpenSpec 根目录；该声明将被忽略。`
       );
     }
     return makeRoot(nearestRoot, 'nearest');
@@ -306,14 +306,14 @@ async function resolveNearestOrDeclaredRoot(
   if (pointer.malformed) {
     const problem = storePointerProblem(pointer.malformed);
     throw new RootSelectionError(
-      `Invalid store declaration in ${pointer.filePath}: ${problem}.`,
+      `${pointer.filePath} 中的 store 声明无效: ${problem}。`,
       'invalid_store_pointer',
       {
         target: 'store.pointer',
         fix:
           pointer.malformed === 'unparseable'
-            ? `Fix the YAML syntax in ${pointer.filePath}.`
-            : `Edit ${pointer.filePath} so the store key is a registered store id, or remove it.`,
+            ? `修复 ${pointer.filePath} 中的 YAML 语法。`
+            : `编辑 ${pointer.filePath} 使 store 键为已注册的 store id，或移除它。`,
       }
     );
   }
@@ -331,10 +331,10 @@ async function resolveNearestOrDeclaredRoot(
       // they did not pass --store.
       const declarationFix =
         error.diagnostic.code === 'unknown_store'
-          ? `注册 store（openspec-cn store register <path> --id ${pointer.value}）或编辑 ${pointer.filePath} 指定一个已注册的 store。`
+          ? `注册 store (openspec-cn store register <path> --id ${pointer.value}) 或编辑 ${pointer.filePath} 来命名一个已注册的 store。`
           : error.diagnostic.fix;
       throw new RootSelectionError(
-        `Declared in ${pointer.filePath}: ${error.message}`,
+        `${pointer.filePath} 中声明: ${error.message}`,
         error.diagnostic.code,
         {
           ...(error.diagnostic.target ? { target: error.diagnostic.target } : {}),
@@ -351,11 +351,11 @@ export async function resolveOpenSpecRoot(
 ): Promise<ResolvedOpenSpecRoot> {
   if (options.storePath !== undefined) {
     throw new RootSelectionError(
-      '--store-path 不再支持。请使用 openspec-cn store register <path> 注册路径，然后用 --store <id> 选择它。',
+      '不支持 --store-path。使用 openspec-cn store register <path> 注册路径，然后使用 --store <id> 选择它。',
       'store_path_not_supported',
       {
         target: 'store.id',
-        fix: 'openspec-cn store register <path>，然后用 --store <id> 重新运行。',
+        fix: 'openspec-cn store register <path>，然后使用 --store <id> 重新运行。',
       }
     );
   }
@@ -384,20 +384,20 @@ export async function resolveOpenSpecRoot(
 
   if (registeredIds.length > 0) {
     throw new RootSelectionError(
-      `从当前目录或其上级目录中未找到 OpenSpec 根目录。已注册的 store：${registeredIds.join(', ')}。使用 --store <id> 选择一个，或运行 openspec-cn init 创建本地根目录。`,
+      `在当前目录或其祖先目录中未找到 OpenSpec 根目录。已注册的 store: ${registeredIds.join(', ')}。使用 --store <id> 选择一个，或运行 openspec-cn init 创建本地根目录。`,
       'no_root_with_registered_stores',
       {
         target: 'openspec.root',
-        fix: `使用 --store <id> 重新运行（已注册：${registeredIds.join(', ')}）或运行 openspec-cn init。`,
+        fix: `使用 --store <id> 重新运行（已注册: ${registeredIds.join(', ')}) 或运行 openspec-cn init。`,
       }
     );
   }
 
   if (options.allowImplicitRoot === false) {
     throw new RootSelectionError(
-      '从当前目录未找到 OpenSpec 根目录。',
+      '在当前目录中未找到 OpenSpec 根目录。',
       'no_openspec_root',
-      { target: 'openspec.root', fix: '运行 openspec-cn init 在此处创建根目录。' }
+      { target: 'openspec.root', fix: '运行 openspec-cn init 在此创建根目录。' }
     );
   }
 
@@ -439,7 +439,7 @@ export function isStoreSelectedRoot(
  */
 export function emitStoreRootBanner(root: ResolvedOpenSpecRoot): void {
   if (isStoreSelectedRoot(root)) {
-    console.error(`正在使用 OpenSpec 根目录：${root.storeId}（${root.path}）`);
+    console.error(`使用 OpenSpec 根目录: ${root.storeId} (${root.path})`);
   }
 }
 

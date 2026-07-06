@@ -1,4 +1,4 @@
-import { z, ZodError } from 'zod';
+﻿import { z, ZodError } from 'zod';
 import { readFileSync, promises as fs } from 'fs';
 import path from 'path';
 import { SpecSchema, ChangeSchema, Spec, Change } from '../schemas/index.js';
@@ -104,13 +104,13 @@ export class Validator {
   }
 
   /**
-   * 验证变更目录下的增量格式规范文件。
-   * 强制要求：
-   * - 所有文件中至少有一个增量
-   * - 新增/修改需求：每个需求必须包含 SHALL/MUST/必须/禁止 并且至少有一个场景
-   * - 移除需求：仅需名称；不需要场景/描述
-   * - 重命名需求：配对格式正确
-   * - 每个部分内无重复；每个规范文件内无跨部分冲突
+   * Validate delta-formatted spec files under a change directory.
+   * Enforces:
+   * - At least one delta across all files
+   * - ADDED/MODIFIED: each requirement has SHALL/MUST and at least one scenario
+   * - REMOVED: names only; no scenario/description required
+   * - RENAMED: pairs well-formed
+   * - No duplicates within sections; no cross-section conflicts per spec
    */
   async validateChangeDeltaSpecs(changeDir: string): Promise<ValidationReport> {
     const issues: ValidationIssue[] = [];
@@ -135,10 +135,10 @@ export class Validator {
         const plan = parseDeltaSpec(content);
         const entryPath = `${specName}/spec.md`;
         const sectionNames: string[] = [];
-        if (plan.sectionPresence.added) sectionNames.push('## 新增需求');
-        if (plan.sectionPresence.modified) sectionNames.push('## 修改需求');
-        if (plan.sectionPresence.removed) sectionNames.push('## 移除需求');
-        if (plan.sectionPresence.renamed) sectionNames.push('## 重命名需求');
+        if (plan.sectionPresence.added) sectionNames.push('## ADDED Requirements');
+        if (plan.sectionPresence.modified) sectionNames.push('## MODIFIED Requirements');
+        if (plan.sectionPresence.removed) sectionNames.push('## REMOVED Requirements');
+        if (plan.sectionPresence.renamed) sectionNames.push('## RENAMED Requirements');
         const hasSections = sectionNames.length > 0;
         const hasEntries = plan.added.length + plan.modified.length + plan.removed.length + plan.renamed.length > 0;
         if (!hasEntries) {
@@ -152,98 +152,98 @@ export class Validator {
         const renamedFrom = new Set<string>();
         const renamedTo = new Set<string>();
 
-        // 验证新增需求
+        // Validate ADDED
         for (const block of plan.added) {
           const key = normalizeRequirementName(block.name);
           totalDeltas++;
           if (addedNames.has(key)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `新增需求中存在重复: "${block.name}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `ADDED 中重复的需求： "${block.name}"` });
           } else {
             addedNames.add(key);
           }
           const requirementText = this.extractRequirementText(block.raw);
           if (!requirementText) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `新增需求 "${block.name}" 缺少需求文本` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `ADDED "${block.name}" is missing requirement text` });
           } else if (!this.containsShallOrMust(requirementText)) {
             issues.push({ level: 'ERROR', path: entryPath, message: this.buildMissingShallOrMustMessage('ADDED', block.name) });
           }
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `新增需求 "${block.name}" 必须至少包含一个场景` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `ADDED "${block.name}" must include at least one scenario` });
           }
         }
 
-        // 验证修改需求
+        // Validate MODIFIED
         for (const block of plan.modified) {
           const key = normalizeRequirementName(block.name);
           totalDeltas++;
           if (modifiedNames.has(key)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `修改需求中存在重复: "${block.name}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED 中重复的需求： "${block.name}"` });
           } else {
             modifiedNames.add(key);
           }
           const requirementText = this.extractRequirementText(block.raw);
           if (!requirementText) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `修改需求 "${block.name}" 缺少需求文本` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED "${block.name}" is missing requirement text` });
           } else if (!this.containsShallOrMust(requirementText)) {
             issues.push({ level: 'ERROR', path: entryPath, message: this.buildMissingShallOrMustMessage('MODIFIED', block.name) });
           }
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `修改需求 "${block.name}" 必须至少包含一个场景` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED "${block.name}" must include at least one scenario` });
           }
         }
 
-        // 验证移除需求（仅名称）
+        // Validate REMOVED (names only)
         for (const name of plan.removed) {
           const key = normalizeRequirementName(name);
           totalDeltas++;
           if (removedNames.has(key)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `移除需求中存在重复: "${name}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `REMOVED 中重复的需求： "${name}"` });
           } else {
             removedNames.add(key);
           }
         }
 
-        // 验证重命名需求配对
+        // Validate RENAMED pairs
         for (const { from, to } of plan.renamed) {
           const fromKey = normalizeRequirementName(from);
           const toKey = normalizeRequirementName(to);
           totalDeltas++;
           if (renamedFrom.has(fromKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `重命名需求中 FROM 存在重复: "${from}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `RENAME 中重复的 FROM："${from}"` });
           } else {
             renamedFrom.add(fromKey);
           }
           if (renamedTo.has(toKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `重命名需求中 TO 存在重复: "${to}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `RENAME 中重复的 TO："${to}"` });
           } else {
             renamedTo.add(toKey);
           }
         }
 
-        // 跨部分冲突检查（同一规范文件内）
+        // Cross-section conflicts (within the same spec file)
         for (const n of modifiedNames) {
           if (removedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时出现在修改需求和移除需求中: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时存在于 MODIFIED 和 REMOVED： "${n}"` });
           }
           if (addedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时出现在修改需求和新增需求中: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时存在于 MODIFIED 和 ADDED： "${n}"` });
           }
         }
         for (const n of addedNames) {
           if (removedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时出现在新增需求和移除需求中: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `需求同时存在于 ADDED 和 REMOVED： "${n}"` });
           }
         }
         for (const { from, to } of plan.renamed) {
           const fromKey = normalizeRequirementName(from);
           const toKey = normalizeRequirementName(to);
           if (modifiedNames.has(fromKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `修改需求引用了重命名需求的旧名称。请使用新标题 "${to}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED references old name from RENAMED. Use new header for "${to}"` });
           }
           if (addedNames.has(toKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `重命名需求的 TO 与新增需求冲突: "${to}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `RENAMED TO collides with ADDED for "${to}"` });
           }
         }
       }
@@ -255,14 +255,14 @@ export class Validator {
       issues.push({
         level: 'ERROR',
         path: specPath,
-        message: `找到了增量部分 ${this.formatSectionList(sections)}，但未解析到任何需求条目。请确保每个部分至少包含一个 "### 需求:" 块（移除需求部分可以使用项目符号列表语法）。`,
+        message: `Delta sections ${this.formatSectionList(sections)} were found, but no requirement entries parsed. Ensure each section includes at least one "### Requirement:" block (REMOVED may use bullet list syntax).`,
       });
     }
     for (const path of missingHeaderSpecs) {
       issues.push({
         level: 'ERROR',
         path,
-        message: '未找到增量部分。请添加标题如 "## 新增需求" 或将非增量说明移到 specs/ 目录外。',
+        message: '未找到 delta 章节。请添加如 "## ADDED Requirements" 的标题，或将非 delta 笔记移出 specs/。',
       });
     }
 
@@ -344,11 +344,10 @@ export class Validator {
       
       if ((delta.operation === 'ADDED' || delta.operation === 'MODIFIED') && 
           (!delta.requirements || delta.requirements.length === 0)) {
-        const operationText = delta.operation === 'ADDED' ? '新增' : '修改';
         issues.push({
           level: 'WARNING',
           path: `deltas[${index}].requirements`,
-          message: `${operationText}${VALIDATION_MESSAGES.DELTA_MISSING_REQUIREMENTS}`,
+          message: `${delta.operation} ${VALIDATION_MESSAGES.DELTA_MISSING_REQUIREMENTS}`,
         });
       }
     });
@@ -361,10 +360,10 @@ export class Validator {
     if (msg === VALIDATION_MESSAGES.CHANGE_NO_DELTAS) {
       return `${msg}. ${VALIDATION_MESSAGES.GUIDE_NO_DELTAS}`;
     }
-    if (msg.includes('规范必须有目的部分') || msg.includes('规范必须有需求部分')) {
+    if (msg.includes('Spec 必须包含 Purpose 章节') || msg.includes('Spec 必须包含 Requirements 章节')) {
       return `${msg}. ${VALIDATION_MESSAGES.GUIDE_MISSING_SPEC_SECTIONS}`;
     }
-    if (msg.includes('变更必须有为什么部分') || msg.includes('变更必须有变更内容部分')) {
+    if (msg.includes('Change 必须包含 Why 章节') || msg.includes('Change 必须包含 What Changes 章节')) {
       return `${msg}. ${VALIDATION_MESSAGES.GUIDE_MISSING_CHANGE_SECTIONS}`;
     }
     return msg;
@@ -442,7 +441,7 @@ export class Validator {
   }
 
   private containsShallOrMust(text: string): boolean {
-    return /\b(SHALL|MUST|必须|禁止)\b/.test(text) || /(?:必须|禁止)/.test(text);
+    return /\b(SHALL|MUST)\b/.test(text);
   }
 
   /**
@@ -456,10 +455,9 @@ export class Validator {
    * the author at that exact fix when the keyword is found in the header only.
    */
   private buildMissingShallOrMustMessage(action: 'ADDED' | 'MODIFIED', blockName: string): string {
-    const actionText = action === 'ADDED' ? '新增' : '修改';
-    const base = `${actionText}需求 "${blockName}" 必须包含 SHALL、MUST、必须 或 禁止`;
+    const base = `${action} "${blockName}" 必须包含 SHALL 或 MUST`;
     if (this.containsShallOrMust(blockName)) {
-      return `${base}（在需求正文中，而不仅仅是标题中）。请将 SHALL/MUST 语句移到 "### 需求: ..." 标题的下一行。`;
+      return `${base}（在需求正文中，而非仅在标题中）。请将 SHALL/MUST 语句移到 "### Requirement: ..." 标题后的下一行。`;
     }
     return base;
   }
@@ -474,6 +472,6 @@ export class Validator {
     if (sections.length === 1) return sections[0];
     const head = sections.slice(0, -1);
     const last = sections[sections.length - 1];
-    return `${head.join('、')} 和 ${last}`;
+    return `${head.join(', ')} and ${last}`;
   }
 }

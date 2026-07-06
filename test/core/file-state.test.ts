@@ -143,11 +143,11 @@ describe('file-state', () => {
             globalDataDir,
           })
         ).rejects.toMatchObject({
-          message: `Cannot create the registry lock file ${lockPath} (EACCES).`,
+          message: `无法创建 注册表锁文件 ${lockPath}（EACCES）`,
           diagnostic: {
             code: 'store_registry_busy',
             target: 'store.registry',
-            fix: `Check permissions on ${path.dirname(lockPath)}.`,
+            fix: `检查 ${path.dirname(lockPath)} 的权限。`,
           },
         });
       } finally {

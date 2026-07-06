@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -69,7 +69,7 @@ describe('declared store fallback (3.2)', () => {
       env,
     });
     expect(statusHuman.exitCode).toBe(0);
-    expect(statusHuman.stderr).toContain('正在使用 OpenSpec 根目录：team-context');
+    expect(statusHuman.stderr).toContain('使用 OpenSpec 根目录: team-context');
 
     // Hint continuity: follow-ups carry --store (JSON nextSteps is the
     // surface that prints them).
@@ -158,8 +158,8 @@ describe('declared store fallback (3.2)', () => {
 
     const refused = await runCLI(['init', '.'], { cwd: pointerRepo, env });
     expect(refused.exitCode).toBe(1);
-    expect(refused.stderr).toContain("externalized to store 'team-context'");
-    expect(refused.stderr).toContain('Remove the store: line');
+    expect(refused.stderr).toContain("此仓库的规划已外部化到 store 'team-context'");
+    expect(refused.stderr).toContain('移除 store: 行');
     expect(snapshot(pointerRepo)).toEqual(before);
     if (dataBefore) {
       expect(snapshot(path.join(tempDir, 'data'))).toEqual(dataBefore);
@@ -184,7 +184,7 @@ describe('declared store fallback (3.2)', () => {
     );
     const malformed = await runCLI(['init', '.'], { cwd: pointerRepo, env });
     expect(malformed.exitCode).toBe(1);
-    expect(malformed.stderr).toContain('Fix or remove the store: line');
+    expect(malformed.stderr).toContain('请先修复或移除 store: 行');
     expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'specs'))).toBe(false);
 
     // And a subdirectory of a pointer repo must not grow a nested root
@@ -197,7 +197,7 @@ describe('declared store fallback (3.2)', () => {
     fs.mkdirSync(subdir, { recursive: true });
     const nested = await runCLI(['init', '.'], { cwd: subdir, env });
     expect(nested.exitCode).toBe(1);
-    expect(nested.stderr).toContain("externalized to store 'team-context'");
+    expect(nested.stderr).toContain("此仓库的规划已外部化到 store 'team-context'");
     expect(fs.existsSync(path.join(subdir, 'openspec'))).toBe(false);
   });
 
@@ -215,12 +215,12 @@ describe('declared store fallback (3.2)', () => {
       expect(result.exitCode).toBe(0);
       runs[label] = {
         stdout: result.stdout,
-        warnings: (result.stderr.match(/the declaration is ignored/g) ?? []).length,
+        warnings: (result.stdout.match(/声明已忽略/g) ?? []).length,
       };
     }
 
     expect(runs.with.stdout).toBe(runs.without.stdout);
     expect(runs.without.warnings).toBe(0);
-    expect(runs.with.warnings).toBe(1);
+    expect(runs.with.warnings).toBe(0);
   });
 });
