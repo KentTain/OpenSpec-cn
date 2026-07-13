@@ -93,7 +93,19 @@ AI：已归档至 openspec/changes/archive/2025-01-23-add-dark-mode/
 
 </details>
 
-## 快速开始
+## Why teams adopt OpenSpec
+
+Solo, OpenSpec keeps you and your AI honest on a single repo. On a team, the hard part moves: a feature spans the API server, the web app, and a shared library; requirements are owned by one team and consumed by others; planning starts before any code exists.
+
+**[Stores](docs/stores-beta/user-guide.md)** are the answer — planning in a repo of its own. The same `openspec/` shape you already know (specs and changes), shared by `git push` like anything else. One source of truth your whole team and every coding agent can read, across every repo.
+
+- **Cross-repo features** — one change, one plan, even when the code lands in three repos.
+- **Shared requirements** — a platform team owns the specs; product teams reference them read-only, right where their coding agent can read them. No drifting wiki.
+- **Plan before code** — capture the plan in the store now; the code repos catch up later.
+
+> Stores are in **beta**. Start with the [Stores User Guide](docs/stores-beta/user-guide.md).
+
+## Quick Start
 
 **需要 Node.js 20.19.0 或更高版本。**
 
@@ -155,10 +167,10 @@ openspec-cn init
 
 AI 编程助手很强大，但当需求只存在于聊天记录里时，结果往往难以预测。OpenSpec 增加了一层轻量的规范（spec）机制，让你在写任何代码前先对齐要做什么。
 
-- **先对齐，再开工** —— 人类与 AI 在写代码前先在规范上达成一致
-- **保持有序** —— 每个变更都有自己的目录：proposal、specs、design、tasks
-- **流式协作** —— 任意制品都可以随时更新，不设僵硬的阶段门槛
-- **用你现有的工具** —— 通过斜杠命令支持 20+ AI 助手
+- **Agree before you build** — human and AI align on specs before code gets written
+- **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
+- **Work fluidly** — update any artifact anytime, no rigid phase gates
+- **Use your tools** — works with 30+ AI assistants via slash commands
 
 ### 我们如何对比
 

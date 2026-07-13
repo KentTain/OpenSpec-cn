@@ -23,8 +23,10 @@ import {
   getOpsxSyncCommandTemplate,
   getOpsxProposeCommandTemplate,
   getOpsxProposeSkillTemplate,
+  getOpsxUpdateCommandTemplate,
   getOpsxVerifyCommandTemplate,
   getSyncSpecsSkillTemplate,
+  getUpdateChangeSkillTemplate,
   getVerifyChangeSkillTemplate,
 } from '../../../src/core/templates/skill-templates.js';
 import {
@@ -58,20 +60,23 @@ const EXPECTED_FUNCTION_HASHES: Record<string, string> = {
   getOpsxProposeSkillTemplate: '540bfd286891e6c854cdad783fe77fb9407462545270e6930252c1718cd00c18',
   getOpsxProposeCommandTemplate: '6a08bc0a352df683d4d8c8688bd0f75b67d690fdecd8612dfe682a502099d106',
   getFeedbackSkillTemplate: '7e8493e4fc577fb4ecb44056e1085abb697f91b2eeb176cc4f8ab7085cbf481f',
+  getUpdateChangeSkillTemplate: 'fe2e8edaf973d42dc7fc7dfd846105c4c3cfec0437606e582ec644985cd4e81d',
+  getOpsxUpdateCommandTemplate: 'e55ac5774203a7d9037d2d588889c97c53f3f930da49497cc79e865375920da7',
 };
 
 const EXPECTED_GENERATED_SKILL_CONTENT_HASHES: Record<string, string> = {
-  'openspec-explore': '256d9b612fc04ee031df60da65ee059df443a5dcb1ee297fe132d22174504c52',
-  'openspec-new-change': 'c206cfa40b8f9fe68477e26370742754e1b276cd54ea3090ea1aa004205c39b0',
-  'openspec-continue-change': 'ff73064bfb17bdb16dd95c4fda7cb255f0c6430ee77bc953b7d0a4a8b3cf7410',
-  'openspec-apply-change': '301d0d869ceb7f064bbfd413ddc1a68cd7aee84a6b312a9683bf65a2986ee2e7',
-  'openspec-ff-change': 'ad27a0f76c85fb7a652b8a3d33a08f71106f3da1effffa22a7a55855c1ea1a6c',
-  'openspec-sync-specs': 'd7c7460c311cd28405365c465082a704e6844ba198d2e17f45c12b182d0481c5',
-  'openspec-archive-change': '4a459deab1bd13d660af3b783c5001aa377754b5663877dec7059be521ed74f7',
-  'openspec-bulk-archive-change': 'ec4f4ead88e320327742f2b8301024a4d767037472833f8832a354fd0896c089',
-  'openspec-verify-change': 'da13c303dc7444273191f05c50acf48228cbe5006df3c22ec5db041fe156e64b',
-  'openspec-onboard': 'cae4c274c15acabcc846b52bfc63e61497ac16c34f3f2de10412308c698078ec',
-  'openspec-propose': '01cc07040db65cddbfd94a05b34c937023c58cc78ea59f421543eaadbfbd60e4',
+  'openspec-explore': 'ba099821631ce75ee70af370917bbddbc88d0882ad0e50e91ed687d2185102ef',
+  'openspec-new-change': 'd5b8909bea70a33b7a312b38ce204a91f40b6bb2bff12c4c06b3e11641b6a689',
+  'openspec-continue-change': '39b4467a4873cde7c97d52c80d53ac647b220bf7c9d96f4e6505f3188e1a1642',
+  'openspec-apply-change': '09c0e1cdf5ccc82416d0969d6bd715cc70616bdbc3531358a5c36057f78be55a',
+  'openspec-ff-change': '8d5a8890eccbd97d714fbab1d73472f79ad9104b519e000264ae43d752cdf631',
+  'openspec-sync-specs': 'f6a1581eb11a30061795c42582db6fa4f5e1f213b4b7cad9f3cbfbe3e9fb2d97',
+  'openspec-archive-change': '1821aee5a06afd895d59d1e1d16495e484b6087ecf59ec93460d7d5e7851e772',
+  'openspec-bulk-archive-change': '7b09b04a440809dd7dbf0b1d7b695cbb8c41184d8d104eb32e82d7cdfb476d18',
+  'openspec-verify-change': '9a8735eaaa34c278d2193eb32fa736f4b111d1c47e675971c8df40f81d20c8c3',
+  'openspec-onboard': 'b1b6fc9a1b3ff64dafe9b8c39a761ee1bd001b542d47b4e4deaf058e0aa21256',
+  'openspec-propose': '0cfc9278123d973929cb4da3ea7ac8ae1b6c84b472eed4fb753657b8347eaeb9',
+  'openspec-update-change': '77ff4d1f1cd08a57649cce1f25e0ebc4f55d6d032dfde5c301d1b479561b72fa',
 };
 
 // Intentionally excludes getFeedbackSkillTemplate: this list only models templates
@@ -88,6 +93,7 @@ const GENERATED_SKILL_FACTORIES: Array<[string, () => SkillTemplate]> = [
   ['openspec-verify-change', getVerifyChangeSkillTemplate],
   ['openspec-onboard', getOnboardSkillTemplate],
   ['openspec-propose', getOpsxProposeSkillTemplate],
+  ['openspec-update-change', getUpdateChangeSkillTemplate],
 ];
 
 function stableStringify(value: unknown): string {
@@ -136,6 +142,8 @@ describe('skill templates split parity', () => {
       getOpsxProposeSkillTemplate,
       getOpsxProposeCommandTemplate,
       getFeedbackSkillTemplate,
+      getUpdateChangeSkillTemplate,
+      getOpsxUpdateCommandTemplate,
     };
 
     const actualHashes = Object.fromEntries(
@@ -163,6 +171,16 @@ describe('skill templates split parity', () => {
     for (const { template, dirName } of getSkillTemplates()) {
       const content = generateSkillContent(template, 'PARITY-BASELINE');
       expect(content, dirName).toContain(STORE_SELECTION_GUIDANCE);
+    }
+  });
+
+  // Auto-approve the OpenSpec CLI: every generated skill carries
+  // `allowed-tools: Bash(openspec:*)` so agents that honor it stop prompting
+  // on each `openspec` call. Iterating the registry covers new skills too.
+  it('pre-approves the openspec CLI via allowed-tools in every deployed skill', () => {
+    for (const { template, dirName } of getSkillTemplates()) {
+      const content = generateSkillContent(template, 'PARITY-BASELINE');
+      expect(content, dirName).toContain('allowed-tools: Bash(openspec:*)');
     }
   });
 
