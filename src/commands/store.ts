@@ -382,7 +382,7 @@ async function confirmRegisterConversion(error: unknown): Promise<void> {
       'store_register_cancelled',
       {
         target: 'store.metadata',
-        fix: '准备好创建 store 身份元数��后重新运行 register。',
+        fix: '准备好创建 store 身份元数据后重新运行 register。',
       }
     );
   }
@@ -464,7 +464,7 @@ function formatMetadataHuman(store: StoreDoctorOutput['stores'][number]): string
 
 function formatDoctorGitHuman(store: StoreDoctorOutput['stores'][number]): string {
   if (store.git.is_repository === null) return '未知';
-  if (!store.git.is_repository) return '未��测到';
+  if (!store.git.is_repository) return '未检测到';
 
   const fact = (value: boolean | null, yes: string, no: string): string =>
     value === null ? '未知' : value ? yes : no;

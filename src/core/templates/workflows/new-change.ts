@@ -88,7 +88,7 @@ export function getOpsxNewCommandTemplate(): CommandTemplate {
     description: '使用实验性产出物工作流启动新变更（OPSX）',
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
-    content: `使用实验性产出物驱��方法启动新变更。
+    content: `使用实验性产出物驱动方法启动新变更。
 
 ${STORE_SELECTION_GUIDANCE}
 

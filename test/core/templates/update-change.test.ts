@@ -19,7 +19,7 @@ const bodies: Array<[string, string]> = [
 describe('update-change templates', () => {
   it('generates the expected skill and command shape (3.1)', () => {
     expect(skill.name).toBe('openspec-update-change');
-    expect(skill.description).toContain('Never edits code');
+    expect(skill.description).toContain('永不编辑代码');
     expect(skill.license).toBe('MIT');
     expect(skill.compatibility).toBe('Requires openspec CLI.');
     expect(skill.metadata).toEqual({ author: 'openspec', version: '1.0' });
@@ -39,9 +39,9 @@ describe('update-change templates', () => {
 
   it('reads artifact ids from status JSON and never branches on hardcoded artifact names (3.2)', () => {
     for (const [label, body] of bodies) {
-      expect(body, label).toContain('do NOT assume them, and do NOT branch on hardcoded artifact names');
-      expect(body, label).toContain('never branch on hardcoded artifact names');
-      expect(body, label).toContain('Custom schemas must work unchanged');
+      expect(body, label).toContain('不要假设它们，也不要根据硬编码的制品名称进行分支');
+      expect(body, label).toContain('永远不要根据硬编码的制品名称进行分支');
+      expect(body, label).toContain('自定义 schema');
       // No literal artifact filenames anywhere: no proposal.md/design.md/tasks.md
       // branching, and no worked example that names them. The only .md literal
       // allowed is the specs/**/*.md glob illustration.
@@ -51,38 +51,38 @@ describe('update-change templates', () => {
 
   it('edits planning artifacts only, hands code off to /opsx:apply, never advances the frontier (3.3)', () => {
     for (const [label, body] of bodies) {
-      expect(body, label).toContain('Never edit code');
-      expect(body, label).toContain('NEVER edit implementation code');
-      expect(body, label).toContain('stop and point to `/opsx:apply`');
-      expect(body, label).toContain('Do not advance the build frontier');
-      expect(body, label).toContain('Do NOT create artifacts that don\'t exist yet');
+      expect(body, label).toContain('永不编辑代码');
+      expect(body, label).toContain('永远不要编辑实现代码');
+      expect(body, label).toContain('停止并指向 `/opsx:apply`');
+      expect(body, label).toContain('不要推进构建前沿');
+      expect(body, label).toContain('不要创建尚不存在的制品');
     }
   });
 
   it('writes to existingOutputPaths, never to a glob resolvedOutputPath (3.4)', () => {
     for (const [label, body] of bodies) {
       expect(body, label).toContain('artifactPaths.<id>.existingOutputPaths');
-      expect(body, label).toContain('Do NOT write to `resolvedOutputPath`');
-      expect(body, label).toContain('still the glob pattern, not a real file');
+      expect(body, label).toContain('不要写入 `resolvedOutputPath`');
+      expect(body, label).toContain('它仍然是 glob 模式，不是真实文件');
     }
   });
 
   it('ends with next-step guidance and never acts on it (3.5)', () => {
     for (const [label, body] of bodies) {
-      expect(body, label).toContain('guidance only - NEVER act on it');
-      expect(body, label).toContain('suggest `/opsx:continue`');
-      expect(body, label).toContain('suggest `/opsx:apply`');
-      expect(body, label).toContain('suggest `/opsx:archive`');
-      expect(body, label).toContain('the code may no longer match the revised plan');
+      expect(body, label).toContain('仅指引 —— 永远不要执行');
+      expect(body, label).toContain('建议 `/opsx:continue`');
+      expect(body, label).toContain('建议 `/opsx:apply`');
+      expect(body, label).toContain('建议 `/opsx:archive`');
+      expect(body, label).toContain('代码可能不再与修订后的计划匹配');
     }
   });
 
   it('confirms every edit and redirects intent changes to /opsx:new', () => {
     for (const [label, body] of bodies) {
-      expect(body, label).toContain('Write only after the user confirms');
-      expect(body, label).toContain('If the user rejects a revision, do not write it');
-      expect(body, label).toContain('recommend starting fresh with `/opsx:new`');
-      expect(body, label).toContain('Update vs. Start Fresh');
+      expect(body, label).toContain('仅在用户确认后才写入');
+      expect(body, label).toContain('如果用户拒绝修订，不要写入');
+      expect(body, label).toContain('重新开始');
+      expect(body, label).toContain('更新与重新开始');
     }
   });
 });

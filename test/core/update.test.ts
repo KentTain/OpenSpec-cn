@@ -600,7 +600,7 @@ Old instructions content
       await updateCommand.execute(testDir);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('up to date')
+        expect.stringContaining('已是最新版本')
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('--force')
@@ -936,7 +936,7 @@ ${OPENSPEC_MARKERS.end}
 
       // Should show warning about --force
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Run with --force to auto-cleanup')
+        expect.stringContaining('使用 --force 自动清理')
       );
 
       // Should continue with update

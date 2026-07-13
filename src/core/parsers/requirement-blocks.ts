@@ -18,8 +18,10 @@ export function normalizeRequirementName(name: string): string {
   return name.trim();
 }
 
-/** The canonical requirement header the delta reader recognizes. */
-const REQUIREMENT_HEADER_REGEX = /^###\s*Requirement:\s*(.+)\s*$/i;
+const REQUIREMENT_KEYWORD_PATTERN = '(?:Requirement|需求)';
+const REQUIREMENT_COLON_PATTERN = '[:：]';
+const REQUIREMENT_HEADER_REGEX = new RegExp(`^###\\s*${REQUIREMENT_KEYWORD_PATTERN}${REQUIREMENT_COLON_PATTERN}\\s*(.+)\\s*$`, 'i');
+const REQUIREMENT_HEADER_PREFIX = new RegExp(`^###\\s*${REQUIREMENT_KEYWORD_PATTERN}${REQUIREMENT_COLON_PATTERN}`, 'i');
 
 /**
  * Extracts the Requirements section from a spec file and parses requirement blocks.
@@ -245,7 +247,20 @@ function parseRequirementBlocksFromSection(
     if (i >= lines.length) break;
     const headerLine = lines[i];
     const m = headerLine.match(REQUIREMENT_HEADER_REGEX);
-    if (!m) { i++; continue; }
+    if (!m) {
+      // nameless "### Requirement:" header — record as skipped
+      if (skipped && !fenceMask![i]) {
+        const h3 = headerLine.match(/^###\s+(.+?)\s*$/);
+        if (h3) {
+          skipped.sink.push({
+            header: h3[1].trim(),
+            section: skipped.section,
+            line: skipped.bodyStartLine + i,
+          });
+        }
+      }
+      i++; continue;
+    }
     const name = normalizeRequirementName(m[1]);
     const buf: string[] = [headerLine];
     i++;

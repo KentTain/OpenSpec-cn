@@ -154,8 +154,8 @@ export class Validator {
             path: entryPath,
             line: stray.line,
             message: nameless
-              ? `Header "### ${stray.header}" in ${stray.section} is missing a requirement name and is ignored by validation. Add a name, e.g. "### Requirement: <name>".`
-              : `Header "### ${stray.header}" in ${stray.section} is not a "### Requirement:" header and is ignored by validation. Use "### Requirement: ${stray.header}" if it should be validated as a requirement.`,
+              ? `${stray.section} 中的标题 "### ${stray.header}" 缺少需求名称，已被验证忽略。请添加名称，例如 "### Requirement: <名称>"。`
+              : `${stray.section} 中的标题 "### ${stray.header}" 不是 "### Requirement:" 标题，已被验证忽略。如果它应该作为需求进行验证，请使用 "### Requirement: ${stray.header}"。`,
           });
         }
 
@@ -193,14 +193,14 @@ export class Validator {
               path: entryPath,
               message: this.containsShallOrMust(block.name)
                 ? this.buildMissingShallOrMustMessage(`ADDED "${block.name}"`, block.name)
-                : `ADDED "${block.name}" is missing requirement text`,
+                : `ADDED "${block.name}" 缺少需求正文`,
             });
           } else if (!this.containsShallOrMust(requirementText)) {
             issues.push({ level: 'ERROR', path: entryPath, message: this.buildMissingShallOrMustMessage(`ADDED "${block.name}"`, block.name) });
           }
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `ADDED "${block.name}" must include at least one scenario` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `ADDED "${block.name}" 必须至少包含一个场景` });
           }
         }
 
@@ -220,14 +220,14 @@ export class Validator {
               path: entryPath,
               message: this.containsShallOrMust(block.name)
                 ? this.buildMissingShallOrMustMessage(`MODIFIED "${block.name}"`, block.name)
-                : `MODIFIED "${block.name}" is missing requirement text`,
+                : `MODIFIED "${block.name}" 缺少需求正文`,
             });
           } else if (!this.containsShallOrMust(requirementText)) {
             issues.push({ level: 'ERROR', path: entryPath, message: this.buildMissingShallOrMustMessage(`MODIFIED "${block.name}"`, block.name) });
           }
           const scenarioCount = this.countScenarios(block.raw);
           if (scenarioCount < 1) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED "${block.name}" must include at least one scenario` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED "${block.name}" 必须至少包含一个场景` });
           }
         }
 
@@ -292,7 +292,7 @@ export class Validator {
       issues.push({
         level: 'ERROR',
         path: specPath,
-        message: `Delta sections ${this.formatSectionList(sections)} were found, but no requirement entries parsed. Ensure each section includes at least one "### Requirement:" block (REMOVED may use bullet list syntax).`,
+        message: `已找到 delta 章节 ${this.formatSectionList(sections)}，但未解析到需求条目。请确保每个章节至少包含一个 "### Requirement:" 块（REMOVED 可以使用列表语法）。`,
       });
     }
     for (const path of missingHeaderSpecs) {
@@ -520,7 +520,7 @@ export class Validator {
    * the author at that exact fix when the keyword is found in the header only.
    */
   private buildMissingShallOrMustMessage(prefix: string, blockName: string): string {
-    const base = `${prefix} must contain SHALL or MUST`;
+    const base = `${prefix} 必须包含 SHALL 或 MUST`;
     if (this.containsShallOrMust(blockName)) {
       return `${base}（在需求正文中，而非仅在标题中）。请将 SHALL/MUST 语句移到 "### Requirement: ..." 标题后的下一行。`;
     }

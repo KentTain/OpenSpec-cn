@@ -362,8 +362,8 @@ export class InitCommand {
 
     if (detectedOnlyNames.length > 0) {
       const detectionLabel = shouldPreselectDetected
-        ? 'pre-selected for first-time setup'
-        : 'not pre-selected';
+        ? '首次设置已预选'
+        : '未预选';
       console.log(`检测到的工具目录：${detectedOnlyNames.join(', ')}（${detectionLabel}）`);
     }
 
@@ -389,7 +389,7 @@ export class InitCommand {
     const raw = this.toolsArg.trim();
     if (raw.length === 0) {
       throw new Error(
-        'The --tools option requires a value. Use "all", "none", or a comma-separated list of tool IDs.'
+        '--tools 选项需要提供一个值。使用 "all"、"none" 或逗号分隔的工具 ID 列表。'
       );
     }
 
@@ -413,7 +413,7 @@ export class InitCommand {
 
     if (tokens.length === 0) {
       throw new Error(
-        'The --tools option requires at least one tool ID when not using "all" or "none".'
+        '--tools 选项在使用 "all" 或 "none" 以外的值时，需要至少指定一个工具 ID。'
       );
     }
 
@@ -462,7 +462,7 @@ export class InitCommand {
       if (!tool.skillsDir) {
         const validToolsWithSkills = getToolsWithSkillsDir();
         throw new Error(
-          `Tool '${toolId}' does not support skill generation.\nTools with skill generation support:\n  ${validToolsWithSkills.join('\n  ')}`
+          `工具 '${toolId}' 不支持 skill 生成。\n支持 skill 生成的工具：\n  ${validToolsWithSkills.join('\n  ')}`
         );
       }
 
@@ -685,11 +685,11 @@ export class InitCommand {
       const skillCount = delivery !== 'commands' ? getSkillTemplates(workflows).length : 0;
       const commandCount = delivery !== 'skills' ? getCommandContents(workflows).length : 0;
       if (skillCount > 0 && commandCount > 0) {
-        console.log(`${skillCount} skills and ${commandCount} commands in ${toolDirs}/`);
+        console.log(`${skillCount} 个 skills 和 ${commandCount} 个命令，位于 ${toolDirs}/`);
       } else if (skillCount > 0) {
-        console.log(`${skillCount} skills in ${toolDirs}/`);
+        console.log(`${skillCount} 个 skills，位于 ${toolDirs}/`);
       } else if (commandCount > 0) {
-        console.log(`${commandCount} commands in ${toolDirs}/`);
+        console.log(`${commandCount} 个命令，位于 ${toolDirs}/`);
       }
     }
 

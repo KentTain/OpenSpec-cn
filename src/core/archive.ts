@@ -287,7 +287,7 @@ export class ArchiveCommand {
         if (!deltaReport.valid) {
           hasValidationErrors = true;
           if (!json) {
-            console.log(chalk.red(`\nValidation errors in change delta specs:`));
+            console.log(chalk.red(`\n变更 delta specs 中存在验证错误：`));
             for (const issue of deltaReport.issues) {
               if (issue.level === 'ERROR') {
                 console.log(chalk.red(`  ✗ ${issue.message}`));
@@ -501,7 +501,7 @@ export class ArchiveCommand {
       }
     }
     if (archiveExists) {
-      throw new ArchiveBlockedError('archive_target_exists', `Archive '${archiveName}' already exists.`);
+      throw new ArchiveBlockedError('archive_target_exists', `归档 '${archiveName}' 已存在。`);
     }
 
     // Create archive directory if needed

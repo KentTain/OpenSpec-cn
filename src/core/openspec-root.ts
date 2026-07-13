@@ -115,7 +115,7 @@ async function inspectOptionalPlanningDirectory(
 
   inspection.diagnostics.push(missingDirectoryDiagnostic(
     notDirectoryCode,
-    `${relativePath}/ exists but is not a directory.`,
+    `${relativePath}/ 存在但不是目录。`,
     target
   ));
   return kind;

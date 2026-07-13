@@ -2,7 +2,7 @@
 
 当前项目是OpenSpec项目的汉化版，当前项目汉化后名叫@studyzy/openspec-cn，只有在命令行下是执行openspec-cn命令，而不是openspec命令了，但新建的目录也还是叫openspec，对应的SKILL也是保持openspec-XXX不变，不用变成openspec-cn-XXX。
 
-在汉化过程中Schema作为特殊计算机词汇，不需要翻译成中文，保持不变即可。
+在汉化过程中Schema作为特殊计算机词汇，不需要翻译成中文，保持不变即可。注意代码中的注释不需要翻译成中文。
 ## 项目概述
 
 `@studyzy/openspec-cn` 是 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的简体中文汉化分支。OpenSpec 是一个面向 AI 编程助手的规范驱动开发框架——在写代码前通过提案(proposal)、规范(spec)、设计(design)、任务(tasks)四类制品与 AI 对齐意图。
@@ -94,7 +94,7 @@ src/
 
 3. **制品图系统**: 核心抽象。每个 schema 定义制品及其依赖关系(`requires`)。系统追踪完成状态，按依赖顺序生成任务。
 
-4. **Schema 驱动**: `schemas/spec-driven/schema.yaml` 定义��� 4 种制品（proposal → spec → design → tasks）及其依赖和模板。Schema 包通过独立仓库分发，类似 GitHub spec-kit 社区扩展模式。
+4. **Schema 驱动**: `schemas/spec-driven/schema.yaml` 定义了 4 种制品（proposal → spec → design → tasks）及其依赖和模板。Schema 包通过独立仓库分发，类似 GitHub spec-kit 社区扩展模式。
 
 5. **命令注册模式**: CLI 定义在 `cli/index.ts`，命令实现逻辑在 `commands/`。子命令注册通过 `registerSpecCommand`、`registerConfigCommand` 等函数完成。
 
@@ -142,3 +142,6 @@ pnpm release       # 发布流程
 ```
 
 Nix 支持通过 `flake.nix` 提供（`pnpm_9`, `nodejs_20`），支持 x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin。
+
+## 注意
+EXPECTED_FUNCTION_HASHES 和 EXPECTED_GENERATED_SKILL_CONTENT_HASHES 会因为汉化而改变，导致相关的UT不通过，这些UT需要在最后所有项目都完成汉化后再重新计算Hash进行修复。

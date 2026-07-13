@@ -153,7 +153,7 @@ describe('ArchiveCommand', () => {
 
       // The gate now sees 5 tasks / 2 incomplete across the nested files.
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('2 incomplete task(s) found')
+        expect.stringContaining('任务状态：3/5 任务')
       );
     });
 
@@ -220,7 +220,7 @@ The system SHALL support logo and backgroundColor fields for gift cards.
       
       // Verify warning was logged about REMOVED requirements being ignored
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Warning: gift-card - 2 REMOVED requirement(s) ignored for new spec (nothing to remove).')
+        expect.stringContaining('gift-card - 2 个 REMOVED 需求在新 spec 中被忽略（无需移除的内容）。')
       );
       
       // Verify spec was created with only ADDED requirements
@@ -265,7 +265,7 @@ Modified content.`;
       
       // Verify error message mentions MODIFIED not allowed for new specs
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('new-capability: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.')
+        expect.stringContaining('new-capability: 目标 spec 不存在；仅允许对新 spec 使用 ADDED 需求。MODIFIED 和 RENAMED 操作需要现有 spec。')
       );
       expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
       
@@ -303,7 +303,7 @@ New feature description.
       
       // Verify error message mentions RENAMED not allowed for new specs
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('another-capability: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.')
+        expect.stringContaining('another-capability: 目标 spec 不存在；仅允许对新 spec 使用 ADDED 需求。MODIFIED 和 RENAMED 操作需要现有 spec。')
       );
       expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
       
@@ -336,7 +336,7 @@ New feature description.
       // Try to archive
       await expect(
         archiveCommand.execute(changeName, { yes: true })
-      ).rejects.toThrow(`Archive '${date}-${changeName}' already exists.`);
+      ).rejects.toThrow(`归档 '${date}-${changeName}' 已存在。`);
     });
 
     it('should handle changes without tasks.md', async () => {
@@ -690,10 +690,10 @@ The system SHALL support the shared rule.
       expect(updated).not.toContain('#### Scenario: Behavior from B');
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining(
-          'stale-modified MODIFIED failed for header "### Requirement: Shared Rule" - current spec contains scenario(s) not present in the modified block: "Behavior from A"'
+          'stale-modified MODIFIED 失败，标题 "### Requirement: Shared Rule" - 当前 spec 包含修改后的块中不存在的场景："Behavior from A"。归档前请刷新变更 spec 以避免丢弃场景。'
         )
       );
-      expect(console.log).toHaveBeenCalledWith('Aborted. No files were changed.');
+      expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
 
       await expect(fs.access(changeBDir)).resolves.not.toThrow();
       const archiveDir = path.join(tempDir, 'openspec', 'changes', 'archive');
@@ -749,7 +749,7 @@ The system SHALL do B differently.
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('delta-target: target spec is structurally invalid and cannot be updated until fixed:')
+        expect.stringContaining('delta-target: 目标 spec 结构无效，在修复之前无法更新：')
       );
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('需求标题 "### Requirement: B" 出现在主 ## Requirements 章节之外。')
@@ -801,7 +801,7 @@ new body`;
       expect(unchanged).toBe(mainContent);
       // Assert error message format and abort notice
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('delta validation failed')
+        expect.stringContaining('验证失败 - 当存在重命名时，MODIFIED 必须引用新的标题')
       );
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('已中止。未更改任何文件。')
@@ -941,7 +941,7 @@ The system will log all events.
 
       expect(process.exitCode).toBe(1);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Validation failed')
+        expect.stringContaining('变更 delta specs 中存在验证错误')
       );
 
       // Change must NOT have been archived
@@ -973,7 +973,7 @@ Modified content.`;
       await archiveCommand.execute(changeName, { yes: true, noValidate: true });
 
       expect(process.exitCode).toBe(1);
-      expect(console.log).toHaveBeenCalledWith('Aborted. No files were changed.');
+      expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
 
       const mainSpecPath = path.join(tempDir, 'openspec', 'specs', 'new-capability', 'spec.md');
       await expect(fs.access(mainSpecPath)).rejects.toThrow();
@@ -1045,9 +1045,9 @@ The system SHALL do the thing differently.
         // buildUpdatedSpec ran for real and the spy made its output "invalid"
         expect(specContentSpy).toHaveBeenCalled();
         expect(console.log).toHaveBeenCalledWith(
-          expect.stringContaining('Validation errors in rebuilt spec for rebuilt-capability')
+          expect.stringContaining('rebuilt-capability 重建规范中存在验证错误（不会写入更改）：')
         );
-        expect(console.log).toHaveBeenCalledWith('Aborted. No files were changed.');
+        expect(console.log).toHaveBeenCalledWith('已中止。未更改任何文件。');
 
         // Main spec must be unchanged (no writes happened)
         const still = await fs.readFile(path.join(mainSpecDir, 'spec.md'), 'utf-8');
@@ -1084,7 +1084,7 @@ The system SHALL do the thing differently.
       
       await expect(
         archiveCommand.execute('any-change', { yes: true })
-      ).rejects.toThrow("Change 'any-change' not found. No active changes exist in this root.");
+      ).rejects.toThrow("未找到变更 'any-change'。此根目录下不存在活跃的变更。");
     });
   });
 
