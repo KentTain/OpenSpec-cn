@@ -93,19 +93,19 @@ AI：已归档至 openspec/changes/archive/2025-01-23-add-dark-mode/
 
 </details>
 
-## Why teams adopt OpenSpec
+## 团队为何采用 OpenSpec
 
-Solo, OpenSpec keeps you and your AI honest on a single repo. On a team, the hard part moves: a feature spans the API server, the web app, and a shared library; requirements are owned by one team and consumed by others; planning starts before any code exists.
+单人开发时，OpenSpec 让你和你的 AI 在同一个仓库里保持诚实。在团队中，难点转移了：一个功能横跨 API 服务、Web 应用和一个共享库；需求由一个团队拥有，却被其他团队消费；规划在你写任何代码之前就已经开始。
 
-**[Stores](docs/stores-beta/user-guide.md)** are the answer — planning in a repo of its own. The same `openspec/` shape you already know (specs and changes), shared by `git push` like anything else. One source of truth your whole team and every coding agent can read, across every repo.
+**[Stores](docs/stores-beta/user-guide.md)** 就是答案 —— 把规划放到一个独立的仓库里。你熟悉的 `openspec/` 形态（specs 和 changes）原样保留，通过 `git push` 像其他东西一样共享。整个团队和每个编码代理都能跨仓库读取的单一事实来源。
 
-- **Cross-repo features** — one change, one plan, even when the code lands in three repos.
-- **Shared requirements** — a platform team owns the specs; product teams reference them read-only, right where their coding agent can read them. No drifting wiki.
-- **Plan before code** — capture the plan in the store now; the code repos catch up later.
+- **跨仓库功能** —— 一个变更、一个计划，即使代码落在三个仓库里。
+- **共享需求** —— 平台团队拥有 specs；产品团队以只读方式引用它们，就在编码代理能读到的地方。不再有漂移的 wiki。
+- **先规划后编码** —— 现在把计划捕获到 store 中；代码仓库随后跟上。
 
-> Stores are in **beta**. Start with the [Stores User Guide](docs/stores-beta/user-guide.md).
+> Stores 目前处于 **beta** 阶段。请从 [Stores 用户指南](docs/stores-beta/user-guide.md) 开始。
 
-## Quick Start
+## 快速开始
 
 **需要 Node.js 20.19.0 或更高版本。**
 
@@ -167,10 +167,10 @@ openspec-cn init
 
 AI 编程助手很强大，但当需求只存在于聊天记录里时，结果往往难以预测。OpenSpec 增加了一层轻量的规范（spec）机制，让你在写任何代码前先对齐要做什么。
 
-- **Agree before you build** — human and AI align on specs before code gets written
-- **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
-- **Work fluidly** — update any artifact anytime, no rigid phase gates
-- **Use your tools** — works with 30+ AI assistants via slash commands
+- **构建前先达成共识** —— 在写代码前，人类和 AI 先在 specs 上对齐
+- **保持有序** —— 每个变更都有自己的文件夹，内含 proposal、specs、design 和 tasks
+- **流畅协作** —— 随时更新任意制品，没有僵化的阶段门槛
+- **使用你的工具** —— 通过斜杠命令与 30+ 种 AI 助手协作
 
 ### 我们如何对比
 

@@ -1,74 +1,74 @@
-# OpenSpec on a Team
+# 团队中使用 OpenSpec
 
-Everything in the other guides works the same whether you're solo or on a team of twenty. What changes on a team is the questions around the edges: where do the specs live, how do teammates review a plan, and how does any of this fit the pull-request flow we already have?
+其他指南里的一切无论在单人还是二十人团队中都一样工作。团队中变化的是边缘处的问题：specs 放在哪、队友如何审阅 plan、这一切如何融入我们已有的 pull-request 流程？
 
-The short answer: a change is just files, and OpenSpec never touches git. So it fits your existing workflow instead of replacing it. This page spells out the conventions that work well.
+简短答案：一个变更只是文件，而 OpenSpec 从不碰 git。所以它适配你已有的工作流，而不是替换它。本页说明行之有效的约定。
 
-## One rule: OpenSpec doesn't touch git
+## 一条规则：OpenSpec 不碰 git
 
-OpenSpec reads and writes plain Markdown under `openspec/`. It never commits, branches, pushes, or pulls in your project — and it never clones or syncs a [store](stores-beta/user-guide.md) on its own. That means:
+OpenSpec 在 `openspec/` 下读写纯 Markdown。它从不在你的项目里提交、分支、推送或拉取——它也从不自行克隆或同步 [store](stores-beta/user-guide.md)。这意味着：
 
-- **You commit `openspec/` like any source.** Specs, active changes, and the archive are part of your project's history. (Yes, commit the whole folder — see the [FAQ](faq.md#should-i-commit-the-openspec-folder-to-git).)
-- **A change is a folder you version like code.** `openspec/changes/add-dark-mode/` is just files on a branch.
-- **Everything below is convention, not enforcement.** OpenSpec won't make you do it this way; it just fits cleanly.
+- **你像提交任何源代码一样提交 `openspec/`。** specs、活跃变更和归档都是你项目历史的一部分。（是的，提交整个文件夹——见 [FAQ](faq.md#should-i-commit-the-openspec-folder-to-git)。）
+- **一个变更是你像代码一样版本化的文件夹。** `openspec/changes/add-dark-mode/` 只是分支上的一些文件。
+- **下面一切都是约定，而非强制。** OpenSpec 不会逼你这么做；它只是恰好干净地契合。
 
-## The everyday loop
+## 日常循环
 
-The workflow that works well maps a change onto a branch and a pull request:
+行之有效的工作流把一个变更映射到一条分支和一个 pull request：
 
 ```
-git switch -c add-dark-mode        start a branch, as usual
+git switch -c add-dark-mode       像往常一样开一条分支
    │
-/opsx:propose add-dark-mode        draft the plan (proposal + specs + tasks)
+/opsx:propose add-dark-mode       起草 plan（proposal + specs + tasks）
    │
-REVIEW THE PLAN                    you read it before any code — see Reviewing a Change
+REVIEW THE PLAN                   写任何代码之前你先读它 — 见 Reviewing a Change
    │
-/opsx:apply                        build it; artifacts + code change together
+/opsx:apply                       构建它；制品与代码一起变化
    │
-git commit && open a PR            the PR contains the spec delta AND the code
+git commit && open a PR            PR 包含了 spec 增量 AND 代码
    │
 teammate reviews, merges
    │
-/opsx:archive                      fold the delta into specs/, move the change to archive/
+/opsx:archive                     把增量并入 specs/，把变更移到 archive/
 ```
 
-The plan and the code live side by side in the same branch, so your teammates review both together, and six months later the archived spec still explains why the code looks the way it does.
+plan 和代码并肩待在同一条分支里，所以你的队友一起审阅两者，六个月后归档的 spec 仍解释着代码为什么长那样。
 
-## Reviewing specs in a pull request
+## 在 pull request 中审阅 specs
 
-This is where a team feels the payoff. When a PR includes the change's delta spec, the reviewer gets something a raw diff never gives them: **a plain-language statement of what this change is supposed to do**, before they read a single line of code.
+这正是团队感受到回报的地方。当 PR 包含了变更的增量规范，审阅者得到了原始 diff 永远给不了的东西：**一句关于这个变更应该做什么的平白陈述**，在他们读任何一行代码之前。
 
-A good review order for the reviewer:
+审阅者的一个好顺序：
 
-1. **Read `proposal.md`** — is this the right problem and scope?
-2. **Read the delta under `specs/`** — is "done" defined correctly? (This is the [Reviewing a Change](reviewing-changes.md) two-minute pass, now happening in the PR.)
-3. **Then read the code diff** — does it deliver exactly those requirements?
+1. **读 `proposal.md`** —— 这是对的问题和范围吗？
+2. **读 `specs/` 下的增量** —— "完成"定义正确吗？（这就是 [Reviewing a Change](reviewing-changes.md) 的两分钟检查，现在发生在 PR 里。）
+3. **然后读代码 diff** —— 它是否精确地交付了那些需求？
 
-A reviewer who disagrees with the *approach* can say so against the proposal, cheaply, instead of relitigating it across 300 lines of code. Put the delta spec near the top of the PR description, or point reviewers at the change folder, so they start there.
+一个对*方法*有不同意见的审阅者，可以针对 proposal 低成本地说出来，而不是在 300 行代码里重新争论。把增量规范放在 PR 描述顶部附近，或指向审阅者看变更文件夹，让他们从这里开始。
 
-## When to archive
+## 何时归档
 
-Archiving folds a change's deltas into your main `openspec/specs/` and moves the change folder to `openspec/changes/archive/YYYY-MM-DD-<name>/`. Because `specs/` is the **shared source of truth**, the timing matters on a team. Two workable conventions:
+归档把一个变更的增量并入你主线的 `openspec/specs/`，并把变更文件夹移到 `openspec/changes/archive/YYYY-MM-DD-<name>/`。因为 `specs/` 是**共享的事实来源**，在团队中时机很重要。两种可行的约定：
 
-- **Archive after the PR merges (recommended).** The branch carries the active change; once it's merged to your main branch, archive there (often a tiny follow-up commit or a scheduled cleanup). This keeps the shared `specs/` moving forward only with work that actually shipped.
-- **Archive inside the PR.** Simpler for small teams: the same PR that adds the code also syncs and archives. The tradeoff is that your `specs/` diff and your code diff land together, which can make the PR noisier.
+- **PR 合并后归档（推荐）。** 分支带着活跃变更；一旦合并到你的主分支，就在那儿归档（通常是一个很小的后续提交或一次计划清理）。这让共享的 `specs/` 只随真正交付的工作前进。
+- **在 PR 内归档。** 对小团队更简单：添加代码的同一个 PR 也同步并归档。权衡是你的 `specs/` diff 和代码 diff 一起落地，可能让 PR 更吵。
 
-Pick one and be consistent. Either way, `/opsx:archive` checks that tasks are complete and offers to sync first, so nothing merges half-finished by accident.
+选一种并保持一致。无论哪种，`/opsx:archive` 都会检查任务是否完成并先提供同步选项，所以不会意外合并半成品。
 
-## Two people, parallel changes
+## 两个人，并行变更
 
-Because changes are separate folders, they don't collide:
+因为变更是独立的文件夹，它们不会撞车：
 
-- **Different changes, different people — no problem.** `add-dark-mode` and `rate-limit-login` are different folders on different branches; they never touch each other until they both archive.
-- **One change, one owner.** Two people editing the same change folder conflict exactly like two people editing the same file. Keep a change to a single author, or split it into two changes (another reason to [right-size](writing-specs.md#right-size-the-change)).
-- **The one place conflicts show up is `specs/`.** If two changes both modify the *same* requirement, archiving the second one will conflict in `openspec/specs/…/spec.md` — resolve it like any merge conflict, keeping the requirement that reflects reality. This is rare, and it's a feature: it's git telling you two changes disagreed about how the system should behave.
+- **不同的变更，不同的人——没问题。** `add-dark-mode` 和 `rate-limit-login` 是不同分支上不同的文件夹；在两者都归档之前从不相碰。
+- **一个变更，一个负责人。** 两个人编辑同一个变更文件夹，冲突方式就像两个人编辑同一个文件。让一个变更只属于一个作者，或者把它拆成两个变更（这也是 [合理控制规模](writing-specs.md#right-size-the-change) 的另一个理由）。
+- **唯一会出现冲突的地方是 `specs/`。** 如果两个变更都修改了*同一个*需求，归档第二个时会在 `openspec/specs/…/spec.md` 处冲突——像任何合并冲突一样解决它，保留反映现实的需求。这很少见，而且这正是一个特性：它让 git 告诉你两个变更对系统应该如何行为有分歧。
 
-## When planning outgrows one repo
+## 当规划超出一个仓库
 
-Everything above assumes the plan lives in the code repo's own `openspec/` folder, which is the right default. When your planning genuinely spans several repos or teams — one feature touching three services, or requirements one team owns and others consume — that's what the beta **stores** feature is for: planning gets its own repo that any code repo can point at. Start with the [Stores User Guide](stores-beta/user-guide.md).
+上面一切都假设 plan 活在代码仓库自己的 `openspec/` 文件夹里，这是对的默认。当你的规划确实跨越多个仓库或团队——一个功能触及三个服务，或者一个团队拥有、其他团队消费的需求——那就是 beta 版 **stores** 功能的用武之地：规划有了自己的仓库，任何代码仓库都可以指向它。从 [Stores User Guide](stores-beta/user-guide.md) 开始。
 
-## Where to go next
+## 下一步去哪
 
-- [Reviewing a Change](reviewing-changes.md) — the review pass, now inside your PR.
-- [Writing Good Specs](writing-specs.md) — including how to right-size a change so it fits one branch.
-- [Stores User Guide](stores-beta/user-guide.md) — planning that spans repos and teams.
+- [Reviewing a Change](reviewing-changes.md) — 审阅过程，现在发生在你的 PR 里。
+- [Writing Good Specs](writing-specs.md) — 包括如何合理控制变更规模以适配一条分支。
+- [Stores User Guide](stores-beta/user-guide.md) — 跨仓库和团队的规划。

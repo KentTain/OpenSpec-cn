@@ -1,31 +1,31 @@
-# Core Concepts at a Glance
+# 核心概念一览
 
-**OpenSpec is a lightweight agreement layer between you and your AI.** You write down what a change should do, the AI drafts the details, you both look at the same plan, and only then does code get written. This page is the whole mental model on one screen. When you want the long version, [Concepts](concepts.md) has it.
+**OpenSpec 是你与你的 AI 之间一层轻量的约定层。** 你写下某个变更应该做什么，AI 起草细节，你们双方看着同一份计划，然后才动笔写代码。本页在一屏之内呈现完整的思维模型。若想看完整长版，请见[核心概念](concepts.md)。
 
-Here's the entire idea in five words: **agree first, then build confidently.**
+整件事用五个词概括：**先对齐，再自信地构建。**
 
-## The five ideas
+## 五个理念
 
-Everything in OpenSpec is built from five concepts. Learn these and the rest is detail.
+OpenSpec 中的一切都由五个概念构建而成。学会这些，其余皆为细节。
 
-**1. Specs are the truth.** A spec describes how your system behaves *right now*. It lives in `openspec/specs/`, organized by domain (`auth/`, `payments/`, `ui/`). Specs are made of requirements ("the system SHALL expire sessions after 30 minutes") and scenarios (concrete given/when/then examples). Think of specs as the single agreed-upon answer to "what does this software do?"
+**1. Specs 即事实。** 一个 spec 描述你的系统*当下*如何运作。它位于 `openspec/specs/`，按领域组织（`auth/`、`payments/`、`ui/`）。Specs 由需求（"系统 SHALL 在 30 分钟无活动后使会话过期"）和场景（具体的 given/when/then 示例）构成。把 specs 想成关于"这个软件做什么？"的唯一约定答案。
 
-**2. A change is one unit of work.** When you want to add, modify, or remove behavior, you create a change: a folder in `openspec/changes/` holding everything about that work in one place. A proposal, a design, a task list, and the spec edits. One change, one folder, one feature.
+**2. 一个 change 是一个工作单元。** 当你想要新增、修改或移除某种行为时，你创建一个变更：一个位于 `openspec/changes/` 的文件夹，把关于那项工作的所有内容放在一处——一份 proposal、一份 design、一份任务列表，以及 spec 的修改。一个变更，一个文件夹，一个功能。
 
-**3. Delta specs describe what's changing, not the whole world.** Inside a change, you don't rewrite the entire spec. You write a small delta: `ADDED` this requirement, `MODIFIED` that one, `REMOVED` this other one. This is the trick that makes OpenSpec good at editing existing systems, not just green-field ones. You describe the diff, not the destination.
+**3. 增量规范描述正在变化的，而非整个世界。** 在变更内部，你不需要重写整个 spec。你写一个小小的增量：`ADDED` 这条需求，`MODIFIED` 那一条，`REMOVED` 另一条。这正是让 OpenSpec 擅长编辑既有系统、而非仅限全新项目的关键技巧。你描述的是 diff，而非终点。
 
-**4. Artifacts build on each other.** A change contains a few documents, created in a natural order, each feeding the next:
+**4. 制品相互依托。** 一个变更包含几个文档，按自然的顺序创建，每个都为下一个提供养料：
 
 ```text
 proposal ──► specs ──► design ──► tasks ──► implement
    why        what       how       steps      do it
 ```
 
-You can revisit any of them at any time. They're enablers, not gates. (More on that below.)
+你可以随时回到其中任意一个。它们是促成因素，而非关卡。（下文详述。）
 
-**5. Archiving folds the change back into the truth.** When the work is done, you archive the change. Its delta specs merge into your main specs, and the change folder moves to `changes/archive/` with a date stamp. Now your specs describe the new reality, and you're ready for the next change. The cycle closes.
+**5. 归档将变更合并回事实来源。** 工作完成时，你归档该变更。它的增量规范合并进你的主 specs，变更文件夹带着日期戳移入 `changes/archive/`。现在你的 specs 描述了新的现实，你已准备好迎接下一个变更。循环闭合。
 
-## The picture
+## 图示
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
@@ -42,50 +42,50 @@ You can revisit any of them at any time. They're enablers, not gates. (More on t
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Two folders. `specs/` is what's true. `changes/` is what you're proposing. Archiving moves a proposal into truth.
+两个文件夹。`specs/` 是事实所在。`changes/` 是你正在拟议的内容。归档把一个提案移入事实。
 
-## The loop you'll actually run
+## 你真正会跑的循环
 
-In the default setup, your day looks like this. Optionally think it through first; then one command drafts the plan, you read it, the next builds it, and the last files it away.
+在默认设置下，你的一天如下。可选地先想清楚；然后一条命令起草计划，你阅读它，下一条命令构建它，最后一条归档它。
 
 ```text
-/opsx:explore                   →  (optional) think it through with the AI first
-/opsx:propose add-dark-mode     →  AI drafts proposal, specs, design, tasks
-        (you read and adjust the plan)
-/opsx:apply                     →  AI builds it, checking off tasks
-/opsx:archive                   →  specs updated, change archived
+/opsx:explore                   →  (可选) 先与 AI 一起把思路理清
+/opsx:propose add-dark-mode     →  AI 起草 proposal、specs、design、tasks
+        (你阅读并调整计划)
+/opsx:apply                     →  AI 构建它，逐项勾选任务
+/opsx:archive                   →  specs 已更新，变更已归档
 ```
 
-**When in doubt, start by exploring.** `/opsx:explore` is a no-stakes thinking partner: it reads your code, lays out options, and turns a fuzzy idea into a concrete plan before any artifact exists. It's the best antidote to an AI that will otherwise build *something* from a vague prompt. Already know exactly what you want? Skip straight to `/opsx:propose`. Either way, explore ships in the default profile, so it's always there. See the [Explore guide](explore.md).
+**拿不准时，从探索开始。** `/opsx:explore` 是一个零负担的思考伙伴：它阅读你的代码，铺陈选项，在任一制品诞生之前把一个模糊的想法变成具体计划。当 AI 可能因模糊提示而构建出错误东西时，它是最好���解药。已经确切知道想要什么？直接跳到 `/opsx:propose`。无论哪种方式，explore 都随默认 profile 提供，因此它始终在那里。请参阅[探索指南](explore.md)。
 
-Those are slash commands, typed in your AI assistant's chat. Setup (`openspec-cn init`) happens in your terminal. If that split is new to you, read [How Commands Work](how-commands-work.md) first; it's the most common point of confusion.
+这些斜杠命令输入在你 AI 助手的聊天框中。初始化（`openspec-cn init`）在你的终端中执行。如果这种划分对你而言是新事物，请先阅读[命令如何运作](how-commands-work.md)；这是最常见的困惑点。
 
-## "Enablers, not gates"
+## "促成因素，而非关卡"
 
-This phrase shows up everywhere in OpenSpec, so here's what it means in plain terms.
+这句话在 OpenSpec 中随处可见，所以这里用大白话解释它的含义。
 
-Old-school spec processes are waterfalls: finish planning, *then* you're allowed to implement, and going back is painful. OpenSpec refuses that. The order `proposal → specs → design → tasks` shows what becomes *possible* next, not what you're *forced* to do next.
+老派规范流程是瀑布：先完成规划，*然后*才允许实现，回头重来则痛苦不堪。OpenSpec 拒绝那样。顺序 `proposal → specs → design → tasks` 展示的是接下来*可能*做什么，而非你被*强迫*接下来做什么。
 
-Discover during implementation that the design was wrong? Edit `design.md` and keep going. Realize the scope should shrink? Update the proposal. Nothing locks. The dependencies exist only so the AI has the context it needs (you can't write good tasks without specs to base them on), not to box you in.
+实现过程中发现设计错了？编辑 `design.md` 然后继续。意识到范畴应当收窄？更新 proposal。没有任何东西被锁死。依赖的存在只是为了让 AI 拥有它所需的上下文（没有 specs 作基础你就写不出好任务），而非为了把你框住。
 
-The strength here is honesty: real work is messy and iterative, and OpenSpec lets it be. The tradeoff is discipline: because nothing forces you forward, it's on you to keep a change focused rather than letting it sprawl. The [Workflows](workflows.md) guide has good habits for that.
+其长处在于诚实：真实工作混乱而迭代，OpenSpec 允许它如此。代价在于自律：因为没有什么强迫你前进，保持一个变更聚焦而不至于失控膨胀，就靠你了。[工作流](workflows.md)指南提供了达成此目的的好习惯。
 
-## Why this is worth the small overhead
+## 为何这点小开销值得
 
-Plain truth: OpenSpec adds a step. You write a short plan before building. So what do you get for it?
+说实话：OpenSpec 增加了一个步骤。你在构建前写一份简短计划。那么你为之得到什么？
 
-- **You catch wrong turns before they cost you.** Fixing a misunderstanding in a one-paragraph proposal is free. Fixing it after the AI wrote 400 lines is not.
-- **The plan and the code stay in the same repo.** Six months later, the spec tells you (and the next AI session) why the system works the way it does.
-- **Changes are reviewable.** A change folder is a tidy package: read the proposal, skim the deltas, check the tasks. No archaeology through chat history.
-- **It fits existing codebases.** Deltas mean you can specify a change to a 50,000-line app without first documenting the whole thing.
+- **你在付出代价前就拦下走错的方向。** 在一个段落长的 proposal 中修正一处误解是免费的。在 AI 写了 400 行后再修正则不然。
+- **计划与代码留在同一个仓库。** 六个月后，spec 会告诉你（以及下一次 AI 会话）系统为何如此运作。
+- **变更可审查。** 变更文件夹是一个整洁的包裹：读 proposal，扫一遍增量，核对任务。无需在聊天历史中考古。
+- **适配既有代码库。** 增量意味着你可以为一个 50,000 行的应用规范一次变更，而无需先记录下整个应用。
 
-And the honest tradeoff: for a truly trivial one-line fix, the ceremony may not pay off, and that's fine. OpenSpec is designed to be lightweight, but it isn't free. Use it where agreement matters, which turns out to be most of the time once you're working with an AI that will confidently build whatever you vaguely asked for.
+而诚实的代价是：对于一个真正琐碎的单行修复，这套仪式可能得不偿失，这没关系。OpenSpec 被设计为轻量的，但它并非免费。在约定要紧的地方使用它——一旦你开始与一个会自信地构建出你含糊要求之任何东西的 AI 共事，你会发现在大多数时候它都值得。
 
-## Where to go next
+## 下一步去哪
 
-- New here? [Getting Started](getting-started.md) walks the first change in full.
-- Not sure what to build yet? [Explore First](explore.md) is the place to start.
-- Confused about where commands run? [How Commands Work](how-commands-work.md).
-- Want the deep version of everything above? [Concepts](concepts.md).
-- Learn by example? [Examples & Recipes](examples.md).
-- Need a term defined? [Glossary](glossary.md).
+- 新来的？[快速上手](getting-started.md)完整走一遍第一个变更。
+- 还不确定要构建什么？[先探索](explore.md)是起步之处。
+- 对命令在哪里运行感到困惑？[命令如何运作](how-commands-work.md)。
+- 想看上面一切的深度版本？[核心概念](concepts.md)。
+- 通过示例学习？[示例与配方](examples.md)。
+- 需要查一个术语？[术语表](glossary.md)。

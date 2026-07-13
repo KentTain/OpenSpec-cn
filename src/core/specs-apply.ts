@@ -512,17 +512,17 @@ export async function applySpecs(
 
       if (!options.silent) {
         console.log(`正在应用变更到 openspec/specs/${capability}/spec.md：`);
-        if (p.counts.added) console.log(`  + ${p.counts.added} added`);
-        if (p.counts.modified) console.log(`  ~ ${p.counts.modified} modified`);
-        if (p.counts.removed) console.log(`  - ${p.counts.removed} removed`);
-        if (p.counts.renamed) console.log(`  → ${p.counts.renamed} renamed`);
+        if (p.counts.added) console.log(`  + ${p.counts.added} 新增`);
+        if (p.counts.modified) console.log(`  ~ ${p.counts.modified} 修改`);
+        if (p.counts.removed) console.log(`  - ${p.counts.removed} 移除`);
+        if (p.counts.renamed) console.log(`  → ${p.counts.renamed} 重命名`);
       }
     } else if (!options.silent) {
       console.log(`将应用变更到 openspec/specs/${capability}/spec.md：`);
-      if (p.counts.added) console.log(`  + ${p.counts.added} added`);
-      if (p.counts.modified) console.log(`  ~ ${p.counts.modified} modified`);
-      if (p.counts.removed) console.log(`  - ${p.counts.removed} removed`);
-      if (p.counts.renamed) console.log(`  → ${p.counts.renamed} renamed`);
+      if (p.counts.added) console.log(`  + ${p.counts.added} 新增`);
+      if (p.counts.modified) console.log(`  ~ ${p.counts.modified} 修改`);
+      if (p.counts.removed) console.log(`  - ${p.counts.removed} 移除`);
+      if (p.counts.renamed) console.log(`  → ${p.counts.renamed} 重命名`);
     }
 
     capabilities.push({

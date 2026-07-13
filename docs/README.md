@@ -1,114 +1,114 @@
-# OpenSpec Documentation
+# OpenSpec 文档
 
-Welcome. This is the home for everything OpenSpec.
+欢迎。这里汇集了关于 OpenSpec 的一切。
 
-OpenSpec helps you and your AI coding assistant **agree on what to build before any code is written.** You describe the change, the AI drafts a short spec and a task list, you both look at the same plan, and then the work happens. No more discovering halfway through that the AI built the wrong thing.
+OpenSpec 帮你和你的 AI 编程助手**在写任何代码之前先就“要构建什么”达成一致。** 你描述这次变更,AI 起草一份简短的 spec 和任务清单,你们双方看着同一份计划,然后才开始动手。再也不会做到一半才发现 AI 把东西做错了。
 
-If you read nothing else, read these two pages:
+如果只能读两页,那就读这两页:
 
-1. [Getting Started](getting-started.md): install, initialize, and ship your first change.
-2. [How Commands Work](how-commands-work.md): where you actually type `/opsx:propose` (hint: in your AI chat, not the terminal). This trips up almost everyone once.
+1. [快速入门](getting-started.md):安装、初始化,并完成你的第一个变更。
+2. [命令是如何工作的](how-commands-work.md):你真正输入 `/opsx:propose` 的地方(提示:是在你的 AI 聊天里,不是终端里)。几乎所有人都会在这里踩一次坑。
 
-That second one matters more than it looks. OpenSpec has two halves: a command line tool you run in your terminal, and slash commands you give to your AI assistant. Knowing which is which saves you the most common moment of confusion.
+第二页的重要性比看起来要大。OpenSpec 有两部分:一个是你在终端里运行的命令行工具,另一个是交给 AI 助手的斜杠命令。搞清楚哪个是哪个,能避免最常见的困惑时刻。
 
-> **The best habit to build first: when you're not sure what to build, start with `/opsx:explore`.** It's a no-stakes thinking partner that reads your code, weighs options, and sharpens a fuzzy idea into a concrete plan before any artifact or code exists. The [Explore First](explore.md) guide makes the case.
+> **最值得先养成的习惯:当你不确定要构建什么时,从 `/opsx:explore` 开始。** 它是一个零风险的思考伙伴,会阅读你的代码、权衡各种方案,并在任何制品或代码产生之前,把一个模糊的想法打磨成一份具体的计划。[先探索](explore.md) 指南对此做了详细阐述。
 
-## Pick your path
+## 选择适合你的路径
 
-**I'm brand new.** Start with [Getting Started](getting-started.md), then skim the [Core Concepts at a Glance](overview.md). When something feels mysterious, the [FAQ](faq.md) and [Glossary](glossary.md) are nearby.
+**我是全新用户。** 从 [快速入门](getting-started.md) 开始,然后浏览 [核心概念速览](overview.md)。当某处感觉费解时,[常见问题](faq.md) 和 [术语表](glossary.md) 就在手边。
 
-**I have a problem but not a plan.** This is the common case, and it has a dedicated answer: [Explore First](explore.md). Use `/opsx:explore` to think it through with the AI before committing to anything.
+**我有问题但还没有计划。** 这是最常见的情况,也有专门的答案:[先探索](explore.md)。在做出任何承诺之前,使用 `/opsx:explore` 与 AI 一起把问题想清楚。
 
-**I have a big existing codebase.** You don't document all of it. [Using OpenSpec in an Existing Project](existing-projects.md) shows how to start on real, brownfield code without boiling the ocean.
+**我有一个庞大的存量代码库。** 你不必为它编写全部文档。[在已有项目中使用 OpenSpec](existing-projects.md) 展示了如何在不“煮干整片海洋”的前提下,在真实的、棕地代码上起步。
 
-**I just want to get it working.** [Install](installation.md), run `openspec-cn init`, then read [How Commands Work](how-commands-work.md) so your first slash command lands in the right place.
+**我只想把它跑起来。** [安装](installation.md),运行 `openspec-cn init`,然后阅读 [命令是如何工作的](how-commands-work.md),让你的第一个斜杠命令落在正确的地方。
 
-**I learn by example.** The [Examples & Recipes](examples.md) page walks through real changes start to finish: a small feature, a bug fix, a refactor, an exploration.
+**我通过示例来学习。** [示例与配方](examples.md) 页面从头到尾走完真实的变更:一个小功能、一个 bug 修复、一次重构、一次探索。
 
-**The AI just drafted a plan — now what?** Read it. [Reviewing a Change](reviewing-changes.md) shows the two-minute pass that catches a wrong turn while it's still cheap, and [Writing Good Specs](writing-specs.md) covers what a plan worth approving is made of.
+**AI 刚刚起草了一份计划——现在该怎么办?** 读它。[审查变更](reviewing-changes.md) 展示了用两分钟做一次检查,在代价还很低时就拦下走偏的方向;而 [编写优秀的 Specs](writing-specs.md) 则涵盖了“一份值得批准的计划”由什么构成。
 
-**I work on a team.** [OpenSpec on a Team](team-workflow.md) shows how a change maps onto a branch and a pull request, and how teammates review a plan before the code.
+**我是团队协作的。** [团队中的 OpenSpec](team-workflow.md) 展示了一次变更如何映射到分支和拉取请求,以及队友如何在代码之前先审查计划。
 
-**I'm coming from the old workflow.** The [Migration Guide](migration-guide.md) explains what changed and why, and promises your existing work is safe.
+**我从旧工作流迁移而来。** [迁移指南](migration-guide.md) 解释了发生了什么变化以及为什么,并承诺你已有的工作都是安全的。
 
-**I want to bend it to my team's process.** [Customization](customization.md) covers project config, custom schemas, and shared context.
+**我想把它改造得符合我的团队流程。** [定制化](customization.md) 涵盖了项目配置、自定义 schema 和共享上下文。
 
-**Something's broken.** [Troubleshooting](troubleshooting.md) collects the failures people actually hit, with fixes.
+**出了点问题。** [故障排查](troubleshooting.md) 汇集了人们真正遇到的问题及其修复方法。
 
-## The whole map
+## 完整地图
 
-### Start here
+### 从这里开始
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [Getting Started](getting-started.md) | Install, initialize, and run your first change end to end |
-| [Explore First](explore.md) | Use `/opsx:explore` to think through an idea before you commit |
-| [How Commands Work](how-commands-work.md) | Where slash commands run, what "interactive mode" means, terminal vs chat |
-| [Core Concepts at a Glance](overview.md) | The whole mental model on one page: specs, changes, deltas, archive |
-| [Installation](installation.md) | npm, pnpm, yarn, bun, Nix, and how to verify it worked |
+| [快速入门](getting-started.md) | 安装、初始化,并端到端地运行你的第一个变更 |
+| [先探索](explore.md) | 在做出承诺之前,使用 `/opsx:explore` 把一个想法想清楚 |
+| [命令是如何工作的](how-commands-work.md) | 斜杠命令在哪里运行、“交互模式”是什么意思、终端与聊天的区别 |
+| [核心概念速览](overview.md) | 整页心智模型:specs、变更、delta、归档 |
+| [安装](installation.md) | npm、pnpm、yarn、bun、Nix,以及如何验证安装成功 |
 
-### Use it day to day
+### 日常使用
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [Workflows](workflows.md) | Common patterns and when to reach for each command |
-| [Examples & Recipes](examples.md) | Full walkthroughs of real changes, copy-pasteable |
-| [Writing Good Specs](writing-specs.md) | What a strong requirement and scenario look like, and how to right-size a change |
-| [Reviewing a Change](reviewing-changes.md) | The two-minute pass on a drafted plan before any code is written |
-| [OpenSpec on a Team](team-workflow.md) | How changes fit branches, pull requests, and review |
-| [Using OpenSpec in an Existing Project](existing-projects.md) | Adopting OpenSpec on a large brownfield codebase |
-| [Editing & Iterating on a Change](editing-changes.md) | Update artifacts, go back, reconcile manual edits |
-| [Commands](commands.md) | Reference for every `/opsx:*` slash command |
-| [CLI](cli.md) | Reference for every `openspec` terminal command |
+| [工作流](workflows.md) | 常见模式,以及何时使用哪条命令 |
+| [示例与配方](examples.md) | 真实变更的完整走查,可复制粘贴 |
+| [编写优秀的 Specs](writing-specs.md) | 一个扎实的需求和场景长什么样,以及如何为变更确定合适的范围 |
+| [审查变更](reviewing-changes.md) | 在写任何代码之前,对草稿计划做两分钟检查 |
+| [团队中的 OpenSpec](team-workflow.md) | 变更如何对应分支、拉取请求和审查 |
+| [在已有项目中使用 OpenSpec](existing-projects.md) | 在大型棕地代码库上采用 OpenSpec |
+| [编辑与迭代一个变更](editing-changes.md) | 更新制品、回退、调和手动修改 |
+| [命令](commands.md) | 每个 `/opsx:*` 斜杠命令的参考 |
+| [CLI](cli.md) | 每个 `openspec` 终端命令的参考 |
 
-### Understand it deeply
+### 深入理解
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [Concepts](concepts.md) | The long-form explanation of specs, changes, artifacts, schemas, and archive |
-| [OPSX Workflow](opsx.md) | Why the workflow is fluid instead of phase-locked, plus an architecture deep dive |
-| [Glossary](glossary.md) | Every term defined in one place |
+| [概念](concepts.md) | 关于 specs、变更、制品、schemas 和归档的长篇解释 |
+| [OPSX 工作流](opsx.md) | 为什么工作流是流动的而非阶段锁定的,外加架构深度解析 |
+| [术语表](glossary.md) | 所有术语集中一处定义 |
 
-### Make it yours
+### 让它属于你
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [Customization](customization.md) | Project config, custom schemas, shared context |
-| [Multi-Language](multi-language.md) | Generate artifacts in languages other than English |
-| [Supported Tools](supported-tools.md) | The 25+ AI tools OpenSpec integrates with, and where files land |
+| [定制化](customization.md) | 项目配置、自定义 schema、共享上下文 |
+| [多语言](multi-language.md) | 以英语以外的语言生成制品 |
+| [支持的工具](supported-tools.md) | OpenSpec 集成的 25 多种 AI 工具,以及文件落在何处 |
 
-### When you need help
+### 当你需要帮助时
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [FAQ](faq.md) | Quick answers to the questions people ask most |
-| [Troubleshooting](troubleshooting.md) | Concrete fixes for concrete failures |
-| [Migration Guide](migration-guide.md) | Moving from the legacy workflow to OPSX |
+| [常见问题](faq.md) | 人们最常提问的快捷答案 |
+| [故障排查](troubleshooting.md) | 针对具体故障的具体修复 |
+| [迁移指南](migration-guide.md) | 从旧工作流迁移到 OPSX |
 
-### Coordinate across repos (beta)
+### 跨仓库协调(beta)
 
-| Doc | What it gives you |
+| 文档 | 它能给你什么 |
 |-----|-------------------|
-| [Stores: User Guide](stores-beta/user-guide.md) | Plan in its own repo when your work spans repos or teams |
-| [Agent Contract](agent-contract.md) | The machine-readable CLI surfaces agents drive |
+| [Stores:用户指南](stores-beta/user-guide.md) | 当你的工作跨多个仓库或团队时,在自己的仓库里做计划 |
+| [Agent 契约](agent-contract.md) | Agent 驱动的机器可读 CLI 接口 |
 
-## The thirty-second version
+## 三十秒速览
 
 ```text
-1. Install        npm install -g @fission-ai/openspec@latest
-2. Initialize     cd your-project && openspec-cn init
-3. Explore        (in your AI chat)  /opsx:explore           ← optional, but a great habit
-4. Propose        (in your AI chat)  /opsx:propose add-dark-mode
-5. Build          (in your AI chat)  /opsx:apply
-6. Archive        (in your AI chat)  /opsx:archive
+1. 安装          npm install -g @fission-ai/openspec@latest
+2. 初始化        cd your-project && openspec-cn init
+3. 探索          (在你的 AI 聊天中)  /opsx:explore           ← 可选,但一个很好的习惯
+4. 提案          (在你的 AI 聊天中)  /opsx:propose add-dark-mode
+5. 构建          (在你的 AI 聊天中)  /opsx:apply
+6. 归档          (在你的 AI 聊天中)  /opsx:archive
 ```
 
-Steps 1 and 2 happen in your terminal. The rest happen in your AI assistant's chat. That split is the one thing worth memorizing, and [How Commands Work](how-commands-work.md) explains exactly why. Step 3 is optional, but starting with `/opsx:explore` when you're unsure is the habit most worth forming.
+第 1 步和第 2 步发生在你的终端里。其余步骤发生在你的 AI 助手的聊天中。这一分工是唯一点得记住的东西,而 [命令是如何工作的](how-commands-work.md) 精确解释了原因。第 3 步是可选的,但在不确定时从 `/opsx:explore` 开始,是最值得养成的习惯。
 
-## Where else to get help
+## 还有其他获取帮助的渠道
 
-- **Discord:** [discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC) for questions, ideas, and help.
-- **GitHub Issues:** [github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues) for bugs and feature requests.
-- **`openspec-cn feedback "your message"`** sends feedback straight from your terminal (it opens a GitHub issue).
+- **Discord:** [discord.gg/YctCnvvshC](https://discord.gg/YctCnvvshC),用于提问、交流想法和获取帮助。
+- **GitHub Issues:** [github.com/Fission-AI/OpenSpec/issues](https://github.com/Fission-AI/OpenSpec/issues),用于报告 bug 和提出功能请求。
+- **`openspec-cn feedback "你的消息"`** 直接从你的终端发送反馈(它会打开一个 GitHub issue)。
 
-Found something in these docs that's wrong, stale, or confusing? That's a bug. Open an issue or a PR. Documentation improvements are some of the most valuable contributions you can make.
+在这些文档中发现有误、过时或令人困惑的内容?那就是一个 bug。请提交 issue 或 PR。文档改进是你所能做出的最有价值的贡献之一。

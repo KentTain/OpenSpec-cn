@@ -1,12 +1,13 @@
 ---
 name: openspec-ff-change
 description: 快速推进 OpenSpec 产出物创建。当用户想快速创建实现所需的所有产出物而无需逐个处理时使用。
+allowed-tools: Bash(openspec-cn:*)
 license: MIT
 compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.5.0"
+  generatedBy: "1.6.0"
 ---
 
 快速推进产出物创建 - 一次性生成开始实现所需的所有内容。

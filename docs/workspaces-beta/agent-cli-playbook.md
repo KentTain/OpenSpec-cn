@@ -1,11 +1,10 @@
-# OpenSpec CLI Playbook For Agents
+# 给 Agent 的 OpenSpec CLI 行动手册
 
-Beta note: workspace and initiative flows are usable, but still small. Prefer
-plain commands, clear paths, and short status reports.
+Beta 说明：workspace 和 initiative 流程可用，但仍然很小。优先使用普通命令、清晰的路径和简短的状态报告。
 
-## Start By Resolving Context
+## 从解析上下文开始
 
-Use JSON when you need exact paths.
+需要精确路径时用 JSON。
 
 ```bash
 openspec-cn context-store list --json
@@ -14,34 +13,28 @@ openspec-cn initiative show <store>/<initiative> --json
 openspec-cn workspace doctor --json
 ```
 
-When the user is working from an opened workspace, treat the workspace as the
-local view. Use `workspace doctor --json` to read linked repos/folders and the
-selected initiative. Do not assume the current directory is the repo that should
-own implementation artifacts.
+当用户正从一个已打开的 workspace 工作时，把 workspace 当作本地视图。用 `workspace doctor --json` 读取关联的仓库/文件夹和选中的 initiative。不要假设当前目录就是应该拥有实现制品的仓库。
 
-## Set Up Context Stores Non-Interactively
+## 用非交互方式搭建 Context Store
 
-Humans can run `openspec-cn context-store setup` and answer prompts. Agents should
-pass the setup inputs explicitly.
+人类可以运行 `openspec-cn context-store setup` 并回答提示。Agent 应该显式传入 setup 输入。
 
 ```bash
 openspec-cn context-store setup team-context --no-init-git --json
 openspec-cn context-store setup team-context --path /path/to/team-context --init-git --json
 ```
 
-Use `context-store unregister <id> --json` to forget a local registration while
-leaving files alone. Use `context-store remove <id> --yes --json` only when the
-user explicitly asks to delete the local context-store folder.
+用 `context-store unregister <id> --json` 来忘记一个本地注册，同时保留文件不动。只有在用户明确要求删除本地 context-store 文件夹时，才用 `context-store remove <id> --yes --json`。
 
-## Create Initiatives In Context Stores
+## 在 Context Store 里创建 Initiative
 
-Create shared coordination context in a context store.
+在 context store 里创建共享的协调上下文。
 
 ```bash
 openspec-cn initiative create billing-launch --store team-context --title "Billing Launch" --summary "Get billing live without losing the plot."
 ```
 
-Then edit the initiative files in the context store:
+然后在 context store 里编辑 initiative 文件：
 
 - `requirements.md`
 - `design.md`
@@ -49,48 +42,42 @@ Then edit the initiative files in the context store:
 - `questions.md`
 - `tasks.md`
 
-## Explore Or Propose From A Workspace
+## 从 Workspace 探索或提案
 
-When the user asks to explore or draft work from a workspace:
+当用户要求从 workspace 探索或起草工作时：
 
-1. Resolve the workspace with `openspec-cn workspace doctor --json`.
-2. Resolve the initiative with `openspec-cn initiative show <store>/<initiative> --json`.
-3. Inspect linked repos or folders and identify the likely owning repo.
-4. If ownership is ambiguous, ask the user which linked repo should own the
-   repo-local OpenSpec change.
-5. Run explore/propose workflow commands from the owning repo, not from the
-   workspace root.
+1. 用 `openspec-cn workspace doctor --json` 解析 workspace。
+2. 用 `openspec-cn initiative show <store>/<initiative> --json` 解析 initiative。
+3. 检查关联的仓库或文件夹，找出可能的所属仓库。
+4. 如果归属不明确，问用户哪个关联仓库应该拥有这个 repo-local 的 OpenSpec 变更。
+5. 从所属仓库运行探索/提案工作流命令，而不是从 workspace 根目录。
 
-The workspace is the cockpit for the conversation. It is not the durable home
-for implementation plans.
+Workspace 是对话的驾驶舱。它不是实现计划的持久归宿。
 
-## Create Changes From The Owning Repo
+## 从所属仓库创建变更
 
-Repo-local changes belong in the repo that owns the work.
+Repo-local 变更属于拥有这项工作的仓库。
 
 ```bash
 openspec-cn new change add-billing-api --initiative team-context/billing-launch
 ```
 
-Run this command with the owning repo as the current working directory. Do not
-ask the user to type it and do not run initiative-linked change creation from a
-workspace root. If you only know the workspace, resolve linked repo paths first.
+以所属仓库为当前工作目录运行这个命令。不要让用户来输入它，也不要从 workspace 根目录运行 initiative 关联的变更创建。如果你只知道 workspace，先解析关联的仓库路径。
 
-After creating a change, report the absolute paths of the created files and the
-initiative link you used.
+创建变更后，报告所创建文件的绝对路径和你使用的 initiative 链接。
 
-## Use Doctor Before Guessing
+## 在猜测之前先用 Doctor
 
 ```bash
 openspec-cn workspace doctor --workspace billing-launch --json
 openspec-cn context-store doctor --json
 ```
 
-## Do Not Promise Yet
+## 暂时还不要承诺
 
-- Automatic sync, pull, push, or conflict handling.
-- Cloning repos.
-- Creating branches, worktrees, or submodules.
-- Workspace apply, verify, or archive.
-- Progress dashboards.
-- Enforced edit boundaries.
+- 自动 sync、pull、push 或冲突处理。
+- Clone 仓库。
+- 创建分支、worktree 或 submodule。
+- Workspace 的 apply、verify 或 archive。
+- 进度仪表盘。
+- 强制的编辑边界。

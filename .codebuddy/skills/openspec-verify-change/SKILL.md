@@ -1,12 +1,13 @@
 ---
 name: openspec-verify-change
 description: 验证实现是否匹配变更产出物。当用户想在归档前确认实现完整、正确且连贯时使用。
+allowed-tools: Bash(openspec-cn:*)
 license: MIT
 compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.5.0"
+  generatedBy: "1.6.0"
 ---
 
 验证实现是否匹配变更产出物（specs、tasks、design）。

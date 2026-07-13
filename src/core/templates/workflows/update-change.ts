@@ -21,7 +21,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 1. **如果未提供变更名称，提示用户选择**
 
-   运行 \`openspec list --json\` 获取按最近修改时间排序的可用变更。然后使用 **AskUserQuestion 工具** 让用户选择要更新的变更。
+   运行 \`openspec-cn list --json\` 获取按最近修改时间排序的可用变更。然后使用 **AskUserQuestion 工具** 让用户选择要更新的变更。
 
    将最近修改的前 3-4 个变更作为选项展示，显示：
    - 变更名称
@@ -35,7 +35,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 2. **获取变更的制品**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    \`\`\`
    解析 JSON 以了解当前状态。响应包括：
    - \`schemaName\`：正在使用的工作流 schema（例如 "spec-driven"）
@@ -63,7 +63,7 @@ ${STORE_SELECTION_GUIDANCE}
    - 如果用户拒绝修订，不要写入 —— 保持该制品不变。
    - 当需要大量重写时，首先获取该制品的规则和模板：
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     openspec-cn instructions <artifact-id> --change "<name>" --json
      \`\`\`
 
 6. **指向下一步（仅指引 —— 永远不要执行）**
@@ -80,13 +80,13 @@ ${STORE_SELECTION_GUIDANCE}
 
 **护栏**
 - 仅限规划制品 —— 永远不要编辑实现代码。如果修订后的计划暗示需要代码更改，停止并指向 \`/opsx:apply\`。
-- 使用 \`openspec status\` 报告的制品 ID 和路径；永远不要根据硬编码的制品名称进行分支。
+- 使用 \`openspec-cn status\` 报告的制品 ID 和路径；永远不要根据硬编码的制品名称进行分支。
 - 仅编辑 \`existingOutputPaths\` 中的具体文件；永远不要写入 glob \`resolvedOutputPath\`。
 - 不要推进构建前沿：不创建新制品，不在 glob 制品下创建新文件 —— 那是 \`/opsx:continue\` 的工作。
 - 写入前与用户确认每个编辑。
 - 如果请求改变了变更的*意图*而不仅仅是完善它，建议使用 \`/opsx:new\` 重新开始（"更新与重新开始"启发式规则）。`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -107,7 +107,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 1. **如果未提供变更名称，提示用户选择**
 
-   运行 \`openspec list --json\` 获取按最近修改时间排序的可用变更。然后使用 **AskUserQuestion 工具** 让用户选择要更新的变更。
+   运行 \`openspec-cn list --json\` 获取按最近修改时间排序的可用变更。然后使用 **AskUserQuestion 工具** 让用户选择要更新的变更。
 
    将最近修改的前 3-4 个变更作为选项展示，显示：
    - 变更名称
@@ -121,7 +121,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 2. **获取变更的制品**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    \`\`\`
    解析 JSON 以了解当前状态。响应包括：
    - \`schemaName\`：正在使用的工作流 schema（例如 "spec-driven"）
@@ -149,7 +149,7 @@ ${STORE_SELECTION_GUIDANCE}
    - 如果用户拒绝修订，不要写入 —— 保持该制品不变。
    - 当需要大量重写时，首先获取该制品的规则和模板：
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     openspec-cn instructions <artifact-id> --change "<name>" --json
      \`\`\`
 
 6. **指向下一步（仅指引 —— 永远不要执行）**
@@ -166,7 +166,7 @@ ${STORE_SELECTION_GUIDANCE}
 
 **护栏**
 - 仅限规划制品 —— 永远不要编辑实现代码。如果修订后的计划暗示需要代码更改，停止并指向 \`/opsx:apply\`。
-- 使用 \`openspec status\` 报告的制品 ID 和路径；永远不要根据硬编码的制品名称进行分支。
+- 使用 \`openspec-cn status\` 报告的制品 ID 和路径；永远不要根据硬编码的制品名称进行分支。
 - 仅编辑 \`existingOutputPaths\` 中的具体文件；永远不要写入 glob \`resolvedOutputPath\`。
 - 不要推进构建前沿：不创建新制品，不在 glob 制品下创建新文件 —— 那是 \`/opsx:continue\` 的工作。
 - 写入前与用户确认每个编辑。

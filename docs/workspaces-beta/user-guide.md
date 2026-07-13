@@ -1,76 +1,51 @@
-# Using OpenSpec With Your Coding Agent
+# 与你的编码 Agent 一起使用 OpenSpec
 
-Beta note: this is the smallest useful path. You do the local setup. Your agent
-manages the OpenSpec work.
+Beta 说明：这是最小可用路径。本地设置由你来做。OpenSpec 工作由你的 Agent 管理。
 
-## 1. Create The Shared Place
+## 1. 创建共享空间
 
 ```bash
 openspec-cn context-store setup
 ```
 
-OpenSpec asks for the context store name, where to put it, and whether to
-initialize Git. Press Enter for the managed local data directory unless you
-want the store somewhere specific.
+OpenSpec 会询问 context store 的名字、放在哪里、是否初始化 Git。除非你想把 store 放在某个特定位置，否则按回车使用托管的本地数据目录。
 
-## 2. Ask Your Agent To Create The Initiative
+## 2. 让你的 Agent 创建 Initiative
 
-> Create an OpenSpec initiative called `billing-launch` in `team-context`. Keep
-> it short and useful.
+> 在 `team-context` 里创建一个叫 `billing-launch` 的 OpenSpec initiative。保持简短有用。
 
-## 3. Open Your Local Workbench
+## 3. 打开你的本地工作台
 
 ```bash
 openspec-cn workspace open
 ```
 
-Select the initiative from the picker. OpenSpec creates a local workspace view
-for it if you do not already have one. When creating a new view, it also asks
-which local repos or folders to include.
+从选择器里选 initiative。如果你还没有对应的本地 workspace 视图，OpenSpec 会为它创建一个。创建新视图时，它还会询问要包含哪些本地仓库或文件夹。
 
-The opened editor view shows linked repos and folders first, initiative context
-when attached, and a small `OpenSpec workspace` folder last with `AGENTS.md`,
-`.openspec-workspace/view.yaml`, and the generated `.code-workspace` file.
+打开的编辑器视图会先显示关联的仓库和文件夹，附加上 initiative 上下文，最后是一个小的 `OpenSpec workspace` 文件夹，内含 `AGENTS.md`、`.openspec-workspace/view.yaml` 和生成的 `.code-workspace` 文件。
 
-Use `openspec-cn workspace open --initiative team-context/billing-launch --editor`
-when you want to skip the picker. Use `--agent codex-cli`, `--agent claude`, or
-`--agent github-copilot` instead of `--editor` when you want to open an agent
-directly.
+当你想跳过选择器时，用 `openspec-cn workspace open --initiative team-context/billing-launch --editor`。当你想直接打开一个 Agent 时，用 `--agent codex-cli`、`--agent claude` 或 `--agent github-copilot` 代替 `--editor`。
 
-## 4. Check The Local Context
+## 4. 检查本地上下文
 
-Ask your agent to inspect the opened workspace before planning work:
+在规划工作之前，让你的 Agent 检查打开的 workspace：
 
-> Check this OpenSpec workspace. Resolve the selected initiative, list the
-> linked repos or folders, and tell me if anything important is missing before
-> we explore the work.
+> 检查这个 OpenSpec workspace。解析选中的 initiative，列出关联的仓库或文件夹，并在我们探索工作之前告诉我是否缺了什么重要的东西。
 
-If a repo or folder is missing, tell the agent which local path should be linked.
-OpenSpec does not clone anything.
+如果缺了某个仓库或文件夹，告诉 Agent 应该关联哪个本地路径。OpenSpec 不会 clone 任何东西。
 
-## 5. Explore Before Creating Artifacts
+## 5. 在创建制品之前先探索
 
-Use the workspace as the place where the conversation happens:
+把 workspace 当作对话发生的地方：
 
-> Using initiative `team-context/billing-launch`, explore the work in this
-> workspace. Read the initiative context and linked repo context first. Do not
-> create a change yet; help me decide what should be proposed and where the
-> OpenSpec artifacts should live.
+> 用 initiative `team-context/billing-launch`，在这个 workspace 里探索工作。先读 initiative 上下文和关联的仓库上下文。先不要创建变更；帮我决定应该提案什么、OpenSpec 制品应该放在哪里。
 
-## 6. Ask For A Draft When Ready
+## 6. 准备好时请求起草
 
-When exploration has converged, ask the agent to create the right artifact in
-the right place:
+当探索收敛了，让 Agent 在正确的位置创建正确的制品：
 
-> Create a draft repo-local OpenSpec proposal for the owning linked repo and
-> link it to `team-context/billing-launch`. Resolve the workspace and initiative
-> context yourself, run the needed OpenSpec commands from the correct repo, and
-> report the files you created.
+> 为所属关联仓库创建一个 repo-local 的 OpenSpec proposal 草稿，并把它关联到 `team-context/billing-launch`。你自己解析 workspace 和 initiative 上下文，从正确的仓库运行需要的 OpenSpec 命令，并报告你创建的文件。
 
-## Tiny Caveat Box
+## 小提示框
 
-OpenSpec is not cloning, syncing, branching, or tracking progress dashboards in
-this beta flow. It gives you shared initiative context, a local workspace view,
-and repo-local plans tied back to the bigger mission. The workspace is where
-you and the agent work together; durable plan artifacts should live in the
-context store initiative or in the owning repo, not in the workspace root.
+在这个 beta 流程中，OpenSpec 不会 clone、sync、创建分支或跟踪进度仪表盘。它给你的是共享的 initiative 上下文、一个本地 workspace 视图，以及绑回更大目标的 repo-local 计划。Workspace 是你和 Agent 一起工作的地方；持久的规划制品应该活在 context store 的 initiative 里，或活在所属仓库里，而不是活在 workspace 根目录里。

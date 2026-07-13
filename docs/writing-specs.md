@@ -1,12 +1,12 @@
-# Writing Good Specs
+# 编写优秀的 Specs
 
-You rarely write a spec from a blank page. You describe a change in plain language, `/opsx:propose` drafts the requirements and scenarios, and then you make them good. This page is about that last part — what "good" looks like, and how to steer the AI toward it.
+你很少从空白页开始写一个 spec。你用平白语言描述一个变更，`/opsx:propose` 起草需求和场景，然后你把它们改好。本页讲的就是最后这部分——"好"长什么样，以及如何引导 AI 朝那个方向走。
 
-It's the companion to [Reviewing a Change](reviewing-changes.md): reviewing is catching the weak spots in a draft, writing is knowing what a strong one is made of.
+它是 [Reviewing a Change](reviewing-changes.md) 的姊妹篇：审阅是抓住草案里的薄弱环节，编写是知道一个强的草案由什么构成。
 
-## A spec is behavior, not code
+## spec 是行为，不是代码
 
-A spec says what your system *does*, in terms anyone could check — not how it's built. It's made of **requirements** (statements of behavior) and **scenarios** (concrete examples that prove them).
+spec 说的是你的系统*做什么*，用任何人都能检查的方式来表述——而不是它如何被构建。它由**需求（requirements）**（行为陈述）和**场景（scenarios）**（证明它们的具体例子）构成。
 
 ```markdown
 ### Requirement: Session Timeout
@@ -18,84 +18,84 @@ The system SHALL expire a session after 30 minutes of inactivity.
 - THEN the session is invalidated and the user must re-authenticate
 ```
 
-Keep the *how* — the queue, the library, the table schema — in `design.md` or the code. When behavior and implementation get mixed into one requirement, the requirement stops being testable and starts going stale the moment the code changes.
+把*如何做*——队列、库、表 schema——留在 `design.md` 或代码里。当行为和实现混进同一个需求，这个需求就不再是可测试的，并且会在代码一改动就开始过时。
 
-## What makes a good requirement
+## 什么造就一个好的需求
 
-A good requirement is one behavior, stated so plainly you could hand it to someone else to test.
+一个好的需求是一个行为，陈述得足够平白，你都能交给别人去测试。
 
-- **One statement, one `SHALL`/`MUST`.** If a requirement has three "and also" clauses, it's really three requirements. Split them.
-- **Observable.** Someone outside the code should be able to tell whether it holds. "The system SHALL show an error banner when the upload exceeds 10 MB" is observable. "The system SHALL handle large uploads gracefully" is not.
-- **The right strength.** OpenSpec uses the RFC 2119 keywords, and they mean different things:
+- **一个陈述，一个 `SHALL`/`MUST`。** 如果一个需求有三句"而且还要"，它其实是三个需求。拆开。
+- **可观察。** 代码之外的人应当能判断它是否成立。"系统 SHALL 在上传超过 10 MB 时显示错误横幅"是可观察的。"系统 SHALL 优雅地处理大上传"则不是。
+- **合适的强度。** OpenSpec 使用 RFC 2119 关键词，它们含义不同：
 
-  | Keyword | Meaning |
+  | 关键词 | 含义 |
   |---------|---------|
-  | `MUST` / `SHALL` | A hard requirement. Non-negotiable. |
-  | `SHOULD` | A strong recommendation, with room for a justified exception. |
-  | `MAY` | Genuinely optional. |
+  | `MUST` / `SHALL` | 硬性需求。不可商量。 |
+  | `SHOULD` | 强建议，允许有正当理由的例外。 |
+  | `MAY` | 真正可选的。 |
 
-  Reach for `MUST`/`SHALL` by default. Use `SHOULD` only when you truly mean "unless there's a good reason not to."
+  默认就选 `MUST`/`SHALL`。只有当你真正意思是"除非有充分理由不这么做"时才用 `SHOULD`。
 
-The test for a requirement: *could a tester who's never seen the code tell whether it passed?* If not, it needs sharpening.
+对一个需求的检验：*一个从没见过代码的测试人员能不能判断它通没通过？* 如果不能，它需要 sharpen。
 
-## What makes a good scenario
+## 什么造就一个好的场景
 
-Scenarios are where a requirement earns its keep. Each one is a concrete GIVEN / WHEN / THEN that could become an automated test.
+场景是一个需求兑现价值的地方。每个都是具体的 GIVEN / WHEN / THEN，可能变成自动化测试。
 
-- **It exercises its requirement.** A scenario that just restates the requirement in other words tests nothing. Make it a specific situation with a specific outcome.
-- **Cover the cases that matter, not just the happy path.** The valid login is easy. The empty input, the expired token, the second click, the thing that goes wrong — those are where bugs live, and where a scenario is worth the most.
-- **Name the case in the title.** "Scenario: Rejects an expired token" tells a reviewer what's covered at a glance; "Scenario: Test 2" doesn't.
+- **它演练它的需求。** 一个只是用别的词重述需求的场景什么也没测。把它做成一个有具体结果的具体情况。
+- **覆盖重要的案例，不只是 happy path。** 有效登录很容易。空输入、过期的令牌、第二次点击、出错的东西——bug 就藏在那里，也是场景最有价值的地方。
+- **在标题里给案例命名。** "Scenario: Rejects an expired token" 让审阅者一眼就知覆盖了什么；"Scenario: Test 2" 不行。
 
-A useful habit: before approving, ask *what's the one case I'd be upset to see broken?* — and make sure a scenario names it.
+一个有用的习惯：在批准前问*我最不情愿看到 broken 的是哪个案例？*——并确保有一个场景点名它。
 
-## Pick the right kind of delta
+## 选对增量的类型
 
-A change describes its edits to the specs with three section types. Using the right one keeps your archived specs honest:
+一个变更用三种小节类型来描述它对 specs 的编辑。用对类型能保持你归档后的 specs 诚实：
 
-- **`## ADDED Requirements`** — brand-new behavior that didn't exist before.
-- **`## MODIFIED Requirements`** — behavior that already existed and is changing. Include the full new version; a short note on what changed helps a reviewer.
-- **`## REMOVED Requirements`** — behavior going away, with a line on why.
+- **`## ADDED Requirements`** —— 之前不存在的全新行为。
+- **`## MODIFIED Requirements`** —— 已存在并正在改变的行为。包含完整的新版本；一行关于改了什么的小注能帮审阅者。
+- **`## REMOVED Requirements`** —— 正在消失的行为，附一行说明原因。
 
-On archive, ADDED gets appended to the main spec, MODIFIED replaces the old version, and REMOVED is deleted. If you mark a real change as ADDED, you end up with two competing requirements; if you describe new behavior as MODIFIED, there's nothing to replace. When in doubt, open the current spec and see whether the requirement is already there.
+归档时，ADDED 会追加到主 spec，MODIFIED 替换旧版本，REMOVED 被删除。如果你把一个真实变更标成 ADDED，你会得到两个互相竞争的需求；如果你把新行为描述成 MODIFIED，却没有可替换的东西。拿不准时，打开当前 spec 看看那个需求是否已经在那儿。
 
-## Right-size the change
+## 合理控制变更规模
 
-The single most common authoring mistake isn't a badly worded requirement — it's a change that's trying to be three changes.
+最常见的一个编写错误不是措辞糟糕的需求——而是一个试图当三个变更的变更。
 
-**A good change has one intent you can say in a sentence.** "Add a dark-mode toggle." "Rate-limit the login endpoint." "Migrate sessions off cookies." If describing the change needs a lot of "and also," that's the signal to split it.
+**一个好的变更有一个你能用一句话说清的意图。** "加一个暗色模式开关。" "给登录端点加上限流。" "把会话从 cookie 迁走。" 如果描述变更需要一大堆"而且还要"，那就是该拆分的信号。
 
-Signs a change is too big:
+变更太大的迹象：
 
-- The proposal's scope reads like a list of unrelated features.
-- Reviewing it would take an afternoon, so nobody will.
-- Two people couldn't work on it without colliding.
-- Half the tasks could ship on their own.
+- proposal 的范围读起来像一列不相关的功能。
+- 审阅它要花一下午，于是没人会去审。
+- 两个人没法不撞车地一起做它。
+- 一半的任务都能自己交付。
 
-Smaller changes are easier to review, easier to build in one focused session, and easier to reason about six months later when the archive is all that's left. You can always run several changes in parallel — see [Editing & iterating](editing-changes.md) and [Workflows](workflows.md).
+更小的变更更易审阅、更易在一段专注会话里构建，也更易在六个月后归档成为唯一遗留时去推理。你随时可以并行跑多个变更——见 [Editing & iterating](editing-changes.md) 和 [Workflows](workflows.md)。
 
-The opposite also happens: a one-line typo fix doesn't need three requirements and a design doc. Match the ceremony to the stakes.
+反面也会发生：一行字的错别字修复不需要三个需求加一份 design 文档。让仪式匹配风险大小。
 
-## How to steer the AI toward a good draft
+## 如何引导 AI 起草好草案
 
-Because `/opsx:propose` does the first draft, the quality of what you get back tracks the quality of what you give it. You don't have to write requirements by hand — you have to aim the AI well:
+因为 `/opsx:propose` 做第一稿，你拿回来的质量取决于你给它的质量。你不必手写需求——你只需把 AI 瞄准好：
 
-- **State the intent and the boundary.** *"Add a dark-mode toggle that follows the OS setting on first load — don't touch the existing theme API."* The out-of-scope half matters as much as the in-scope half.
-- **Name the cases you care about.** *"Make sure there's a scenario for a user who already picked a theme manually."* The AI covers what you point at.
-- **Then edit.** It's plain Markdown. Tighten a vague `SHALL`, delete a scenario that tests nothing, add the case it missed — or ask the AI to: *"the timeout requirement is vague, pin it to 30 minutes."*
+- **陈述意图和边界。** *"加一个首次加载时跟随系统设置的暗色模式开关——别碰现有的主题 API。"* 范围外那半和范围内那半一样重要。
+- **点名你在意的案例。** *"确保有一个场景覆盖手动已选过主题的用户。"* AI 会覆盖你指向的地方。
+- **然后编辑。** 它是纯 Markdown。收紧一个模糊的 `SHALL`、删掉一个什么也没测的场景、补上它漏掉的案例——或让 AI 来：*"超时需求太模糊，把它钉死在 30 分钟。"*
 
-Draft, sharpen, repeat. A few rounds of that produces a spec you'd trust, which is the whole point.
+起草、打磨、重复。几轮下来就能产生一个你会信任的 spec，这就是全部意义。
 
-## A quick checklist
+## 快速清单
 
-- [ ] Each requirement is one observable behavior with a `SHALL`/`MUST`.
-- [ ] No implementation details are baked into the requirements.
-- [ ] Every requirement has at least one scenario that actually exercises it.
-- [ ] The important edge and error cases have scenarios, not just the happy path.
-- [ ] Deltas use ADDED / MODIFIED / REMOVED correctly against the current spec.
-- [ ] The whole change has one intent you can state in a sentence.
+- [ ] 每个需求是一个带 `SHALL`/`MUST` 的可观察行为。
+- [ ] 没有任何实现细节被写进需求。
+- [ ] 每个需求至少有一个真正演练它的场景。
+- [ ] 重要的边界和错误案例都有场景，不只是 happy path。
+- [ ] 增量对照当前 spec 正确使用了 ADDED / MODIFIED / REMOVED。
+- [ ] 整个变更有一个你能用一句话说清的意图。
 
-## Where to go next
+## 下一步去哪
 
-- [Reviewing a Change](reviewing-changes.md) — the two-minute pass that catches what slipped through.
-- [Concepts](concepts.md) — the deeper model behind specs, changes, and deltas.
-- [Examples & Recipes](examples.md) — real changes from start to finish.
+- [Reviewing a Change](reviewing-changes.md) — 抓住漏网之鱼的两分钟检查。
+- [Concepts](concepts.md) — specs、changes、deltas 背后的更深模型。
+- [Examples & Recipes](examples.md) — 从开始到结束的真实变更。

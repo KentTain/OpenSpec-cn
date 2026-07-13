@@ -277,10 +277,10 @@ export class Validator {
           const fromKey = normalizeRequirementName(from);
           const toKey = normalizeRequirementName(to);
           if (modifiedNames.has(fromKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED references old name from RENAMED. Use new header for "${to}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED 引用了 RENAMED 中的旧名称。请为 "${to}" 使用新的标题` });
           }
           if (addedNames.has(toKey)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `RENAMED TO collides with ADDED for "${to}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `RENAMED 的目标名称 "${to}" 与 ADDED 中的需求冲突` });
           }
         }
       }
