@@ -1,5 +1,5 @@
 export interface RequirementBlock {
-  headerLine: string; // e.g., '### Requirement: Something' or '### 需求: Something'
+  headerLine: string; // e.g., '### Requirement: Something'
   name: string; // e.g., 'Something'
   raw: string; // full block including headerLine and following content
 }
@@ -16,6 +16,8 @@ export function normalizeRequirementName(name: string): string {
   return name.trim();
 }
 
+// Match both English ("Requirement") and Chinese ("需求") requirement headers,
+// and both the ASCII colon (:) and the full-width Chinese colon (：).
 const REQUIREMENT_KEYWORD_PATTERN = '(?:Requirement|需求)';
 const REQUIREMENT_COLON_PATTERN = '[:：]';
 const REQUIREMENT_HEADER_REGEX = new RegExp(`^###\\s*${REQUIREMENT_KEYWORD_PATTERN}${REQUIREMENT_COLON_PATTERN}\\s*(.+)\\s*$`, 'i');
@@ -25,7 +27,6 @@ const REQUIREMENT_HEADER_PREFIX = new RegExp(`^###\\s*${REQUIREMENT_KEYWORD_PATT
  * Extracts the Requirements section from a spec file and parses requirement blocks.
  */
 export function extractRequirementsSection(content: string): RequirementsSectionParts {
-
   const normalized = normalizeLineEndings(content);
   const lines = normalized.split('\n');
   const reqHeaderIndex = lines.findIndex(l => /^##\s+(?:Requirements|需求)\s*$/i.test(l));
@@ -33,7 +34,7 @@ export function extractRequirementsSection(content: string): RequirementsSection
   if (reqHeaderIndex === -1) {
     // No requirements section; create an empty one at the end
     const before = content.trimEnd();
-    const headerLine = '## 需求';
+    const headerLine = '## Requirements';
     return {
       before: before ? before + '\n\n' : '',
       headerLine,
@@ -123,10 +124,12 @@ function normalizeLineEndings(content: string): string {
 export function parseDeltaSpec(content: string): DeltaPlan {
   const normalized = normalizeLineEndings(content);
   const sections = splitTopLevelSections(normalized);
-  const addedLookup = getSectionCaseInsensitive(sections, '新增需求');
-  const modifiedLookup = getSectionCaseInsensitive(sections, '修改需求');
-  const removedLookup = getSectionCaseInsensitive(sections, '移除需求');
-  const renamedLookup = getSectionCaseInsensitive(sections, '重命名需求');
+  // English keys are passed here; getSectionCaseInsensitive also accepts the
+  // Chinese equivalents (新增需求 / 修改需求 / 移除需求 / 重命名需求).
+  const addedLookup = getSectionCaseInsensitive(sections, 'ADDED Requirements');
+  const modifiedLookup = getSectionCaseInsensitive(sections, 'MODIFIED Requirements');
+  const removedLookup = getSectionCaseInsensitive(sections, 'REMOVED Requirements');
+  const renamedLookup = getSectionCaseInsensitive(sections, 'RENAMED Requirements');
   const added = parseRequirementBlocksFromSection(addedLookup.body);
   const modified = parseRequirementBlocksFromSection(modifiedLookup.body);
   const removedNames = parseRemovedNames(removedLookup.body);
@@ -167,15 +170,14 @@ function splitTopLevelSections(content: string): Record<string, string> {
 
 function getSectionCaseInsensitive(sections: Record<string, string>, desired: string): { body: string; found: boolean } {
   const target = desired.toLowerCase();
-  // Map Chinese to English equivalents
-  const alternates: Record<string, string> = {
-    '新增需求': 'added requirements',
-    '修改需求': 'modified requirements',
-    '移除需求': 'removed requirements',
-    '重命名需求': 'renamed requirements',
+  // Accept Chinese delta section titles as equivalents of the English headers.
+  const chineseAlternates: Record<string, string> = {
+    'added requirements': '新增需求',
+    'modified requirements': '修改需求',
+    'removed requirements': '移除需求',
+    'renamed requirements': '重命名需求',
   };
-  const altTarget = alternates[desired]?.toLowerCase();
-  
+  const altTarget = chineseAlternates[target]?.toLowerCase();
   for (const [title, body] of Object.entries(sections)) {
     const lowerTitle = title.toLowerCase();
     if (lowerTitle === target || (altTarget && lowerTitle === altTarget)) {
@@ -220,12 +222,12 @@ function parseRemovedNames(sectionBody: string): string[] {
       continue;
     }
     // Also support bullet list of headers
-    const bullet = line.match(new RegExp(`^\\s*-\\s*` +
-      '`?###\\s*' + REQUIREMENT_KEYWORD_PATTERN + REQUIREMENT_COLON_PATTERN + '\\s*(.+?)`?\\s*$'));
+    const bullet = line.match(new RegExp(
+      '^\\s*-\\s*`?###\\s*' + REQUIREMENT_KEYWORD_PATTERN + REQUIREMENT_COLON_PATTERN + '\\s*(.+?)`?\\s*$'
+    ));
     if (bullet) {
       names.push(normalizeRequirementName(bullet[1]));
     }
-
   }
   return names;
 }
@@ -235,23 +237,15 @@ function parseRenamedPairs(sectionBody: string): Array<{ from: string; to: strin
   const pairs: Array<{ from: string; to: string }> = [];
   const lines = normalizeLineEndings(sectionBody).split('\n');
   let current: { from?: string; to?: string } = {};
-
   const fromRegex = new RegExp(
-    '^\\s*-?\\s*FROM:\\s*`?###\\s*' +
-      REQUIREMENT_KEYWORD_PATTERN +
-      REQUIREMENT_COLON_PATTERN +
-      '\\s*(.+?)`?\\s*$'
+    '^\\s*-?\\s*FROM:\\s*`?###\\s*' + REQUIREMENT_KEYWORD_PATTERN + REQUIREMENT_COLON_PATTERN + '\\s*(.+?)`?\\s*$'
   );
   const toRegex = new RegExp(
-    '^\\s*-?\\s*TO:\\s*`?###\\s*' +
-      REQUIREMENT_KEYWORD_PATTERN +
-      REQUIREMENT_COLON_PATTERN +
-      '\\s*(.+?)`?\\s*$'
+    '^\\s*-?\\s*TO:\\s*`?###\\s*' + REQUIREMENT_KEYWORD_PATTERN + REQUIREMENT_COLON_PATTERN + '\\s*(.+?)`?\\s*$'
   );
-
   for (const line of lines) {
     const fromMatch = line.match(fromRegex);
-    const toMatch = !fromMatch && line.match(toRegex);
+    const toMatch = line.match(toRegex);
     if (fromMatch) {
       current.from = normalizeRequirementName(fromMatch[1]);
     } else if (toMatch) {
@@ -262,6 +256,5 @@ function parseRenamedPairs(sectionBody: string): Array<{ from: string; to: strin
       }
     }
   }
-
   return pairs;
 }
