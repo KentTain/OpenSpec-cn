@@ -6,6 +6,10 @@ import { promisify } from 'node:util';
 
 import { FileSystemUtils } from '../../utils/file-system.js';
 import {
+  classifyOpenSpecDir,
+  storePointerProblem,
+} from '../project-config.js';
+import {
   ANCHORED_OPENSPEC_DIRS,
   DIRECTORY_ANCHOR_FILE_NAME,
   OPENSPEC_ROOT_DIR,
@@ -220,6 +224,33 @@ function alreadyRegisteredDiagnostic(id: string): StoreDiagnostic {
   );
 }
 
+function assertNotConfigOnlyPointerRoot(storeRoot: string): void {
+  const { hasPlanningShape, pointer } = classifyOpenSpecDir(storeRoot);
+  if (hasPlanningShape || pointer.filePath === null) return;
+
+  if (pointer.malformed) {
+    throw new StoreError(
+      `The store declaration in ${pointer.filePath} is invalid (${storePointerProblem(pointer.malformed)}).`,
+      'invalid_store_pointer',
+      {
+        target: 'store.pointer',
+        fix: `Fix or remove the store: line in ${pointer.filePath} before registering this path as a store.`,
+      }
+    );
+  }
+
+  if (pointer.value !== undefined) {
+    throw new StoreError(
+      `This repo's planning is externalized to store '${pointer.value}' (${pointer.filePath}); it is not itself a store root.`,
+      'store_root_pointer_declared',
+      {
+        target: 'store.pointer',
+        fix: '注册已声明的 store 的检出，或者先删除 store: 行以将此仓库转换为本地 store 根目录。',
+      }
+    );
+  }
+}
+
 function createdPath(relativePath: string, absolutePath: string, kind: CreatedPathLedgerEntry['kind']): CreatedPathLedgerEntry {
   return {
     relativePath,
@@ -314,7 +345,7 @@ function resolveSetupRoot(id: string, inputPath: string | undefined): string {
   // A store is a repo the user places; setup never silently picks app data.
   if (inputPath === undefined || inputPath.trim().length === 0) {
     throw new StoreError(
-      'Pass --path with the folder where this store should live.',
+      '传入 --path 以及该 store 应放置的文件夹。',
       'store_setup_path_required',
       {
         target: 'store.root',
@@ -459,6 +490,7 @@ async function prepareSetupPlan(
   let backend: StoreGitBackendConfig | undefined;
 
   if (kind === 'directory') {
+    assertNotConfigOnlyPointerRoot(storeRoot);
     metadata = await readStoreMetadataForOperation(storeRoot);
 
     if (metadata) {
@@ -730,11 +762,12 @@ export async function registerExistingStore(
     );
   }
 
+  assertNotConfigOnlyPointerRoot(storeRoot);
   const openspecRoot = await inspectOpenSpecRoot(storeRoot);
   if (!openspecRoot.healthy) {
     const problems =
       openspecRoot.diagnostics.map((diagnostic) => diagnostic.message).join(' ') ||
-      'The OpenSpec root is missing or incomplete.';
+      'OpenSpec 根目录缺失或不完整。';
     const isEmptyCloneSuspect =
       (await isGitRepositoryAtRoot(storeRoot)) &&
       (await gitHasCommits(storeRoot)) === false;
@@ -749,7 +782,7 @@ export async function registerExistingStore(
         target: 'openspec.root',
         fix: isEmptyCloneSuspect
           ? '如果这是 store 克隆：提交并推送 origin store，拉取到此克隆中，然后重新运行 register。'
-          : 'Run openspec-cn store setup for a new store, or point register at a checkout whose openspec/ files are present.',
+          : '运行 openspec-cn store setup 创建新 store，或将 register 指向 openspec/ 文件已存在的检出。',
       }
     );
   }
@@ -1181,7 +1214,7 @@ export async function doctorStores(id?: string): Promise<StoreDoctorResult> {
   if (selectedId && selected.length === 0) {
     throw new StoreError(`未知 store '${selectedId}'。`, 'store_not_found', {
       target: 'store.id',
-      fix: 'Run openspec-cn store list to see registered stores.',
+      fix: '运行 openspec-cn store list 查看已注册的 stores。',
     });
   }
 

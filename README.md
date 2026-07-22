@@ -42,7 +42,7 @@
 ```
 
 > [!TIP]
-> **全新工作流现已上线！** 我们用一种全新的“以制品（artifact）���导向”的工作流重构了 OpenSpec。
+> **全新工作流现已上线！** 我们用一种全新的"以制品（artifact）为导向"的工作流重构了 OpenSpec。
 >
 > 运行 `/opsx:propose "你的想法"` 开始使用。→ [在此了解更多](docs/opsx.md)
 
@@ -66,7 +66,7 @@ AI：  让我看看你的样式方案...
 你：/opsx:propose add-dark-mode
 AI：已创建 openspec/changes/add-dark-mode/
      ✓ proposal.md — 为什么要做这个，什么在变
-     ✓ specs/       — 需求和���景
+     ✓ specs/       — 需求和场景
      ✓ design.md    — 技术方案
      ✓ tasks.md     — 实现清单
      准备好开始实现了！
@@ -93,7 +93,19 @@ AI：已归档至 openspec/changes/archive/2025-01-23-add-dark-mode/
 
 </details>
 
-## 快速开始
+## Why teams adopt OpenSpec
+
+Solo, OpenSpec keeps you and your AI honest on a single repo. On a team, the hard part moves: a feature spans the API server, the web app, and a shared library; requirements are owned by one team and consumed by others; planning starts before any code exists.
+
+**[Stores](docs/stores-beta/user-guide.md)** are the answer — planning in a repo of its own. The same `openspec/` shape you already know (specs and changes), shared by `git push` like anything else. One source of truth your whole team and every coding agent can read, across every repo.
+
+- **Cross-repo features** — one change, one plan, even when the code lands in three repos.
+- **Shared requirements** — a platform team owns the specs; product teams reference them read-only, right where their coding agent can read them. No drifting wiki.
+- **Plan before code** — capture the plan in the store now; the code repos catch up later.
+
+> Stores are in **beta**. Start with the [Stores User Guide](docs/stores-beta/user-guide.md).
+
+## Quick Start
 
 **需要 Node.js 20.19.0 或更高版本。**
 
@@ -155,16 +167,16 @@ openspec-cn init
 
 AI 编程助手很强大，但当需求只存在于聊天记录里时，结果往往难以预测。OpenSpec 增加了一层轻量的规范（spec）机制，让你在写任何代码前先对齐要做什么。
 
-- **先对齐，再开工** —— 人类与 AI 在写代码前先在规范上达成一致
-- **保持有序** —— 每个变更都有自己的目录：proposal、specs、design、tasks
-- **流式协作** —— 任意制品都可以随时更新，不设僵硬的阶段门槛
-- **用你现有的工具** —— 通过斜杠命令支持 20+ AI 助手
+- **Agree before you build** — human and AI align on specs before code gets written
+- **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
+- **Work fluidly** — update any artifact anytime, no rigid phase gates
+- **Use your tools** — works with 30+ AI assistants via slash commands
 
 ### 我们如何对比
 
 **对比 [Spec Kit](https://github.com/github/spec-kit)**（GitHub）—— 很全面但偏厚重：阶段门槛严格、Markdown 很多、需要 Python 环境。OpenSpec 更轻量，也更适合自由迭代。
 
-**对比 [Kiro](https://kiro.dev)**（AWS）—— 功能强大，但��被锁定在他们的 IDE 中，并且模型选择受限（主要是 Claude）。OpenSpec 可与您已有的工具协作。
+**对比 [Kiro](https://kiro.dev)**（AWS）—— 功能强大，但会被锁定在他们的 IDE 中，并且模型选择受限（主要是 Claude）。OpenSpec 可与您已有的工具协作。
 
 **对比“什么都不用”** —— 只靠聊天做 AI 编程容易产生模糊需求和不可预测的实现。OpenSpec 在不增加太多仪式感的前提下，带来更可预期的结果。
 
@@ -198,7 +210,7 @@ openspec-cn update
 
 **较大改动** —— 对于新功能、重大重构或架构调整，请先提交一个 OpenSpec 变更提案，以便在实现前对齐意图与目标。
 
-撰写提案时，请牢记 OpenSpec 的��念：我们服务于各种不同的编码代理、模型与使用场景。改动应对所有人都工作良好。
+撰写提案时，请牢记 OpenSpec 的理念：我们服务于各种不同的编码代理、模型与使用场景。改动应对所有人都工作良好。
 
 **欢迎 AI 生成代码** —— 只要经过测试与验证即可。包含 AI 生成代码的 PR 应注明使用的编码代理与模型（例如："Generated with Claude Code using claude-opus-4-5-20251101"）。
 
@@ -215,7 +227,7 @@ openspec-cn update
 <details>
 <summary><strong>遥测（Telemetry）</strong></summary>
 
-OpenSpec 会收集匿��使用统计。
+OpenSpec 会收集匿名使用统计。
 
 我们只收集命令名与版本号，用于理解使用模式；不会收集参数、路径、内容或任何个人信息。CI 中会自动禁用。
 

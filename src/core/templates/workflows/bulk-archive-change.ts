@@ -293,7 +293,7 @@ ${STORE_SELECTION_GUIDANCE}
       - 解析 \`schemaName\`、\`artifacts\`、\`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`
       - 记录哪些产出物为 \`done\`，哪些为其他状态
 
-   b. **任务完成情况** - ��状态 JSON 读取 \`artifactPaths.tasks.existingOutputPaths\`
+   b. **任务完成情况** - 从状态 JSON 读取 \`artifactPaths.tasks.existingOutputPaths\`
       - 统计 \`- [ ]\`（未完成）与 \`- [x]\`（已完成）
       - 若无任务文件，记为"无任务"
 
