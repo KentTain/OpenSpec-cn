@@ -1,12 +1,13 @@
 ---
 name: openspec-bulk-archive-change
 description: 一次性归档多个已完成的变更。当需要归档多个并行变更时使用。
+allowed-tools: Bash(openspec-cn:*)
 license: MIT
 compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.5.0"
+  generatedBy: "1.6.0"
 ---
 
 在单次操作中归档多个已完成的变更。

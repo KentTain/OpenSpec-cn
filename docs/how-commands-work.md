@@ -1,19 +1,19 @@
-﻿# How Commands Work
+# 命令如何运作
 
-**The one thing to know: OpenSpec has two kinds of commands, and they run in two different places.**
+**唯一需要知道的事：OpenSpec 有两类命令，它们运行在两个不同的地方。**
 
-- `openspec ...` commands run in your **terminal**. (Example: `openspec-cn init`.)
-- `/opsx:...` commands run in your **AI assistant's chat**. (Example: `/opsx:propose`.)
+- `openspec ...` 命令运行在你的**终端**中。（例：`openspec-cn init`。）
+- `/opsx:...` 命令运行在你的 **AI 助手的聊天框**中。（例：`/opsx:propose`。）
 
-If you ever type `/opsx:propose` into your terminal and nothing happens, this page is why. You are talking to the wrong half of OpenSpec. Slash commands are not terminal commands. They are instructions you give to your AI coding assistant, in the same chat box where you'd normally type "add a login form."
+如果你曾在终端里输入 `/opsx:propose` 却毫无反应，原因就是本页所讲。你是在和 OpenSpec 的终端部分对话，而非聊天部分。斜杠命令不是终端命令。它们是你在与 AI 编程助手对话的同一个聊天框里给出的指令——通常你会在那里输入"add a login form"。
 
-That single distinction is the most common stumbling block for new users, so let's make it crystal clear.
+这唯一的区别是新用户最常见的绊脚石，所以我们把它讲得清清楚楚。
 
-## The two halves
+## 两半
 
-OpenSpec is one project wearing two hats.
+OpenSpec 是一个戴了两顶帽子的项目。
 
-**The CLI (terminal half).** A program named `openspec` that you install and run from your shell. It sets up your project, lists and validates changes, shows a dashboard, and archives finished work. You type these into iTerm, the VS Code terminal, PowerShell, anywhere you'd run `git` or `npm`.
+**CLI（终端一半）。** 一个名叫 `openspec` 的程序，你安装并从 shell 运行它。它设置你的项目、列出并验证变更、显示仪表盘，并归档已完成的工作。你把这些输入到 iTerm、VS Code 终端、PowerShell——任何你会运行 `git` 或 `npm` 的地方。
 
 ```bash
 openspec-cn init        # set up OpenSpec in this project
@@ -21,7 +21,7 @@ openspec-cn list        # see active changes
 openspec-cn view        # open the interactive dashboard
 ```
 
-**The slash commands (chat half).** Short commands like `/opsx:propose` and `/opsx:apply` that you type into your AI assistant. These tell the AI to follow the OpenSpec workflow: draft a proposal, write specs, build from the task list, archive when done. You type these into Claude Code, Cursor, Windsurf, Copilot, or whichever assistant you use.
+**斜杠命令（聊天一半）。** 像 `/opsx:propose` 和 `/opsx:apply` 这样的短命令，你输入到 AI 助手中。它们告诉 AI 遵循 OpenSpec 工作流：起草 proposal、编写 specs、基于任务列表构建、完成时归档。你把这些输入到 Claude Code、Cursor、Windsurf、Copilot，或你使用的任何助手中。
 
 ```text
 /opsx:propose add-dark-mode    (typed in your AI chat)
@@ -29,7 +29,7 @@ openspec-cn view        # open the interactive dashboard
 /opsx:archive                  (typed in your AI chat)
 ```
 
-Here's the mental model in one picture:
+用一张图来表达这个思维模型：
 
 ```text
         YOUR TERMINAL                         YOUR AI ASSISTANT'S CHAT
@@ -41,93 +41,93 @@ Here's the mental model in one picture:
         run openspec-cn here                       run /opsx:* here
 ```
 
-Notice the arrow. Running `openspec-cn init` in your terminal is what *installs* the slash commands into your AI tool. The terminal half sets up the chat half. After that, day-to-day driving mostly happens in chat.
+注意那个箭头。在终端运行 `openspec-cn init`，正是把斜杠命令*安装*进你的 AI 工具。终端一半设置了聊天一半。此后，日常驱动主要发生在聊天中。
 
-## "How do I start interactive mode?"
+## "我如何启动交互模式？"
 
-**There is no separate interactive mode to start.** This question comes up a lot, so it deserves a plain answer.
+**没有单独的"交互模式"需要启动。** 这个问题经常出现，所以它值得一个直白的回答。
 
-You don't enter a special OpenSpec mode. You just open your AI coding assistant like you always do, and type a slash command into the chat. The slash command *is* how you "enter" OpenSpec. Your assistant recognizes it, loads the matching OpenSpec skill, and starts following the workflow.
+你不会进入一个特殊的 OpenSpec 模式。你只需像往常一样打开你的 AI 编程助手，并在聊天中输入一条斜杠命令。斜杠命令*就是*你"进入" OpenSpec 的方式。你的助手识别它，加载对应的 OpenSpec skill，然后开始遵循工作流。
 
-So the real instructions are:
+所以真正的操作指引是：
 
-1. Open your AI coding assistant (Claude Code, Cursor, Windsurf, and so on) in your project.
-2. Type `/opsx:propose` in its chat, the same place you type any other request.
-3. Watch the autocomplete: if OpenSpec is installed, you'll see `/opsx:propose`, `/opsx:apply`, and friends appear as you type the slash.
+1. 在你的项目中打开 AI 编程助手（Claude Code、Cursor、Windsurf，等等）。
+2. 在它的聊天中输入 `/opsx:propose`，与输入任何其他请求的同一处。
+3. 观察自动补全：如果 OpenSpec 已安装，你会在输入斜杠时看到 `/opsx:propose`、`/opsx:apply` 等冒出来。
 
-That's it. No mode to toggle, no daemon to launch, no separate window.
+就这些。没有要切换的模式，没有要启动的守护进程，没有单独的窗口。
 
-One thing that *is* genuinely interactive lives in the terminal: `openspec-cn view`. It opens a dashboard for browsing your specs and changes. But that's a viewer, not the thing you propose and build with. The building happens through slash commands in chat.
+终端里有一件事确实是交互式的：`openspec-cn view`。它打开一个用于浏览你的 specs 与变更的仪表盘。但那是个查看器，而非你用来提议和构建的东西。构建是通过聊天中的斜杠命令进行的。
 
-## Why this split exists
+## 为何存在这种划分
 
-It's worth understanding, because it explains why OpenSpec works with 25+ different AI tools.
+值得理解，因为它解释了 OpenSpec 为何能与 25+ 种不同的 AI 工具协作。
 
-The CLI is the **engine**. It knows the rules: what a change folder looks like, which artifacts depend on which, how to merge a delta spec into your source of truth. It's the same everywhere.
+CLI 是**引擎**。它了解规则：一个变更文件夹长什么样、哪些制品依赖哪些、如何把增量规范合并进你的事实来源。它处处相同。
 
-The slash commands are the **steering wheel**, and every AI tool has a slightly different one. Claude Code calls them commands. Cursor and Windsurf have their own formats. Some tools call them skills. When you run `openspec-cn init`, OpenSpec generates the right kind of file for each tool you selected, so the same `/opsx:propose` intent works no matter which assistant you prefer.
+斜杠命令是**方向盘**，而每个 AI 工具有一个略有不同的方向盘。Claude Code 称之为 commands。Cursor 和 Windsurf 有它们自己的格式。有些工具称之为 skills。当你运行 `openspec-cn init` 时，OpenSpec 为你所选的每个工具生成正确种类的文件，因此同一个 `/opsx:propose` 意图无论你偏好哪个助手都能运作。
 
-The strength of this design: you learn the workflow once and carry it across tools. The tradeoff: the exact syntax of a command can differ slightly between tools, which is the next section.
+这种设计的长处：你学一次工作流，就能带到各个工具间。代价：一条命令的确切语法在不同工具间可能略有差异，这正是下一节内容。
 
-## Slash command syntax by tool
+## 各工具的斜杠命令语法
 
-The intent is identical everywhere. The punctuation differs. Use the form that matches your assistant.
+意图处处相同。标点不同。使用匹配你助手的形式。
 
-| Tool | How you type it |
+| 工具 | 如何输入 |
 |------|-----------------|
 | Claude Code | `/opsx:propose`, `/opsx:apply` |
 | Cursor | `/opsx-propose`, `/opsx-apply` |
 | Windsurf | `/opsx-propose`, `/opsx-apply` |
 | GitHub Copilot (IDE) | `/opsx-propose`, `/opsx-apply` |
 | Oh My Pi | `/opsx-propose`, `/opsx-apply` |
-| Kimi CLI | skill-style, e.g. `/skill:openspec-propose` |
+| Kimi CLI | skill 形式，如 `/skill:openspec-propose` |
 | Trae | `/opsx-propose`, `/opsx-apply` |
 
-Most tools use either the colon form (`/opsx:propose`) or the dash form (`/opsx-propose`). A few tools surface OpenSpec as named skills instead of slash commands; for those you invoke the skill by name. The full per-tool list, including exactly which files get written where, lives in [Supported Tools](supported-tools.md).
+大多数工具使用冒号形式（`/opsx:propose`）或短横线形式（`/opsx-propose`）。少数工具把 OpenSpec 作为具名 skills 而非斜杠命令呈现；对于这些，你按名字调用 skill。包含确切文件写入位置的逐工具完整列表，见[支持的工具](supported-tools.md)。
 
-When in doubt, type a slash in your AI chat and look at the autocomplete. Your tool will show you the form it expects.
+拿不准时，在你的 AI 聊天中输入一个斜杠，看自动补全。你的工具会显示它期望的形式。
 
-## How the commands got there: skills and commands
+## 命令从何而来：skills 与 commands
 
-When you run `openspec-cn init` (or `openspec-cn update`), OpenSpec writes small files into your project so your AI tool can find the workflow. Depending on your tool and settings, these are **skills**, **commands**, or both.
+当你运行 `openspec-cn init`（或 `openspec-cn update`）时，OpenSpec 把小文件写入你的项目，以便你的 AI 工具能找到该工作流。取决于你的工具与设置，这些文件是 **skills**、**commands**，或两者皆有。
 
-- **Skills** live in places like `.claude/skills/openspec-*/SKILL.md`. They're the emerging cross-tool standard: a folder of instructions your assistant auto-detects.
-- **Commands** live in places like `.claude/commands/opsx/<id>.md`. They're the older per-tool slash command files.
+- **Skills** 位于 `.claude/skills/openspec-*/SKILL.md` 这类位置。它们是新兴的跨工具标准：一个你的助手自动检测的指令文件夹。
+- **Commands** 位于 `.claude/commands/opsx/<id>.md` 这类位置。它们是较老的、每工具专属的斜杠命令文件。
 
-You don't have to care which one your tool uses. You just type the slash command and it works. But knowing these files exist helps when something goes wrong: if your commands vanish, it usually means these files are missing or stale, and `openspec-cn update` regenerates them.
+你无需关心你的工具用哪一种。你只需输入斜杠命令，它就能工作。但当出问题时，知道这些文件存在是有帮助的：如果你的命令消失了，通常意味着这些文件缺失或过期，而 `openspec-cn update` 会重新生成它们。
 
-See [Supported Tools](supported-tools.md) for the exact paths per tool, and [Migration Guide](migration-guide.md) for how skills replaced the older command-only approach.
+逐工具的精确路径见[支持的工具](supported-tools.md)，skills 如何取代旧的纯命令方式见[迁移指南](migration-guide.md)。
 
-## Confirming it's installed
+## 确认它已安装
 
-Quick checks, fastest first:
+快速检查，按从快到慢：
 
-1. **Type a slash in your AI chat.** Start typing `/opsx` and watch for autocomplete suggestions. If they appear, you're set.
-2. **Look for the files.** For Claude Code, check that `.claude/skills/` contains `openspec-*` folders. Other tools use their own directories ([Supported Tools](supported-tools.md) lists them).
-3. **Re-run setup.** From your project root, run `openspec-cn update`. This regenerates the skill and command files for whatever tools you configured.
-4. **Restart your assistant.** Many tools scan for skills and commands at startup, so a fresh window can be the missing step.
+1. **在你的 AI 聊天中输入一个斜杠。** 开始输入 `/opsx` 并观察是否有自动补全建议出现。如果它们出现了，你就已就绪。
+2. **查找文件。** 对于 Claude Code，检查 `.claude/skills/` 是否包含 `openspec-*` 文件夹。其他工具使用它们自己的目录（[支持的工具](supported-tools.md)列出了它们）。
+3. **重新运行设置。** 从你的项目根目录运行 `openspec-cn update`。这会为你配置过的任何工具重新生成 skill 和 command 文件。
+4. **重启你的助手。** 许多工具在启动时扫描 skills 和 commands，所以一个新窗口可能就是缺失的那一步。
 
-## Which commands do I even have?
+## 我到底有哪些命令
 
-By default, OpenSpec installs the **core** set of slash commands:
+默认情况下，OpenSpec 安装 **core** 这组斜杠命令：
 
-- `/opsx:explore`: think through an idea with the AI before committing to a change (great first step when you're unsure)
-- `/opsx:propose`: create a change and draft all its planning artifacts in one step
-- `/opsx:apply`: build the change by working through its task list
-- `/opsx:sync`: merge a change's spec updates into your main specs (usually automatic)
-- `/opsx:archive`: finish a change and file it away
+- `/opsx:explore`：在下定决心前与 AI 一起想清楚一个想法（拿不准时极好的第一步）
+- `/opsx:propose`：创建一个变更并一步起草它的所有规划制品
+- `/opsx:apply`：通过完成其任务列表来构建变更
+- `/opsx:sync`：把变更的 spec 更新合并进你的主 specs（通常是自动的）
+- `/opsx:archive`：完成一个变更并把它归档
 
-A good default rhythm: `explore` when you're figuring out what to do, then `propose`, `apply`, `archive`. The [Explore First](explore.md) guide explains why that opening step pays off.
+一个不错的默认节奏：拿不准要做什么时用 `explore`，然后 `propose`、`apply`、`archive`。[先探索](explore.md)指南解释了为何这第一步值得。
 
-There's also an **expanded** set for people who want finer control (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:bulk-archive`, `/opsx:onboard`). You turn it on with `openspec-cn config profile`, then apply it with `openspec-cn update`.
+还有一套**扩展**命令，给想要更细控制的人（`/opsx:new`、`/opsx:continue`、`/opsx:ff`、`/opsx:verify`、`/opsx:bulk-archive`、`/opsx:onboard`）。你用 `openspec-cn config profile` 开启它，再用 `openspec-cn update` 应用。
 
-New to all of this? `/opsx:onboard` (in the expanded set) walks you through a complete change on your own codebase, narrating each step. It's the friendliest possible introduction.
+这一切对你而言是全新的？`/opsx:onboard`（在扩展集中）会在你自己的代码库上带你走完一个完整变更，逐步旁白。它是最友好的可能入门。
 
-For what each command does in detail, see [Commands](commands.md). For when to reach for which, see [Workflows](workflows.md).
+每个命令的详细功能，见[命令](commands.md)。何时该用哪个，见[工作流](workflows.md)。
 
-## A clean first run
+## 一次干净的首跑
 
-Putting it together, here is the whole sequence with each step labeled by where it happens.
+综合起来，这里是从头到尾的整个序列，每步标注了它发生的位置。
 
 ```text
 TERMINAL   $ npm install -g @fission-ai/openspec@latest
@@ -148,13 +148,13 @@ AI CHAT      /opsx:archive
               (change is merged into your specs and filed away)
 ```
 
-Two terminal steps to set up. Then you live in chat. That's the rhythm.
+两步终端操作完成设置。然后你就在聊天里了。这就是节奏。
 
-## Related
+## 相关
 
-- [Getting Started](getting-started.md): the full first-change walkthrough
-- [Commands](commands.md): every slash command in detail
-- [CLI](cli.md): every terminal command in detail
-- [Supported Tools](supported-tools.md): per-tool syntax and file locations
-- [FAQ](faq.md): more quick answers
-- [Troubleshooting](troubleshooting.md): fixes when commands don't show up
+- [快速上手](getting-started.md)：完整的第一个变更走查
+- [命令](commands.md)：每个斜杠命令的细节
+- [CLI](cli.md)：每个终端命令的细节
+- [支持的工具](supported-tools.md)：逐工具的语法与文件位置
+- [FAQ](faq.md)：更多快速解答
+- [故障排查](troubleshooting.md)：命令不出现时的修复办法

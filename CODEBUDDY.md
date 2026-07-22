@@ -3,6 +3,7 @@
 当前项目是OpenSpec项目的汉化版，当前项目汉化后名叫@studyzy/openspec-cn，只有在命令行下是执行openspec-cn命令，而不是openspec命令了，但新建的目录也还是叫openspec，对应的SKILL也是保持openspec-XXX不变，不用变成openspec-cn-XXX。
 
 在汉化过程中Schema作为特殊计算机词汇，不需要翻译成中文，保持不变即可。注意代码中的注释不需要翻译成中文。
+翻译术语表参见：`TRANSLATION_GLOSSARY.md` 如果有新的术语时也请记得补充完善。
 ## 项目概述
 
 `@studyzy/openspec-cn` 是 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的简体中文汉化分支。OpenSpec 是一个面向 AI 编程助手的规范驱动开发框架——在写代码前通过提案(proposal)、规范(spec)、设计(design)、任务(tasks)四类制品与 AI 对齐意图。

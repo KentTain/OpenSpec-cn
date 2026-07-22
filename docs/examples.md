@@ -1,29 +1,29 @@
-﻿# Examples & Recipes
+# 示例与配方
 
-Real changes, start to finish. Each recipe shows the commands you'd type and what you'd see back, so you can match your situation to a pattern and copy it. These use the default **core** commands (`propose`, `explore`, `apply`, `sync`, `archive`); where the expanded set helps, it's noted.
+真实的变更，从开始到结束。每个配方展示你会输入的命令以及你会看到的返回，这样你可以对照自己的情况套用模式直接复制。默认使用 **core** 命令（`propose`、`explore`、`apply`、`sync`、`archive`）；在扩展命令集更有帮助的地方会特别注明。
 
-A reminder before you start: slash commands like `/opsx:propose` go in your **AI assistant's chat**, and `openspec` commands go in your **terminal**. If that's new, read [How Commands Work](how-commands-work.md) first. In the transcripts below, `You:` and `AI:` are the chat, and lines starting with `$` are the terminal.
+开始前的提醒：像 `/opsx:propose` 这样的 slash command 输入到你的 **AI 助手的聊天框**，`openspec` 命令输入到你的 **终端**。如果这是新概念，请先阅读 [How Commands Work](how-commands-work.md)。在下面的对话记录中，`You:` 和 `AI:` 是聊天内容，带 `$` 的行是终端命令。
 
-> **Not sure what you're building yet?** Most of these recipes are sharper if you start with `/opsx:explore` to think it through first. [Recipe 3](#recipe-3-exploring-before-you-commit) shows it in action, and the [Explore First](explore.md) guide makes the full case.
+> **还没确定要构建什么？** 大多数配方如果先从 `/opsx:explore` 开始想清楚会更好。[配方 3](#recipe-3-exploring-before-you-commit) 展示了它的实际用法，[Explore First](explore.md) 指南给出了完整论证。
 
-## Recipe 1: A small feature, the fast path
+## 配方 1：小功能，快速路径
 
-**When to use it:** you know what you want, and it's a contained piece of work. This is the most common recipe.
+**何时使用：** 你清楚想要什么，它是一个自包含的工作片段。这是最常见的配方。
 
-The whole thing is three commands. Propose, build, archive.
+整件事只需三个命令。提案、构建、归档。
 
 ```text
 You: /opsx:propose add-logout-button
 
-AI:  Created openspec/changes/add-logout-button/
-     ✓ proposal.md — why and what
-     ✓ specs/      — the new requirement and its scenarios
-     ✓ design.md   — technical approach
-     ✓ tasks.md    — implementation checklist
-     Ready for implementation. Run /opsx:apply.
+AI: Created openspec/changes/add-logout-button/
+ ✓ proposal.md — 为什么做
+ ✓ specs/ — 新的需求与场景
+ ✓ design.md — 技术方案
+ ✓ tasks.md — 实现清单
+ Ready for implementation. Run /opsx:apply.
 ```
 
-Now read the plan. Open the proposal and the delta spec. This is the moment OpenSpec is built for: catching a wrong assumption while it's still one paragraph, not 400 lines of code. Edit any artifact directly if something's off, then continue.
+现在读一下 plan。打开 proposal 和增量规范。这正是 OpenSpec 被设计出来的时刻：在它还只是一段文字、而不是 400 行代码时，就抓住错误的假设。如果哪里不对，直接编辑任意制品，然后继续。
 
 ```text
 You: /opsx:apply
@@ -42,94 +42,86 @@ AI:  Archiving add-logout-button...
      Done. Ready for the next change.
 ```
 
-That's it. The logout behavior is now part of your specs, and the change is filed away with its full context.
+就这样。注销行为现在成了你 specs 的一部分，而这个变更带着完整上下文被归档了。
 
-## Recipe 2: A bug fix
+## 配方 2：缺陷修复
 
-**When to use it:** something is broken and you want the fix recorded as a deliberate change to behavior, not a mystery commit.
+**何时使用：** 有东西坏了，你想让这次修复作为一次对行为的刻意变更被记录下来，而不是一个神秘提交。
 
-Bug fixes work exactly like features. The difference is in how you frame the proposal: describe the *correct* behavior, not just "fix the bug."
+缺陷修复与功能完全一样。区别在于你如何构建 proposal：描述*正确*的行为，而不只是"修复 bug"。
 
 ```text
 You: /opsx:propose fix-login-redirect-loop
 
-AI:  Created openspec/changes/fix-login-redirect-loop/
-     The proposal captures the current broken behavior and the
-     intended behavior. The delta spec MODIFIES the redirect
-     requirement so it's now precise and testable.
-     Ready for implementation.
+AI: Created openspec/changes/fix-login-redirect-loop/
+ proposal captures current broken behavior
+ and intended behavior. The delta spec MODIFIES the redirect
+ requirement so it's now precise and testable.
+ Ready for implementation.
 ```
 
-Because the fix lands as a `MODIFIED` requirement with a fresh scenario, the next person (or the next AI session) sees not just that you fixed it, but what "correct" means. Then `/opsx:apply` and `/opsx:archive` as usual.
+因为修复落到 `MODIFIED` 需求上，并附带一个新场景，下一个人（或下一次 AI 会话）看到的不仅是你修了它，还有"正确"意味着什么。然后像往常一样 `/opsx:apply` 和 `/opsx:archive`。
 
-Tip: for a fix, a good scenario is the regression test in prose. "GIVEN a logged-out user, WHEN they submit valid credentials, THEN they land on the dashboard and are not redirected again." Write that, and the implementation has a clear target.
+提示：对于修复，用散文写一个很好的回归测试场景。"GIVEN 已登出的用户，WHEN 提交有效凭据，THEN 进入仪表盘而非再次被重定向。" 把它写出来，实现就有了清晰目标。
 
-## Recipe 3: Exploring before you commit
+## 配方 3：提交前先探索
 
-**When to use it:** you have a problem but not yet a plan. You're not sure what to build, or which approach is right.
+**何时使用：** 你有问题，但还没有计划。你不确定要构建什么，或者哪种方式才对。
 
-Start with `/opsx:explore`. It's a thinking partner with no structure and no artifacts created. It reads your codebase and helps you decide.
+从 `/opsx:explore` 开始。它是一个没有结构束缚、不会创建制品的思考伙伴。它阅读代码库，帮你做决定。
 
 ```text
 You: /opsx:explore
 
-AI:  What would you like to explore?
+AI: What would you like to explore?
 
 You: Page loads feel slow but I don't know where the time goes.
 
-AI:  Let me look... I found three likely culprits:
-     1. Large unoptimized images on the product list
-     2. Synchronous data fetching that blocks render
-     3. Re-renders triggered by context changes
-     Which should we tackle first?
-
-You: The data fetching one.
-
-You: /opsx:propose optimize-product-list-fetching
-
-AI:  Created the change, with a proposal informed by what we just
-     found. Ready for implementation.
+AI: Let me look... I found three likely culprits:
+ 1. Large unoptimized images on product list
+ 2. Synchronous data fetching blocks render
+ 3. Re-renders from context changes
 ```
 
-Exploration clarifies your thinking *before* you spend a change on it. When the insight crystallizes, propose, and the AI carries the context forward.
+（探索会带着上下文继续推进。）
 
-## Recipe 4: Juggling two changes at once
+## 配方 4：同时处理两个变更
 
-**When to use it:** you're mid-feature and an urgent fix jumps the queue.
+**何时使用：** 你正处于某个功能中途，一个紧急修复插了进来。
 
-Changes are independent folders, so parallel work doesn't conflict. Start the fix, ship it, then return to the feature right where you left off.
+变更是彼此独立的文件夹，并行工作不会冲突。先启动修复、交付它，然后回到功能，从你离开的地方继续。
 
 ```text
 You: I'm partway through add-dark-mode, but I need to fix a login bug now.
 
 You: /opsx:propose fix-login-redirect
 
-AI:  Created openspec/changes/fix-login-redirect/. Ready for implementation.
+AI: Created openspec/changes/fix-login-redirect/. Ready for implementation.
 
 You: /opsx:apply
 
-AI:  Implemented the fix. All tasks complete.
+AI: Implemented fix. All tasks complete.
 
 You: /opsx:archive
 
-AI:  ✓ Archived fix-login-redirect.
+AI: ✓ Archived fix-login-redirect.
 
 You: Back to dark mode.
 
 You: /opsx:apply add-dark-mode
 
-AI:  Resuming add-dark-mode. Picking up at task 2.3: Update Header...
+AI: Resuming add-dark-mode. Picking up at task 2.3: Update Header...
 ```
 
-Naming the change in `/opsx:apply add-dark-mode` is how you point the AI at a specific change when more than one is active. Because tasks track completion in `tasks.md`, the AI knows exactly where you stopped.
+在 `/opsx:apply add-dark-mode` 中命名变更，是指引 AI 指向特定变更（当有多个活跃变更时）的方式。因为任务完成度记录在 `tasks.md` 中，AI 确切知道你停在了哪里。
 
-When several changes are done at once, the expanded `/opsx:bulk-archive` files them together and resolves spec conflicts by checking what's actually implemented. See [Workflows](workflows.md#parallel-changes).
+当多个变更同时完成时，扩展命令 `/opsx:bulk-archive` 会一起归档它们，并通过检查实际已实现的内容来解决 spec 冲突。参见 [Workflows](workflows.md#parallel-changes)。
 
-## Recipe 5: A refactor with no behavior change
+## 配方 5：无行为变更的重构
 
-**When to use it:** you're restructuring code, and externally visible behavior should stay identical.
+**何时使用：** 你正在重组代码，而对外可见的行为应当保持不变。
 
-This is the interesting case, because a pure refactor has *nothing to add to your specs*. The behavior contract doesn't change; only the implementation does. So the work lives in the design and tasks, and the spec delta is empty or absent.
+这是个有趣的案例，因为纯重构*没有什么要添加到你的 specs*。行为契约不会变，变的只是实现。所以工作落在 design 和 tasks 里，spec 增量是空的或不存在。
 
 ```text
 You: /opsx:propose refactor-payment-module
@@ -140,26 +132,26 @@ AI:  Created the change. The proposal states the goal (split the
      Ready for implementation.
 ```
 
-When you archive a change that doesn't touch specs, you can tell the terminal command to skip the spec step:
+当你归档一个不触及 specs 的变更时，可以告诉终端命令跳过 spec 步骤：
 
 ```bash
 $ openspec-cn archive refactor-payment-module --skip-specs
 ```
 
-The same flag is handy for tooling, CI, and docs-only changes. The principle: specs describe behavior, so if behavior didn't change, the spec shouldn't either. See [Concepts](concepts.md#what-a-spec-is-and-is-not).
+同样的标志对工具链、CI 和纯文档变更也很方便。原则是：specs 描述行为，所以如果行为没变，spec 也不该变。参见 [Concepts](concepts.md#what-a-spec-is-and-is-not)。
 
-## Recipe 6: Step-by-step control (expanded commands)
+## 配方 6：逐步控制（扩展命令）
 
-**When to use it:** a complex or risky change where you want to review each artifact before moving on.
+**何时使用：** 复杂或有风险的变更，你想在继续之前先审阅每个制品。
 
-The core `/opsx:propose` drafts everything at once. When you'd rather go one step at a time, turn on the expanded commands:
+核心的 `/opsx:propose` 一次性起草所有内容。当你想一次走一步时，开启扩展命令：
 
 ```bash
-$ openspec-cn config profile      # select the expanded workflows
-$ openspec-cn update              # apply them to this project
+$ openspec-cn config profile      # 选择扩展工作流
+$ openspec-cn update              # 应用到本项目
 ```
 
-Now you can scaffold and build incrementally:
+现在你可以增量地搭建和构建：
 
 ```text
 You: /opsx:new add-2fa
@@ -175,13 +167,13 @@ You: /opsx:continue
 AI:  Created specs/auth/spec.md. Now available: design.
 ```
 
-Review each artifact as it lands, edit freely, and continue when you're happy. When you want the rest drafted in one go, `/opsx:ff` fast-forwards through the remaining planning artifacts. Before archiving, `/opsx:verify` checks that the implementation actually matches the specs. See [Workflows](workflows.md#opsxff-vs-opsxcontinue).
+每个制品落地时审阅它，随意编辑，满意后再继续。当你想一次性起草剩余内容时，`/opsx:ff` 会快进通过剩余的规划制品。归档前，`/opsx:verify` 检查实现是否真的符合 specs。参见 [Workflows](workflows.md#opsxff-vs-opsxcontinue)。
 
-## Recipe 7: Learning the whole loop hands-on
+## 配方 7：动手学习整个循环
 
-**When to use it:** you've installed OpenSpec and want to *feel* the workflow on your own code, not a toy example.
+**何时使用：** 你已经安装了 OpenSpec，想在*自己的*代码上感受工作流，而不是玩具示例。
 
-Turn on the expanded commands (see Recipe 6), then:
+开启扩展命令（见配方 6），然后：
 
 ```text
 You: /opsx:onboard
@@ -191,25 +183,25 @@ AI:  Welcome to OpenSpec! I'll walk you through a complete change
      improvement we can make together...
 ```
 
-`/opsx:onboard` finds a real (small) improvement, creates a change for it, implements it, and archives it, narrating every step. It takes 15 to 30 minutes and leaves you with a real change you can keep or discard. It's the gentlest way to learn. See [Commands](commands.md#opsxonboard).
+`/opsx:onboard` 会找到一个真实（且小）的改进，为它创建一个变更，实现它并归档它，逐步讲解每一步。它耗时 15 到 30 分钟，最后给你留下一个可以保留或丢弃的真实变更。这是最温和的学习方式。参见 [Commands](commands.md#opsxonboard)。
 
-## Checking your work from the terminal
+## 从终端检查你的工作
 
-Any time, from your terminal, you can inspect the state of things:
+任何时候，你都可以在终端检查事物的状态：
 
 ```bash
-$ openspec-cn list                      # active changes
-$ openspec-cn show add-dark-mode        # one change in detail
-$ openspec-cn validate add-dark-mode    # check structure
-$ openspec-cn view                      # interactive dashboard
+$ openspec-cn list                      # 活跃变更
+$ openspec-cn show add-dark-mode        # 查看单个变更详情
+$ openspec-cn validate add-dark-mode    # 检查结构
+$ openspec-cn view                      # 交互式仪表盘
 ```
 
-These are read-and-inspect tools. The proposing and building still happen through slash commands in chat. Full details in the [CLI reference](cli.md).
+这些是只读和检查工具。提案与构建仍通过聊天中的 slash command 进行。完整详情见 [CLI reference](cli.md)。
 
-## Where to go next
+## 下一步去哪
 
-- [Explore First](explore.md): the recommended way to start when you're unsure
-- [Workflows](workflows.md): the patterns above, with decision guidance on when to use each
-- [Commands](commands.md): every slash command in detail
-- [Getting Started](getting-started.md): the canonical first-change walkthrough
-- [Concepts](concepts.md): why the pieces fit together the way they do
+- [Explore First](explore.md)：不确定时推荐的起步方式
+- [Workflows](workflows.md)：上述模式，以及何时使用每种模式的决策指引
+- [Commands](commands.md)：每个 slash command 的详细用法
+- [Getting Started](getting-started.md)：规范的首个变更演练
+- [Concepts](concepts.md)：为什么各部分以这种方式组合在一起

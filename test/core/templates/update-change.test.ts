@@ -21,7 +21,7 @@ describe('update-change templates', () => {
     expect(skill.name).toBe('openspec-update-change');
     expect(skill.description).toContain('永不编辑代码');
     expect(skill.license).toBe('MIT');
-    expect(skill.compatibility).toBe('Requires openspec CLI.');
+    expect(skill.compatibility).toBe('需要 openspec-cn CLI。');
     expect(skill.metadata).toEqual({ author: 'openspec', version: '1.0' });
 
     expect(command.name).toBe('OPSX: Update');
@@ -31,9 +31,9 @@ describe('update-change templates', () => {
 
     for (const [label, body] of bodies) {
       expect(body, label).toContain(STORE_SELECTION_GUIDANCE);
-      expect(body, label).toContain('openspec list --json');
-      expect(body, label).toContain('openspec status --change "<name>" --json');
-      expect(body, label).toContain('openspec instructions <artifact-id> --change "<name>" --json');
+      expect(body, label).toContain('openspec-cn list --json');
+      expect(body, label).toContain('openspec-cn status --change "<name>" --json');
+      expect(body, label).toContain('openspec-cn instructions <artifact-id> --change "<name>" --json');
     }
   });
 

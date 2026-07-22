@@ -1,119 +1,121 @@
-# 先做探索
+# 先探索
 
-**`/opsx:explore` 是你的思考伙伴。每当你有一个问题但还没有方案时，就找它。** 它调查你的代码库，与你权衡选项，厘清你真正想要什么——这一切都发生在任何制品或代码产生之前。当图景清晰后，它把工作交给 `/opsx:propose`。
+**`/opsx:explore` 是你的思考伙伴。每当你有问题却还没有计划时，就找它。** 它在创建任何一个制品或一行代码之前，调查你的代码库、与你权衡选项、并厘清你真正想要什么。当画面清晰时，它交接给 `/opsx:propose`。
 
-如果你只能从这份文档里带走一个习惯，那就是：**不确定时，先探索再提案。**
+如果说要从这些文档中取走一个习惯，就取这一个：**拿不准时，先探索，再提议。**
 
-为什么这很重要。AI 编程助手很积极。你问得模糊，它会自信地造出*某种东西*，只不过可能不是你需要的那个。Explore 正是解药。它是一场零成本的对话，你与 AI 一起想清楚正确的方向，所以等你提案时，你提案的是对的东西。
+这背后的原因很重要。AI 编程助手很积极。你含糊地一问，它们就会自信地构建出*某种东西*，只是也许并非你所需的那个东西。Explore 就是解药。它是一场零负担的对话，你与 AI 一起弄清正确的举措，这样等到你提议时，提议的已是正确的东西。
 
-## 什么时候探索
+## 何时探索
 
-Explore 适合作为第一步的频率比人们以为的高得多。下列任何一种情况都适用：
+探索作为正确的第一步，出现的频率比人们预期的更高。当以下任一情况为真时，就使用它：
 
-- 你知道*问题*，但不知道*方案*。（"页面感觉慢。""Auth 一团糟。""我们老是收到重复订单。"）
-- 你在多种方案之间取舍，想看到对照你真实代码的权衡。
-- 你刚接手一个代码库，需要先搞懂某个东西怎么运作才能改。
-- 需求模糊，你想在承诺之前把它磨清楚。
-- 你怀疑工作量比看起来更大或更小，想诚实地圈定范围。
+- 你知道*问题*但不知道*解法*。（"页面感觉很慢。""Auth 一团糟。""我们不断收到重复订单。"）
+- 你在多种方案间做选择，并希望针对你的真实代码铺陈权衡。
+- 你初来乍到一个代码库，需要在改动某物前先理解它如何运作。
+- 需求模糊，你想在下定决心前把它磨利。
+- 你怀疑工作比看上去更大或更小，并希望诚实地界定它的范畴。
 
-只有当你已经确切知道想要什么、以及怎么做时，才跳过 explore。那种情况下直接用 [`/opsx:propose`](commands.md#opsxpropose)。
+只有当你已经确切知道想要什么、以及怎么做时，才跳过探索。那种情况下，直接去 [`/opsx:propose`](commands.md#opsxpropose)。
 
-## 它做什么（与不做什么）
+## 它做什么（以及不做什么）
 
-Explore 是一场**对话**，不是一个生成器。
+Explore 是一场**对话**，而非生成器。
 
 **它做：**
-- 阅读和搜索你的代码库，回答真实问题。
-- 比较选项，点出各自的权衡。
-- 画图，让设计更易读。
-- 帮你把模糊想法收窄到一个具体、可构建的范围。
-- 在你准备好时，转交给 `/opsx:propose`。
+- 阅读并搜索你的代码库以回答真实问题。
+- 比较选项并点明每个选项的权衡。
+- 绘制图表以使设计清晰易懂。
+- 帮你把一个模糊想法收窄为具体、可构建的范畴。
+- 当你准备好时，过渡到 `/opsx:propose`。
 
 **它不做：**
-- 创建 change 文件夹。
-- 写任何制品（没有 proposal、specs、design、tasks）。
-- 写或修改代码。
+- 创建变更文件夹。
+- 写入任何制品（没有 proposal、specs、design 或 tasks）。
+- 写入或修改代码。
 
-这正是关键。探索不花成本，也不承诺任何东西。你可以连探三条死胡同，每条都学到一点，最后只把活下来的那条做成提案。
+这正是重点所在。探索不花你任何代价，也不让你对任何东西做出承诺。你可以探索三个死胡同，从每个中都有所学，然后才提议那个幸存下来的路径。
 
-## 它已经装好了
+## 它已安装
 
-好消息：`/opsx:explore` 默认随 **core** profile 分发，和 `propose`、`apply`、`sync`、`archive` 并列。你不需要启用任何东西。只要你的项目装了 OpenSpec，explore 就在你的 AI 聊天里。（和所有 `/opsx:*` 命令一样，你在助手的聊天里输入它，不是终端。见 [命令是如何工作的](how-commands-work.md)。）
+好消息：`/opsx:explore` 随默认的 **core** profile 提供，就在一旁与 `propose`、`apply`、`sync`、`archive` 并列。你无需启用任何东西。只要 OpenSpec 在项目里配置好，explore 就在你的 AI 聊天中就绪。（与所有 `/opsx:*` 命令一样，你把它输入助手的聊天框，而非终端。请参阅[命令如何运作](how-commands-work.md)。）
 
 ## 一个完整示例
 
-看一个模糊的担忧如何变成锋利、可构建的变更。
+看一个模糊的担忧如何变成一个清晰、可构建的变更。
 
 ```text
 You: /opsx:explore
 
-AI:  你想探索什么？
+AI:  What would you like to explore?
 
-You: 我们的 checkout 有时会创建重复订单。我不知道为什么，
-     也不知道怎么安全地修。
+You: Our checkout sometimes creates duplicate orders. I don't know why
+     and I don't know how to fix it safely.
 
-AI:  让我挖一下 checkout 路径……
-     [阅读 order service、payment webhook handler 和客户端提交逻辑]
+AI:  Let me dig into the checkout path...
+     [reads the order service, the payment webhook handler, and the
+      client submit logic]
 
-     这是我发现的。重复有两种发生方式：
+     Here's what I found. There are two ways a duplicate can happen:
 
-     1. 客户端可能提交两次（双击、慢网络下重试）。
-        没有任何防抖。
-     2. payment webhook 可能触发多次，handler 每次都
-        创建一个订单。没有幂等键。
+     1. The client can submit twice (double-click, retry on slow network).
+        Nothing debounces it.
+     2. The payment webhook can fire more than once, and the handler
+        creates an order each time. There's no idempotency key.
 
-     原因 #2 危险：它可能扣款并发货两次。
+     Cause #2 is the dangerous one: it can charge and fulfill twice.
 
-     三种修法，按健壮性大致排序：
-     - 在 order-creation 接口加幂等键（同时治两种原因）
-     - 在 webhook 上按 payment-intent id 去重（只治 #2）
-     - 客户端防抖（只治 #1，掩盖了真正的 bug）
+     Three ways to fix it, roughly in order of robustness:
+     - Idempotency key on the order-creation endpoint (handles both causes)
+     - Dedup on the webhook by payment-intent id (handles #2 only)
+     - Client-side debounce (handles #1 only, papers over the real bug)
 
-     鉴于你的代码已经存了 payment-intent id，幂等键方案
-     改动小、收益最大。要我把它圈成提案吗？
+     Given your code already stores the payment-intent id, the
+     idempotency-key approach is a small change with the biggest payoff.
+     Want me to scope that?
 
-You: 好，做幂等键。
+You: Yes, let's do the idempotency key.
 
 You: /opsx:propose add-order-idempotency-key
 
-AI:  已创建 openspec/changes/add-order-idempotency-key/，含 proposal
-     和 delta spec，基于我们刚才发现的内容。可以开始实现了。
+AI:  Created openspec/changes/add-order-idempotency-key/, with a proposal
+     and delta spec grounded in what we just found. Ready for implementation.
 ```
 
-注意发生了什么。起点是"有问题，但我不敢碰"。二十秒的探索把它变成了：一个有名字的根因、三个排序过的选项、一个结合现有代码的推荐，以及一个精确的变更。接下来的 proposal 锋利，因为思考先行了。
+注意发生了什么。起点是"有东西出错了，而我不敢碰它"。二十秒的探索把这个变成了：一个有名字的根因、三个排好序的选项、一个贴合现有代码的建议，以及一个精确的变更。随之而来的 proposal 之所以犀利，是因为思考先行发生了。
 
-## 移交给 propose
+## 交接给提议
 
-Explore 不会归档成任何东西。当你准备好时，只要启动一个 change，AI 就会把对话中的上下文带进制品。
+Explore 不归档进任何东西。当你准备好时，你只需启动一个变更，AI 会把对话中的上下文带入制品。
 
 ```text
 explore  ──►  propose  ──►  apply  ──►  archive
- (思考)     (对齐)       (构建)      (归档)
+ (think)     (agree)       (build)     (record)
 ```
 
-你可以用自然语言说（"把这个做成一个变更"），也可以直接运行 `/opsx:propose <name>`。无论哪种，你刚才的探索就成了 proposal 的基础，而不是一次性聊天。
+你可以用平实的语言说（"let's turn this into a change"），或直接运行 `/opsx:propose <name>`。无论哪种方式，你刚刚做的探索成为 proposal 的基础，而非被丢弃的聊天。
 
-如果你用扩展命令集，explore 可以改交给 `/opsx:new`，逐步创建制品。见 [工作流](workflows.md)。
+如果你使用扩展命令集，探索可以改为交接给 `/opsx:new`，进行逐步骤的制品创建。请参阅[工作流](workflows.md)。
 
-## 让探索做得好的几点提示
+## 一次好探索的诀窍
 
-- **带问题来，不要带方案来。** "登录感觉慢"给 AI 留出调查空间。"加一个 Redis 缓存"则把你预先锁定在一个还没验证的答案上。
-- **大声要权衡。** "每个选项的缺点是什么？"能让你得到更诚实的对比。
-- **让它先读。** 最好的探索都是从 AI 真正看你的代码开始，而不是猜测。需要时把它指向相关区域。
-- **可以中途放弃。** 如果探索发现这个想法不值得做，那就是一次胜利。你以很低的成本学到了这一点。
-- **变更中途也可以再探。** `/opsx:apply` 期间卡住了？退一步，探索一下子问题，再回来。
+- **带来问题，而非解法。** "Logins feel slow" 给 AI 留出调查的空间。"Add a Redis cache" 则让你预先承诺了一个尚未检验过的答案。
+- **大声要求权衡。** "每个选项的缺点是什么？"会换来更诚实的比较。
+- **让它先读。** 最好的探索始于 AI 真正去看你的代码，而非猜测。如有帮助，把它的目光引向相关区域。
+- **放弃也没关系。** 如果探索揭示这个想法不值得，那也是胜利。你以低廉的代价学到了它。
+- **变更中途再探索。** 在 `/opsx:apply` 中卡住了？你可以退一步，探索一个子问题，然后回来。
 
 ## 诚实的权衡
 
-**你得到什么：** explore 在最便宜的时刻——任何制品还没存在之前——拦下错误方向。它在不熟悉的代码里尤其强大，AI 阅读和总结系统的能力能省你一下午的考古。
+**你得到什么：** 探索在任何制品诞生之前，以最廉价的代价拦下走错的方向。它在陌生代码中尤其强大——AI 读取并总结系统的能力，为你省下一下午的摸索。
 
-**代价是什么：** 一点耐心。Explore 是对话，所以比直接发 `/opsx:propose` 祈祷要慢。对于你已经真正理解的工作，这一步就是纯粹开销，可以跳过。
+**它花费什么：** 一点耐心。探索是一场对话，所以比甩出 `/opsx:propose` 然后碰运气要慢。对于你真正已经理解的工作，那额外的一步纯属开销，你应该跳过它。
 
-经验法则：任务越模糊，explore 越值。任务越清晰，越可以直奔 propose。
+经验法则：任务越模糊，探索回报越大。任务越清晰，你越能直接跳到提议。
 
-## 接下来去哪儿
+## 下一步去哪
 
-- [命令：`/opsx:explore`](commands.md#opsxexplore)：精确参考
-- [工作流](workflows.md)：explore 作为日常循环的一部分
-- [示例与配方](examples.md#recipe-3-exploring-before-you-commit)：完整演练中的 explore
-- [快速开始](getting-started.md)：首次变更指南，包含探索
+- [命令：`/opsx:explore`](commands.md#opsxexplore)：精确的参考
+- [工作流](workflows.md)：作为日常循环一部分的探索
+- [示例与配方](examples.md#recipe-3-exploring-before-you-commit)：在一个完整走查中的探索
+- [快速上手](getting-started.md)：第一个变更指南，含探索
