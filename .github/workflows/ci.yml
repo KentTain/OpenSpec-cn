@@ -265,15 +265,15 @@ jobs:
             exit 1
           fi
           for completion in \
-            "share/bash-completion/completions/openspec.bash" \
-            "share/fish/vendor_completions.d/openspec.fish" \
-            "share/zsh/site-functions/_openspec"; do
+            "share/bash-completion/completions/openspec-cn.bash" \
+            "share/fish/vendor_completions.d/openspec-cn.fish" \
+            "share/zsh/site-functions/_openspec-cn"; do
             if [ ! -s "result/$completion" ]; then
               echo "Error: completion script missing or empty: $completion"
               exit 1
             fi
           done
-          if [ "$(head -1 result/share/zsh/site-functions/_openspec)" != "#compdef openspec" ]; then
+          if [ "$(head -1 result/share/zsh/site-functions/_openspec-cn)" != "#compdef openspec-cn" ]; then
             echo "Error: zsh completion is not autoloadable (missing #compdef header)"
             exit 1
           fi
