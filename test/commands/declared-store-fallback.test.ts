@@ -69,13 +69,13 @@ describe('declared store fallback (3.2)', () => {
       env,
     });
     expect(statusHuman.exitCode).toBe(0);
-    expect(statusHuman.stderr).toContain('使用 OpenSpec 根目录: team-context');
+    expect(statusHuman.stderr).toContain('Using OpenSpec root: team-context');
 
     // Hint continuity: follow-ups carry --store on BOTH surfaces. A text
     // `Next:` line that dropped the flag would resolve against the pointer
     // repo instead of the store.
     expect(statusHuman.stdout).toContain(
-      'Next: openspec-cn instructions proposal --change "billing-rework" --store team-context --json'
+      'Next: openspec instructions proposal --change "billing-rework" --store team-context --json'
     );
 
     const statusJson = await runCLI(['status', '--change', 'billing-rework', '--json'], {
@@ -155,39 +155,87 @@ describe('declared store fallback (3.2)', () => {
     expect(refs.map((entry: any) => entry.store_id)).toEqual(['upstream-context']);
   });
 
-  it('refuses init in a pointer repo and creates nothing, then converts cleanly', async () => {
+  it('installs integrations in a pointer repo without creating a local planning root', async () => {
+    const legacyAgentsPath = path.join(pointerRepo, 'openspec', 'AGENTS.md');
+    fs.writeFileSync(legacyAgentsPath, 'Keep this pointer-repo file.\n');
     const before = snapshot(pointerRepo);
-    const dataBefore = fs.existsSync(path.join(tempDir, 'data'))
-      ? snapshot(path.join(tempDir, 'data'))
-      : null;
-
-    const refused = await runCLI(['init', '.'], { cwd: pointerRepo, env });
-    expect(refused.exitCode).toBe(1);
-    expect(refused.stderr).toContain("此仓库的规划已外部化到 store 'team-context'");
-    expect(refused.stderr).toContain('移除 store: 行');
-    expect(snapshot(pointerRepo)).toEqual(before);
-    if (dataBefore) {
-      expect(snapshot(path.join(tempDir, 'data'))).toEqual(dataBefore);
-    }
-
-    const refusedWithLanguage = await runCLI(
-      ['init', '.', '--tools', 'none', '--language', 'French'],
-      { cwd: pointerRepo, env }
-    );
-    expect(refusedWithLanguage.exitCode).toBe(1);
-    expect(refusedWithLanguage.stderr).toContain("此仓库的规划已外部化到 store 'team-context'");
-    expect(refusedWithLanguage.stderr).toContain('移除 store: 行');
-    expect(snapshot(pointerRepo)).toEqual(before);
-
-    // Conversion: remove the line, rerun, get a normal local root.
-    fs.writeFileSync(path.join(pointerRepo, 'openspec', 'config.yaml'), 'schema: spec-driven\n');
-    const converted = await runCLI(['init', '.', '--tools', 'none'], {
+    const initialized = await runCLI(['init', '.', '--tools', 'claude'], {
       cwd: pointerRepo,
       env,
     });
-    expect(converted.exitCode).toBe(0);
-    expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'specs'))).toBe(true);
-    expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'changes'))).toBe(true);
+
+    expect(initialized.exitCode).toBe(0);
+    expect(fs.existsSync(path.join(pointerRepo, '.claude', 'skills', 'openspec-propose', 'SKILL.md'))).toBe(true);
+    expect(fs.readFileSync(path.join(pointerRepo, 'openspec', 'config.yaml'), 'utf8')).toBe(
+      'store: team-context\n'
+    );
+    expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'specs'))).toBe(false);
+    expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'changes'))).toBe(false);
+    expect(fs.readFileSync(legacyAgentsPath, 'utf8')).toBe('Keep this pointer-repo file.\n');
+
+    expect(before.get('openspec/config.yaml')).toBe('store: team-context\n');
+  });
+
+  it.skipIf(process.platform === 'win32')('installs integrations through a symlinked pointer-repo root', async () => {
+    const alias = path.join(tempDir, 'repo-alias');
+    fs.symlinkSync(pointerRepo, alias, 'dir');
+    const initialized = await runCLI(['init', alias, '--tools', 'claude'], {
+      cwd: tempDir,
+      env,
+    });
+
+    expect(initialized.exitCode).toBe(0);
+    expect(fs.existsSync(path.join(pointerRepo, '.claude', 'skills', 'openspec-propose', 'SKILL.md'))).toBe(true);
+    expect(fs.readFileSync(path.join(pointerRepo, 'openspec', 'config.yaml'), 'utf8')).toBe(
+      'store: team-context\n'
+    );
+  });
+
+  it('applies explicit Copilot cloud choices without changing the pointer config', async () => {
+    const configPath = path.join(pointerRepo, 'openspec', 'config.yaml');
+    const setupStepsPath = path.join(
+      pointerRepo,
+      '.github',
+      'workflows',
+      'copilot-setup-steps.yml'
+    );
+    const agentPath = path.join(pointerRepo, '.github', 'agents', 'openspec.agent.md');
+    const before = fs.readFileSync(configPath, 'utf8');
+
+    const enabled = await runCLI(
+      ['init', '.', '--tools', 'github-copilot', '--copilot-cloud'],
+      { cwd: pointerRepo, env }
+    );
+
+    expect(enabled.exitCode).toBe(0);
+    expect(fs.existsSync(setupStepsPath)).toBe(true);
+    expect(fs.existsSync(agentPath)).toBe(true);
+    expect(fs.readFileSync(configPath, 'utf8')).toBe(before);
+
+    const disabled = await runCLI(
+      ['init', '.', '--tools', 'github-copilot', '--no-copilot-cloud'],
+      { cwd: pointerRepo, env }
+    );
+
+    expect(disabled.exitCode).toBe(0);
+    expect(fs.existsSync(setupStepsPath)).toBe(false);
+    expect(fs.existsSync(agentPath)).toBe(false);
+    expect(fs.readFileSync(configPath, 'utf8')).toBe(before);
+    expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'specs'))).toBe(false);
+  });
+
+  it('rejects --language in a pointer repo without changing either root', async () => {
+    const pointerBefore = snapshot(pointerRepo);
+    const storeBefore = snapshot(storeRoot);
+    const result = await runCLI(
+      ['init', '.', '--tools', 'none', '--language', 'French'],
+      { cwd: pointerRepo, env }
+    );
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain('--language cannot update an external store');
+    expect(snapshot(pointerRepo)).toEqual(pointerBefore);
+    expect(snapshot(storeRoot)).toEqual(storeBefore);
   });
 
   it('refuses init for malformed pointers and from pointer-repo subdirectories', async () => {
@@ -198,7 +246,7 @@ describe('declared store fallback (3.2)', () => {
     );
     const malformed = await runCLI(['init', '.'], { cwd: pointerRepo, env });
     expect(malformed.exitCode).toBe(1);
-    expect(malformed.stderr).toContain('请先修复或移除 store: 行');
+    expect(malformed.stderr).toContain('Fix or remove the store: line');
     expect(fs.existsSync(path.join(pointerRepo, 'openspec', 'specs'))).toBe(false);
 
     // And a subdirectory of a pointer repo must not grow a nested root
@@ -211,7 +259,7 @@ describe('declared store fallback (3.2)', () => {
     fs.mkdirSync(subdir, { recursive: true });
     const nested = await runCLI(['init', '.'], { cwd: subdir, env });
     expect(nested.exitCode).toBe(1);
-    expect(nested.stderr).toContain("此仓库的规划已外部化到 store 'team-context'");
+    expect(nested.stderr).toContain("externalized to store 'team-context'");
     expect(fs.existsSync(path.join(subdir, 'openspec'))).toBe(false);
   });
 
@@ -229,12 +277,12 @@ describe('declared store fallback (3.2)', () => {
       expect(result.exitCode).toBe(0);
       runs[label] = {
         stdout: result.stdout,
-        warnings: (result.stdout.match(/声明已忽略/g) ?? []).length,
+        warnings: (result.stderr.match(/the declaration is ignored/g) ?? []).length,
       };
     }
 
     expect(runs.with.stdout).toBe(runs.without.stdout);
     expect(runs.without.warnings).toBe(0);
-    expect(runs.with.warnings).toBe(0);
+    expect(runs.with.warnings).toBe(1);
   });
 });

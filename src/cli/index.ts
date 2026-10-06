@@ -1,58 +1,31 @@
-import { asStatus } from '../commands/shared-output.js';
 import { Command, Option } from 'commander';
 import { createRequire } from 'module';
-import ora from 'ora';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, promises as fs } from 'fs';
 import { AI_TOOLS, TOOL_ID_ALIASES } from '../core/config.js';
-import { UpdateCommand } from '../core/update.js';
-import {
-  getAvailableCliUpdate,
-  displayCliUpdateNote,
-  shouldOfferUpgrade,
-  getInstallDir,
-  offerCliUpgrade,
-  rerunUpdateWithUpgradedCli,
-  displayUpgradeCommand,
-  isSourceCheckout,
-} from '../core/version-check.js';
-import { ListCommand } from '../core/list.js';
-import { ArchiveCommand, type ArchiveOptions } from '../core/archive.js';
-import { ViewCommand } from '../core/view.js';
-import { resolveRootForCommand, toRootOutput } from '../core/root-selection.js';
-import { registerSpecCommand } from '../commands/spec.js';
-import { ChangeCommand } from '../commands/change.js';
-import { ValidateCommand } from '../commands/validate.js';
-import { ShowCommand } from '../commands/show.js';
-import { CompletionCommand } from '../commands/completion.js';
-import { FeedbackCommand } from '../commands/feedback.js';
-import { registerConfigCommand } from '../commands/config.js';
-import { registerSchemaCommand } from '../commands/schema.js';
-import { registerStoreCommand } from '../commands/store.js';
-import { registerDoctorCommand } from '../commands/doctor.js';
-import { registerContextCommand } from '../commands/context.js';
-import { registerWorksetCommand } from '../commands/workset.js';
-import {
-  statusCommand,
-  BATCH_STATUS_FAILURE_PAYLOAD,
-  instructionsCommand,
-  applyInstructionsCommand,
-  archiveInstructionsCommand,
-  templatesCommand,
-  schemasCommand,
-  newChangeCommand,
-  DEFAULT_SCHEMA,
-  type StatusOptions,
-  type InstructionsOptions,
-  type TemplatesOptions,
-  type SchemasOptions,
-  type NewChangeOptions,
+import type { ArchiveOptions } from '../core/archive.js';
+import { registerSpecCommand } from './commands/spec.js';
+import { registerConfigCommand } from './commands/config.js';
+import { registerSchemaCommand } from './commands/schema.js';
+import { registerStoreCommand } from './commands/store.js';
+import { registerDoctorCommand } from './commands/doctor.js';
+import { registerContextCommand } from './commands/context.js';
+import { registerWorksetCommand } from './commands/workset.js';
+import { DEFAULT_SCHEMA } from '../commands/workflow/default-schema.js';
+import type {
+  StatusOptions,
+  InstructionsOptions,
+  TemplatesOptions,
+  SchemasOptions,
+  NewChangeOptions,
 } from '../commands/workflow/index.js';
-import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
-import { maybeShowCompletionTip } from '../core/completion-tip.js';
 import { COMMON_FLAGS } from '../core/completions/shared-flags.js';
-import { isInteractive } from '../utils/interactive.js';
+
+// Startup cost: every command's implementation, and the packages it uses,
+// loads with `await import()` inside its action. This module and
+// ./commands/ only define commands (names, options, help), so `--version`,
+// `--help`, and each command load no other command's implementation.
 
 const STORE_OPTION_DESCRIPTION = COMMON_FLAGS.store.description;
 
@@ -63,17 +36,18 @@ const STORE_OPTION_DESCRIPTION = COMMON_FLAGS.store.description;
 function hiddenStorePathOption(): Option {
   return new Option(
     '--store-path <path>',
-    '不支持；请使用 "openspec-cn store register <path>" 注册路径，并使用 --store <id>'
+    'Not supported; register the path with "openspec store register <path>" and use --store <id>'
   ).hideHelp();
 }
 
-function failWithError(
+async function failWithError(
   error: unknown,
   json?: { enabled: boolean | undefined; payload?: Record<string, unknown>; fallbackCode?: string }
-): void {
+): Promise<void> {
   // The agent contract: every --json failure leaves exactly one JSON
   // document on stdout (the command's null-shape plus a status array).
   if (json?.enabled) {
+    const { asStatus } = await import('../commands/shared-output.js');
     console.log(
       JSON.stringify(
         { ...(json.payload ?? {}), status: [asStatus(error, json.fallbackCode ?? 'command_error')] },
@@ -84,11 +58,12 @@ function failWithError(
     process.exitCode = 1;
     return;
   }
+  const { default: ora } = await import('ora');
   ora().fail(`Error: ${(error as Error).message}`);
   // Resolution and store errors carry a pasteable fix - never drop it.
   const fix = (error as { diagnostic?: { fix?: string } }).diagnostic?.fix;
   if (fix) {
-    console.error(`修复：${fix}`);
+    console.error(`Fix: ${fix}`);
   }
   process.exitCode = process.exitCode ?? 1;
 }
@@ -106,12 +81,11 @@ export function getCommandPath(command: Command): string {
   let current: Command | null = command;
 
   while (current) {
-    // Stop at the root program (it has no parent); never include its name
-    // in the telemetry/path, regardless of what the program is called.
-    if (current.parent === null) {
-      break;
+    const name = current.name();
+    // Skip the root 'openspec' command
+    if (name && name !== 'openspec') {
+      names.unshift(name);
     }
-    names.unshift(current.name());
     current = current.parent;
   }
 
@@ -163,14 +137,54 @@ export function shouldDeferCompletionTip(command: Command, stderrIsTty: boolean)
 }
 
 program
-  .name('openspec-cn')
-  .description('基于规范驱动开发的AI原生系统')
-  .version(version, '-V, --version', '输出版本号')
-  .helpOption('-h, --help', '显示命令帮助')
-  .addHelpCommand('help [command]', '显示命令帮助');
+  .name('openspec')
+  .description('AI-native system for spec-driven development')
+  .version(version);
 
 // Global options
-program.option('--no-color', '禁用彩色输出');
+program.option('--no-color', 'Disable color output');
+
+program
+  .command('version')
+  .description('Report the installed OpenSpec version and update availability')
+  .option('--json', 'Output as JSON')
+  .option('--check', 'Check the registry for a newer version')
+  .action(async (options: { json?: boolean; check?: boolean }) => {
+    const {
+      getCliInstallInfo,
+      checkForCliUpdate,
+      getCliUpdateCommand,
+      canSelfUpgrade,
+      buildVersionReportLines,
+    } = await import('../core/version-check.js');
+    const install = getCliInstallInfo();
+    const update = options.check ? await checkForCliUpdate() : undefined;
+    const command = update?.status === 'available' ? getCliUpdateCommand(install) : null;
+    const output = {
+      schemaVersion: 1,
+      version,
+      install,
+      ...(update
+        ? {
+            update: {
+              ...update,
+              command,
+              canSelfUpgrade:
+                update.status === 'available'
+                  ? canSelfUpgrade(install.location, process.cwd())
+                  : false,
+            },
+          }
+        : {}),
+    };
+
+    if (options.json) {
+      console.log(JSON.stringify(output, null, 2));
+      return;
+    }
+
+    console.log(buildVersionReportLines(version, install, update, command).join('\n'));
+  });
 
 // Apply global flags and telemetry before any command runs
 // Note: preAction receives (thisCommand, actionCommand) where:
@@ -185,6 +199,7 @@ program.hook('preAction', async (thisCommand, actionCommand) => {
   // Show first-run telemetry notice (if not seen). It's written to stderr, so it
   // never pollutes stdout — but --json runs still defer it (see isJsonRun) so the
   // very first invocation stays free of any incidental output on either stream.
+  const { maybeShowTelemetryNotice, trackCommand } = await import('../telemetry/index.js');
   await maybeShowTelemetryNotice({ silent: isJsonRun(actionCommand) });
 
   // Track command execution (use actionCommand to get the actual subcommand)
@@ -202,12 +217,14 @@ program.hook('postAction', async (_thisCommand, actionCommand) => {
   // `openspec completion ...`, and a stderr that is not a terminal (agents and
   // pipes would otherwise silently burn the user's one-shot tip).
   try {
+    const { maybeShowCompletionTip } = await import('../core/completion-tip.js');
     await maybeShowCompletionTip({
       silent: shouldDeferCompletionTip(actionCommand, Boolean(process.stderr.isTTY)),
     });
   } finally {
     // The flush runs even if the hint throws: parse() is synchronous, so a
     // rejection here has no catch anywhere above it.
+    const { shutdown } = await import('../telemetry/index.js');
     await shutdown();
   }
 });
@@ -218,18 +235,18 @@ const availableToolIds = AI_TOOLS
 const toolAliasNote = Object.entries(TOOL_ID_ALIASES)
   .map(([retired, current]) => `${retired} (now ${current})`)
   .join(', ');
-const toolsOptionDescription = `非交互式配置AI工具。使用 "all"、"none" 或逗号分隔的列表：${availableToolIds.join(', ')}。同时接受：${toolAliasNote}`;
+const toolsOptionDescription = `Configure AI tools non-interactively. Use "all", "none", or a comma-separated list of: ${availableToolIds.join(', ')}. Also accepted: ${toolAliasNote}`;
 
 program
   .command('init [path]')
-  .description('在您的项目中初始化OpenSpec')
+  .description('Initialize OpenSpec in your project')
   .option('--tools <tools>', toolsOptionDescription)
-  .option('--language <language>', '用此语言编写新的 OpenSpec 制品')
-  .option('--force', '自动清理旧文件而不提示')
-  .option('--profile <profile>', '覆盖全局配置档案（core 或 custom）')
-  .option('--no-animation', '显示静态欢迎屏而非动画版')
-  .option('--copilot-cloud', '无需提示直接配置 GitHub Copilot 云端 coding-agent 文件')
-  .option('--no-copilot-cloud', '无需提示跳过 GitHub Copilot 云端 coding-agent 文件')
+  .option('--language <language>', 'Write new OpenSpec artifacts in this language')
+  .option('--force', 'Auto-cleanup legacy files without prompting')
+  .option('--profile <profile>', 'Override global config profile (core or custom)')
+  .option('--no-animation', 'Show a static welcome screen instead of the animated one')
+  .option('--copilot-cloud', 'Set up GitHub Copilot cloud coding-agent files without prompting')
+  .option('--no-copilot-cloud', 'Skip GitHub Copilot cloud coding-agent files without prompting')
   .action(async (targetPath = '.', options?: { tools?: string; language?: string; force?: boolean; profile?: string; animation?: boolean; copilotCloud?: boolean }) => {
     try {
       // Validate that the path is a valid directory
@@ -238,16 +255,16 @@ program
       try {
         const stats = await fs.stat(resolvedPath);
         if (!stats.isDirectory()) {
-          throw new Error(`路径 "${targetPath}" 不是一个目录`);
+          throw new Error(`Path "${targetPath}" is not a directory`);
         }
       } catch (error: any) {
         if (error.code === 'ENOENT') {
           // Directory doesn't exist, but we can create it
-          console.log(`目录 "${targetPath}" 不存在，将被创建。`);
+          console.log(`Directory "${targetPath}" doesn't exist, it will be created.`);
         } else if (error.message && error.message.includes('not a directory')) {
           throw error;
         } else {
-          throw new Error(`无法访问路径 "${targetPath}": ${error.message}`);
+          throw new Error(`Cannot access path "${targetPath}": ${error.message}`);
         }
       }
 
@@ -262,7 +279,7 @@ program
       });
       await initCommand.execute(targetPath);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -270,12 +287,12 @@ program
 // Hidden alias: 'experimental' -> 'init' for backwards compatibility
 program
   .command('experimental', { hidden: true })
-  .description('init 的别名（已弃用）')
-  .option('--tool <tool-id>', '目标 AI 工具（映射到 --tools）')
-  .option('--no-interactive', '禁用交互式提示')
+  .description('Alias for init (deprecated)')
+  .option('--tool <tool-id>', 'Target AI tool (maps to --tools)')
+  .option('--no-interactive', 'Disable interactive prompts')
   .action(async (options?: { tool?: string; noInteractive?: boolean }) => {
     try {
-      console.log('注意："openspec-cn experimental" 已弃用。请使用 "openspec-cn init" 代替。');
+      console.log('Note: "openspec experimental" is deprecated. Use "openspec init" instead.');
       const { InitCommand } = await import('../core/init.js');
       const initCommand = new InitCommand({
         tools: options?.tool,
@@ -283,17 +300,35 @@ program
       });
       await initCommand.execute('.');
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
 
 program
   .command('update [path]')
-  .description('更新OpenSpec指令文件')
-  .option('--force', '即使工具已是最新也强制更新')
+  .description('Update OpenSpec instruction files')
+  .option('--force', 'Force update even when tools are up to date')
   .action(async (targetPath = '.', options?: { force?: boolean }) => {
     try {
+      const [
+        {
+          getInstallDir,
+          isSourceCheckout,
+          getAvailableCliUpdate,
+          shouldOfferUpgrade,
+          displayCliUpdateNote,
+          offerCliUpgrade,
+          rerunUpdateWithUpgradedCli,
+          displayUpgradeCommand,
+        },
+        { isInteractive },
+        { UpdateCommand },
+      ] = await Promise.all([
+        import('../core/version-check.js'),
+        import('../utils/interactive.js'),
+        import('../core/update.js'),
+      ]);
       const installDir = getInstallDir();
       // Running from a clone: the version is whatever the branch says, so any
       // upgrade advice would be noise. Decided before the request, so a
@@ -348,22 +383,31 @@ program
         displayCliUpdateNote(latestVersion, targetPath);
       }
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
 
 program
   .command('list')
-  .description('列出项目（默认显示更改）。使用 --specs 列出规范。')
-  .option('--specs', '列出规范而非更改')
-  .option('--changes', '明确列出更改（默认）')
-  .option('--sort <order>', '排序方式："recent"（默认）或 "name"', 'recent')
-  .option('--json', '以 JSON 格式输出（供程序使用）')
+  .description('List items (changes by default). Use --specs to list specs.')
+  .option('--specs', 'List specs instead of changes')
+  .option('--changes', 'List changes explicitly (default)')
+  .option('--archived', 'Show only archived changes')
+  .option('--all', 'Show both active and archived changes')
+  .option('--sort <order>', 'Sort order: "recent" (default) or "name"', 'recent')
+  .option('--json', 'Output as JSON (for programmatic use)')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
-  .action(async (options?: { specs?: boolean; changes?: boolean; sort?: string; json?: boolean; store?: string; storePath?: string }) => {
+  .action(async (options?: { specs?: boolean; changes?: boolean; archived?: boolean; all?: boolean; sort?: string; json?: boolean; store?: string; storePath?: string }) => {
     try {
+      if (options?.specs && (options.archived || options.all)) {
+        throw new Error('--archived and --all can only be used when listing changes.');
+      }
+      const [{ resolveRootForCommand, toRootOutput }, { ListCommand }] = await Promise.all([
+        import('../core/root-selection.js'),
+        import('../core/list.js'),
+      ]);
       const root = await resolveRootForCommand(options ?? {}, {
         json: options?.json,
         failurePayload: options?.specs ? { specs: [], root: null } : { changes: [], root: null },
@@ -380,10 +424,12 @@ program
       await listCommand.execute(root.path, mode, {
         sort,
         json: options?.json,
+        archived: options?.archived,
+        all: options?.all,
         ...(options?.json ? { root: toRootOutput(root) } : {}),
       });
     } catch (error) {
-      failWithError(error, {
+      await failWithError(error, {
         enabled: options?.json,
         payload: options?.specs ? { specs: [], root: null } : { changes: [], root: null },
         fallbackCode: 'list_error',
@@ -394,7 +440,7 @@ program
 
 program
   .command('view')
-  .description('显示规范和更改的交互式仪表板')
+  .description('Display an interactive dashboard of specs and changes')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (options?: { store?: string; storePath?: string }) => {
@@ -402,6 +448,10 @@ program
       // Implicit cwd fallback stays enabled so `view` keeps accepting the same
       // directories as `list`/`status` — notably pre-config.yaml `openspec/`
       // dirs. ViewCommand still reports a missing openspec/ directory itself.
+      const [{ resolveRootForCommand }, { ViewCommand }] = await Promise.all([
+        import('../core/root-selection.js'),
+        import('../core/view.js'),
+      ]);
       const root = await resolveRootForCommand(options ?? {});
       if (!root) {
         return;
@@ -409,7 +459,7 @@ program
       const viewCommand = new ViewCommand();
       await viewCommand.execute(root.path);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -417,55 +467,58 @@ program
 // Change command with subcommands
 const changeCmd = program
   .command('change')
-  .description('管理OpenSpec变更提案');
+  .description('Manage OpenSpec change proposals');
 
 // Deprecation notice for noun-based commands
 changeCmd.hook('preAction', () => {
-  console.error('警告："openspec-cn change ..." 命令已弃用。请优先使用动词前置命令（例如 "openspec-cn list"、"openspec-cn validate --changes"）。');
+  console.error('Warning: The "openspec change ..." commands are deprecated. Prefer verb-first commands (e.g., "openspec list", "openspec validate --changes").');
 });
 
 changeCmd
   .command('show [change-name]')
-  .description('以 JSON 或 Markdown 格式显示变更提案')
-  .option('--json', '以 JSON 格式输出')
-  .option('--deltas-only', '仅显示 deltas（仅 JSON）')
-  .option('--requirements-only', '--deltas-only 的别名（已弃用）')
-  .option('--diff', '显示 delta spec 的逐需求 diff')
-  .option('--no-interactive', '禁用交互式提示')
+  .description('Show a change proposal in JSON or markdown format')
+  .option('--json', 'Output as JSON')
+  .option('--deltas-only', 'Show only deltas (JSON only)')
+  .option('--requirements-only', 'Alias for --deltas-only (deprecated)')
+  .option('--diff', 'Show per-requirement diffs for delta specs')
+  .option('--no-interactive', 'Disable interactive prompts')
   .action(async (changeName?: string, options?: { json?: boolean; requirementsOnly?: boolean; deltasOnly?: boolean; diff?: boolean; noInteractive?: boolean }) => {
     try {
+      const { ChangeCommand } = await import('../commands/change.js');
       const changeCommand = new ChangeCommand();
       await changeCommand.show(changeName, options);
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
 
 changeCmd
   .command('list')
-  .description('列出所有活跃变更（已弃用：请使用 "openspec-cn list"）')
-  .option('--json', '以 JSON 格式输出')
-  .option('--long', '显示 id 和 title 及计数')
+  .description('List all active changes (DEPRECATED: use "openspec list" instead)')
+  .option('--json', 'Output as JSON')
+  .option('--long', 'Show id and title with counts')
   .action(async (options?: { json?: boolean; long?: boolean }) => {
     try {
-      console.error('警告："openspec-cn change list" 已弃用。请使用 "openspec-cn list"。');
+      console.error('Warning: "openspec change list" is deprecated. Use "openspec list".');
+      const { ChangeCommand } = await import('../commands/change.js');
       const changeCommand = new ChangeCommand();
       await changeCommand.list(options);
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
 
 changeCmd
   .command('validate [change-name]')
-  .description('验证变更提案')
-  .option('--strict', '启用严格验证模式')
-  .option('--json', '以 JSON 格式输出验证报告')
-  .option('--no-interactive', '禁用交互式提示')
+  .description('Validate a change proposal')
+  .option('--strict', 'Enable strict validation mode')
+  .option('--json', 'Output validation report as JSON')
+  .option('--no-interactive', 'Disable interactive prompts')
   .action(async (changeName?: string, options?: { strict?: boolean; json?: boolean; noInteractive?: boolean }) => {
     try {
+      const { ChangeCommand } = await import('../commands/change.js');
       const changeCommand = new ChangeCommand();
       // validate() already sets process.exitCode, and Node honours it at
       // natural exit. Calling process.exit() here would skip commander's
@@ -474,26 +527,27 @@ changeCmd
       // a routine outcome, not an error: a change that fails validation.
       await changeCommand.validate(changeName, options);
     } catch (error) {
-      console.error(`错误：${(error as Error).message}`);
+      console.error(`Error: ${(error as Error).message}`);
       process.exitCode = 1;
     }
   });
 
 program
   .command('archive [change-name]')
-  .description('归档已完成的变更并更新主规范')
-  .option('-y, --yes', '跳过确认提示')
-  .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或纯文档变更）')
-  .option('--no-validate', '跳过验证（不推荐，需确认）')
-  .option('--json', '以 JSON 格式输出（非交互式）')
+  .description('Archive a completed change and update main specs')
+  .option('-y, --yes', 'Skip confirmation prompts')
+  .option('--skip-specs', 'Skip spec update operations (useful for infrastructure, tooling, or doc-only changes)')
+  .option('--no-validate', 'Skip validation (not recommended, requires confirmation)')
+  .option('--json', 'Output as JSON (non-interactive)')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (changeName?: string, options?: ArchiveOptions) => {
     try {
+      const { ArchiveCommand } = await import('../core/archive.js');
       const archiveCommand = new ArchiveCommand();
       await archiveCommand.execute(changeName, options);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -509,25 +563,26 @@ registerWorksetCommand(program);
 // Top-level validate command
 program
   .command('validate [item-name]')
-  .description('验证更改和规范')
-  .option('--all', '验证所有更改和规范')
-  .option('--changes', '验证所有更改')
-  .option('--specs', '验证所有规范')
-  .option('--archived', '验证已归档的更改是否所有任务已完成（用于 pre-commit lint）')
-  .option('--report <full|findings>', '选择批量报告内容：full|findings；配合 --json 输出 JSON')
-  .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
-  .option('--strict', '启用严格验证模式')
-  .option('--json', '以JSON格式输出验证报告')
-  .option('--concurrency <n>', '最大并发验证数 (默认为环境变量 OPENSPEC_CONCURRENCY 或 6)')
-  .option('--no-interactive', '禁用交互式提示')
+  .description('Validate changes and specs')
+  .option('--all', 'Validate all changes and specs')
+  .option('--changes', 'Validate all changes')
+  .option('--specs', 'Validate all specs')
+  .option('--archived', 'Validate that archived changes have all tasks completed (for pre-commit linting)')
+  .option('--report <full|findings>', 'Select bulk report content: full|findings; combine with --json for JSON')
+  .option('--type <type>', 'Specify item type when ambiguous: change|spec')
+  .option('--strict', 'Enable strict validation mode')
+  .option('--json', 'Output validation results as JSON')
+  .option('--concurrency <n>', 'Max concurrent validations (defaults to env OPENSPEC_CONCURRENCY or 6)')
+  .option('--no-interactive', 'Disable interactive prompts')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (itemName?: string, options?: { all?: boolean; changes?: boolean; specs?: boolean; archived?: boolean; report?: string; type?: string; strict?: boolean; json?: boolean; noInteractive?: boolean; concurrency?: string; store?: string; storePath?: string }) => {
     try {
+      const { ValidateCommand } = await import('../commands/validate.js');
       const validateCommand = new ValidateCommand();
       await validateCommand.execute(itemName, options);
     } catch (error) {
-      failWithError(error, { enabled: options?.json, fallbackCode: 'validate_error' });
+      await failWithError(error, { enabled: options?.json, fallbackCode: 'validate_error' });
       process.exit(1);
     }
   });
@@ -535,18 +590,18 @@ program
 // Top-level show command
 program
   .command('show [item-name]')
-  .description('显示更改或规范')
-  .option('--json', '以JSON格式输出')
-  .option('--type <type>', '当项目类型不明确时指定类型：change|spec')
-  .option('--no-interactive', '禁用交互式提示')
+  .description('Show a change or spec')
+  .option('--json', 'Output as JSON')
+  .option('--type <type>', 'Specify item type when ambiguous: change|spec')
+  .option('--no-interactive', 'Disable interactive prompts')
   // change-only flags
-  .option('--deltas-only', '仅显示 deltas（仅 JSON，change）')
-  .option('--requirements-only', '--deltas-only 的别名（已弃用，change）')
-  .option('--diff', '显示 delta spec 的逐需求 diff（change）')
+  .option('--deltas-only', 'Show only deltas (JSON only, change)')
+  .option('--requirements-only', 'Alias for --deltas-only (deprecated, change)')
+  .option('--diff', 'Show per-requirement diffs for delta specs (change)')
   // spec-only flags
-  .option('--requirements', '仅 JSON：仅显示需求（排除场景）')
-  .option('--no-scenarios', '仅 JSON：排除场景内容')
-  .option('-r, --requirement <id>', '仅 JSON：按 ID 显示特定需求（从 1 开始）')
+  .option('--requirements', 'JSON only: Show only requirements (exclude scenarios)')
+  .option('--no-scenarios', 'JSON only: Exclude scenario content')
+  .option('-r, --requirement <id>', 'JSON only: Show specific requirement by ID (1-based)')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   // Explicit registration required: allowUnknownOption would otherwise
   // silently swallow --store-path instead of rejecting it deliberately.
@@ -555,10 +610,11 @@ program
   .allowUnknownOption(true)
   .action(async (itemName?: string, options?: { json?: boolean; type?: string; noInteractive?: boolean; [k: string]: any }) => {
     try {
+      const { ShowCommand } = await import('../commands/show.js');
       const showCommand = new ShowCommand();
       await showCommand.execute(itemName, options ?? {});
     } catch (error) {
-      failWithError(error, { enabled: options?.json, fallbackCode: 'show_error' });
+      await failWithError(error, { enabled: options?.json, fallbackCode: 'show_error' });
       process.exit(1);
     }
   });
@@ -566,14 +622,15 @@ program
 // Feedback command
 program
   .command('feedback <message>')
-  .description('提交关于 OpenSpec 的反馈')
-  .option('--body <text>', '反馈的详细描述')
+  .description('Submit feedback about OpenSpec')
+  .option('--body <text>', 'Detailed description for the feedback')
   .action(async (message: string, options?: { body?: string }) => {
     try {
+      const { FeedbackCommand } = await import('../commands/feedback.js');
       const feedbackCommand = new FeedbackCommand();
       await feedbackCommand.execute(message, options);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -581,45 +638,48 @@ program
 // Completion command with subcommands
 const completionCmd = program
   .command('completion')
-  .description('管理 OpenSpec CLI 的 Shell 补全');
+  .description('Manage shell completions for OpenSpec CLI');
 
 completionCmd
   .command('generate [shell]')
-  .description('为指定 Shell 生成补全脚本（输出到 stdout）')
+  .description('Generate completion script for a shell (outputs to stdout)')
   .action(async (shell?: string) => {
     try {
+      const { CompletionCommand } = await import('../commands/completion.js');
       const completionCommand = new CompletionCommand();
       await completionCommand.generate({ shell });
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
 
 completionCmd
   .command('install [shell]')
-  .description('为指定 Shell 安装补全脚本')
-  .option('--verbose', '显示详细安装输出')
+  .description('Install completion script for a shell')
+  .option('--verbose', 'Show detailed installation output')
   .action(async (shell?: string, options?: { verbose?: boolean }) => {
     try {
+      const { CompletionCommand } = await import('../commands/completion.js');
       const completionCommand = new CompletionCommand();
       await completionCommand.install({ shell, verbose: options?.verbose });
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
 
 completionCmd
   .command('uninstall [shell]')
-  .description('卸载指定 Shell 的补全脚本')
-  .option('-y, --yes', '跳过确认提示')
+  .description('Uninstall completion script for a shell')
+  .option('-y, --yes', 'Skip confirmation prompts')
   .action(async (shell?: string, options?: { yes?: boolean }) => {
     try {
+      const { CompletionCommand } = await import('../commands/completion.js');
       const completionCommand = new CompletionCommand();
       await completionCommand.uninstall({ shell, yes: options?.yes });
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -627,9 +687,10 @@ completionCmd
 // Hidden command for machine-readable completion data
 program
   .command('__complete <type>', { hidden: true })
-  .description('以机器可读格式输出补全数据（内部使用）')
+  .description('Output completion data in machine-readable format (internal use)')
   .action(async (type: string) => {
     try {
+      const { CompletionCommand } = await import('../commands/completion.js');
       const completionCommand = new CompletionCommand();
       await completionCommand.complete({ type });
     } catch (error) {
@@ -645,22 +706,25 @@ program
 // Status command
 program
   .command('status')
-  .description('显示变更的产出物完成状态')
-  .option('--change <id>', '要显示状态的变更名称')
-  .option('--all', '显示所有活跃变更的状态')
-  .option('--schema <name>', 'Schema 覆盖（从 config.yaml 自动检测）')
-  .option('--json', '以 JSON 格式输出')
+  .description('Display artifact completion status for a change')
+  .option('--change <id>', 'Change name to show status for')
+  .option('--all', 'Show status for all active changes')
+  .option('--schema <name>', 'Schema override (auto-detected from config.yaml)')
+  .option('--json', 'Output as JSON')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (options: StatusOptions) => {
     try {
+      const { statusCommand } = await import('../commands/workflow/status.js');
       await statusCommand(options);
     } catch (error) {
-      failWithError(error, {
+      await failWithError(error, {
         enabled: options.json,
         // The batch null-shape; the single-change failure shape is
         // pre-existing contract and stays payload-free.
-        payload: options.all ? BATCH_STATUS_FAILURE_PAYLOAD : undefined,
+        payload: options.all
+          ? (await import('../commands/workflow/status.js')).BATCH_STATUS_FAILURE_PAYLOAD
+          : undefined,
         fallbackCode: 'change_error',
       });
       process.exit(1);
@@ -670,14 +734,16 @@ program
 // Instructions command
 program
   .command('instructions [artifact]')
-  .description('输出制品、apply 或 archive 的增强指令')
-  .option('--change <id>', '变更名称')
-  .option('--schema <name>', 'Schema 覆盖（从 config.yaml 自动检测）')
-  .option('--json', '以 JSON 格式输出')
+  .description('Output enriched instructions for artifacts, apply, or archive')
+  .option('--change <id>', 'Change name')
+  .option('--schema <name>', 'Schema override (auto-detected from config.yaml)')
+  .option('--json', 'Output as JSON')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (artifactId: string | undefined, options: InstructionsOptions) => {
     try {
+      const { applyInstructionsCommand, archiveInstructionsCommand, instructionsCommand } =
+        await import('../commands/workflow/instructions.js');
       // Workflow instruction surfaces are reserved command branches, not artifacts.
       if (artifactId === 'apply') {
         await applyInstructionsCommand(options);
@@ -687,7 +753,7 @@ program
         await instructionsCommand(artifactId, options);
       }
     } catch (error) {
-      failWithError(error, { enabled: options.json, fallbackCode: 'change_error' });
+      await failWithError(error, { enabled: options.json, fallbackCode: 'change_error' });
       process.exit(1);
     }
   });
@@ -695,14 +761,15 @@ program
 // Templates command
 program
   .command('templates')
-  .description('显示 Schema 中所有产出物的已解析模板路径')
-  .option('--schema <name>', `要使用的 Schema（默认：${DEFAULT_SCHEMA}）`)
-  .option('--json', '以 JSON 格式输出产出物 ID 到模板路径的映射')
+  .description('Show resolved template paths for all artifacts in a schema')
+  .option('--schema <name>', `Schema to use (default: ${DEFAULT_SCHEMA})`)
+  .option('--json', 'Output as JSON mapping artifact IDs to template paths')
   .action(async (options: TemplatesOptions) => {
     try {
+      const { templatesCommand } = await import('../commands/workflow/templates.js');
       await templatesCommand(options);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });
@@ -710,15 +777,16 @@ program
 // Schemas command
 program
   .command('schemas')
-  .description('列出可用的工作流 Schema 及其描述')
-  .option('--json', '以 JSON 格式输出（供 Agent 使用）')
+  .description('List available workflow schemas with descriptions')
+  .option('--json', 'Output as JSON (for agent use)')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   .action(async (options: SchemasOptions) => {
     try {
+      const { schemasCommand } = await import('../commands/workflow/schemas.js');
       await schemasCommand(options);
     } catch (error) {
-      failWithError(error, {
+      await failWithError(error, {
         enabled: options.json,
         payload: { schemas: [], root: null },
         fallbackCode: 'schemas_error',
@@ -728,26 +796,27 @@ program
   });
 
 // New command group with change subcommand
-const newCmd = program.command('new').description('创建新项目');
+const newCmd = program.command('new').description('Create new items');
 
 newCmd
   .command('change <name>')
-  .description('创建新的变更目录')
-  .option('--description <text>', '添加到 README.md 的描述')
-  .option('--goal <text>', '随变更存储的可选目标元数据')
-  .option('--schema <name>', `要使用的工作流 Schema（默认：${DEFAULT_SCHEMA}）`)
-  .option('--json', '以 JSON 格式输出')
+  .description('Create a new change directory')
+  .option('--description <text>', 'Description to add to README.md')
+  .option('--goal <text>', 'Optional goal metadata to store with the change')
+  .option('--schema <name>', `Workflow schema to use (default: ${DEFAULT_SCHEMA})`)
+  .option('--json', 'Output as JSON')
   .option('--store <id>', STORE_OPTION_DESCRIPTION)
   .addOption(hiddenStorePathOption())
   // Removed options kept registered (hidden) so users get a deliberate
   // explanation instead of a generic unknown-option error.
-  .addOption(new Option('--initiative <id>', '不再支持').hideHelp())
-  .addOption(new Option('--areas <names>', '不再支持').hideHelp())
+  .addOption(new Option('--initiative <id>', 'No longer supported').hideHelp())
+  .addOption(new Option('--areas <names>', 'No longer supported').hideHelp())
   .action(async (name: string, options: NewChangeOptions) => {
     try {
+      const { newChangeCommand } = await import('../commands/workflow/new-change.js');
       await newChangeCommand(name, options);
     } catch (error) {
-      failWithError(error);
+      await failWithError(error);
       process.exit(1);
     }
   });

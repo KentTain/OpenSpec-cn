@@ -1,5 +1,5 @@
 /**
- * `openspec-cn context` (slice 4.1): the working set a root's declarations
+ * `openspec context` (slice 4.1): the working set a root's declarations
  * describe, as an agent brief (JSON), a human listing, or an editor
  * view (`--code-workspace`). Assembly is presentation over the Phase 3
  * relationship data; doctor is the health surface. The only write this
@@ -7,7 +7,6 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { Command, Option } from 'commander';
 
 import {
   resolveRootForCommand,
@@ -22,8 +21,6 @@ import {
   type WorkingSetMember,
 } from '../core/working-set.js';
 import { StoreError } from '../core/store/errors.js';
-import { COMMAND_REGISTRY } from '../core/completions/command-registry.js';
-import { COMMON_FLAGS } from '../core/completions/shared-flags.js';
 import { emitFailure, printJson } from './shared-output.js';
 import { gatherRelationshipData } from './shared-gather.js';
 
@@ -61,9 +58,9 @@ function memberLine(member: WorkingSetMember): string {
 
 function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: number): void {
   const rootLabel = workingSet.root.store_id ?? path.basename(workingSet.root.path);
-  console.log(`${rootLabel} 的工作上下文（${workingSet.root.path}）`);
+  console.log(`Working context for ${rootLabel} (${workingSet.root.path})`);
   console.log('');
-  console.log('OpenSpec 根目录');
+  console.log('OpenSpec root');
   console.log(`  ${rootLabel}  ${workingSet.root.path}`);
 
   const availableStores = workingSet.members.filter(
@@ -73,11 +70,11 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
 
   if (availableStores.length > 0) {
     console.log('');
-    console.log('引用的 stores');
+    console.log('Referenced stores');
     for (const member of availableStores) {
       console.log(memberLine(member));
       if (member.fetch) {
-        console.log(`  获取：${member.fetch}`);
+        console.log(`    Fetch: ${member.fetch}`);
       }
     }
   }
@@ -88,14 +85,14 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
     // emptied-by-omission set must not claim nothing was declared.
     console.log(
       declaredReferenceCount > 0
-        ? '声明的引用全部解析到此根目录；工作集仅为此根目录。'
-        : '未声明引用；工作集仅为此根目录。'
+        ? 'Declared references all resolve to this root; the working set is this root alone.'
+        : 'No references declared; the working set is this root alone.'
     );
   }
 
   if (unavailable.length > 0 || workingSet.status.length > 0) {
     console.log('');
-    console.log('此机器上不可用');
+    console.log('Not available on this machine');
     for (const member of unavailable) {
       if (member.status.length === 0) {
         console.log(`  - ${member.id}`);
@@ -104,14 +101,14 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
       for (const diagnostic of member.status) {
         console.log(`  - ${member.id}: ${diagnostic.message}`);
         if (diagnostic.fix) {
-          console.log(`    修复：${diagnostic.fix}`);
+          console.log(`    Fix: ${diagnostic.fix}`);
         }
       }
     }
     for (const diagnostic of workingSet.status) {
-      console.log(`  备注：${diagnostic.message}`);
+      console.log(`  Note: ${diagnostic.message}`);
       if (diagnostic.fix) {
-        console.log(`  修复：${diagnostic.fix}`);
+        console.log(`  Fix: ${diagnostic.fix}`);
       }
     }
   }
@@ -125,20 +122,20 @@ function writeCodeWorkspace(
   const resolved = path.resolve(outputPath);
   if (fs.existsSync(resolved) && !force) {
     throw new StoreError(
-      `拒绝覆盖 ${resolved}。`,
+      `Refusing to overwrite ${resolved}.`,
       'context_file_exists',
       {
         target: 'context.output',
-        fix: `传入 --force 覆盖，或选择其他路径。`,
+        fix: `Pass --force to overwrite, or choose a different path.`,
       }
     );
   }
   const parent = path.dirname(resolved);
   if (!fs.existsSync(parent)) {
     throw new StoreError(
-      `输出目录不存在：${parent}。`,
+      `Output directory does not exist: ${parent}.`,
       'context_output_dir_missing',
-      { target: 'context.output', fix: '先创建目录，或选择其他路径。' }
+      { target: 'context.output', fix: 'Create the directory first, or choose another path.' }
     );
   }
 
@@ -151,62 +148,46 @@ function writeCodeWorkspace(
     .map((member) => member.id);
   const summary =
     skipped.length > 0
-      ? `已写入 ${resolved}（${available + 1} 个文件夹；不可用：${skipped.join(', ')}）`
-      : `已写入 ${resolved}（${available + 1} 个文件夹）`;
+      ? `Wrote ${resolved} (${available + 1} folders; not available: ${skipped.join(', ')})`
+      : `Wrote ${resolved} (${available + 1} folders)`;
   // stderr keeps JSON stdout pure; for humans it reads inline.
   console.error(summary);
 }
 
-export function registerContextCommand(program: Command): void {
-  const description =
-    COMMAND_REGISTRY.find((entry) => entry.name === 'context')?.description ??
-    '打印已解析 OpenSpec 根目录的工作上下文';
+export interface ContextOptions {
+  store?: string;
+  storePath?: string;
+  json?: boolean;
+  codeWorkspace?: string;
+  force?: boolean;
+}
 
-  program
-    .command('context')
-    .description(description)
-    .option('--store <id>', COMMON_FLAGS.store.description)
-    .addOption(
-      new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
-    )
-    .option('--json', '以 JSON 格式输出代理简报')
-    .option('--code-workspace <path>', '同时为此集合写入 VS Code 工作区文件')
-    .option('--force', '覆盖已有的 --code-workspace 文件')
-    .action(
-      async (options: {
-        store?: string;
-        storePath?: string;
-        json?: boolean;
-        codeWorkspace?: string;
-        force?: boolean;
-      }) => {
-        try {
-          const root = await resolveRootForCommand(
-            { store: options.store, storePath: options.storePath },
-            { json: options.json, failurePayload: FAILURE_PAYLOAD, allowImplicitRoot: false }
-          );
-          if (!root) {
-            return;
-          }
-
-          const { workingSet, declaredReferenceCount } = await gatherWorkingSet(root);
-
-          if (options.json) {
-            // The write runs FIRST: a write failure must leave stdout
-            // holding exactly one JSON document (the failure payload).
-            if (options.codeWorkspace) {
-              writeCodeWorkspace(workingSet, options.codeWorkspace, options.force === true);
-            }
-            printJson(workingSet);
-          } else {
-            printHumanWorkingSet(workingSet, declaredReferenceCount);
-            if (options.codeWorkspace) {
-              writeCodeWorkspace(workingSet, options.codeWorkspace, options.force === true);
-            }
-          }
-        } catch (error) {
-          emitFailure(options.json, FAILURE_PAYLOAD, error, 'context_failed');
-        }
-      }
+export async function contextCommand(options: ContextOptions): Promise<void> {
+  try {
+    const root = await resolveRootForCommand(
+      { store: options.store, storePath: options.storePath },
+      { json: options.json, failurePayload: FAILURE_PAYLOAD, allowImplicitRoot: false }
     );
+    if (!root) {
+      return;
+    }
+
+    const { workingSet, declaredReferenceCount } = await gatherWorkingSet(root);
+
+    if (options.json) {
+      // The write runs FIRST: a write failure must leave stdout
+      // holding exactly one JSON document (the failure payload).
+      if (options.codeWorkspace) {
+        writeCodeWorkspace(workingSet, options.codeWorkspace, options.force === true);
+      }
+      printJson(workingSet);
+    } else {
+      printHumanWorkingSet(workingSet, declaredReferenceCount);
+      if (options.codeWorkspace) {
+        writeCodeWorkspace(workingSet, options.codeWorkspace, options.force === true);
+      }
+    }
+  } catch (error) {
+    emitFailure(options.json, FAILURE_PAYLOAD, error, 'context_failed');
+  }
 }

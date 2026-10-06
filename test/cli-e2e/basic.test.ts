@@ -1,5 +1,5 @@
 import { afterAll, describe, it, expect } from 'vitest';
-import { promises as fs } from 'fs';
+import { promises as fs, realpathSync } from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
 import { execFileSync } from 'node:child_process';
@@ -69,13 +69,14 @@ describe('openspec CLI e2e basics', () => {
     expect(JSON.parse(changes.stdout).changes).toEqual([]);
     const specs = await runCLI(['list', '--specs'], { cwd: cloneDir, env });
     expect(specs.exitCode).toBe(0);
-    expect(specs.stdout).toContain('未找到规范。');
-  });
+    expect(specs.stdout).toContain('No specs found.');
+    // Seven subprocesses (3 CLI, 4 git): ~2.6s on the Windows runner, past 10s under load.
+  }, 60_000);
 
   it('shows help output', async () => {
     const result = await runCLI(['--help']);
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('Usage: openspec-cn');
+    expect(result.stdout).toContain('Usage: openspec');
     expect(result.stderr).toBe('');
 
   });
@@ -89,7 +90,7 @@ describe('openspec CLI e2e basics', () => {
       .join(', ');
     const normalizedOutput = result.stdout.replace(/\s+/g, ' ').trim();
     expect(normalizedOutput).toContain(
-      `使用 "all"、"none" 或逗号分隔的列表：${expectedTools}`
+      `Use "all", "none", or a comma-separated list of: ${expectedTools}`
     );
     expect(normalizedOutput).toContain('--language <language>');
   });
@@ -102,7 +103,75 @@ describe('openspec CLI e2e basics', () => {
     expect(result.stdout.trim()).toBe(pkg.version);
   });
 
-  it('validates the tmp-init fixture with --all --json', { timeout: 30000 }, async () => {
+  describe('version command', () => {
+    it('reports local version and source install details outside an OpenSpec project', async () => {
+      const cwd = await fs.mkdtemp(path.join(tmpdir(), 'openspec-version-empty-'));
+      tempRoots.push(cwd);
+      const pkgRaw = await fs.readFile(path.join(cliProjectRoot, 'package.json'), 'utf-8');
+      const pkg = JSON.parse(pkgRaw);
+
+      const result = await runCLI(['version'], { cwd });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toBe(`OpenSpec ${pkg.version} (source)\n`);
+      expect(result.stderr).toBe('');
+    });
+
+    it('prints one schema-versioned JSON document without checking the network', async () => {
+      const result = await runCLI(['version', '--json']);
+
+      expectJsonOnlyOutput(result);
+      expect(result.stdout).not.toMatch(/\u001b\[/);
+      const output = JSON.parse(result.stdout);
+      expect(output).toEqual({
+        schemaVersion: 1,
+        version: expect.any(String),
+        install: {
+          location: expect.any(String),
+          packageManager: null,
+          scope: 'source',
+        },
+      });
+      expect(await fs.realpath(output.install.location)).toBe(await fs.realpath(cliProjectRoot));
+    });
+
+    it('reports a disabled update check as data and exits successfully', async () => {
+      const result = await runCLI(['version', '--check', '--json'], {
+        env: { OPENSPEC_NO_UPDATE_CHECK: '1' },
+      });
+
+      expectJsonOnlyOutput(result);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        schemaVersion: 1,
+        update: {
+          status: 'disabled',
+          latest: null,
+          command: null,
+          canSelfUpgrade: false,
+        },
+      });
+    });
+
+    it('renders the disabled check for people', async () => {
+      const result = await runCLI(['version', '--check'], {
+        env: { OPENSPEC_NO_UPDATE_CHECK: '1' },
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toMatch(/^OpenSpec \S+ \(source\)\nUpdate check disabled\.\n$/);
+      expect(result.stderr).toBe('');
+    });
+
+    it('rejects upgrades without invoking a package manager', async () => {
+      const result = await runCLI(['version', '--upgrade']);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe('');
+      expect(result.stderr).toContain("error: unknown option '--upgrade'");
+    });
+  });
+
+  it('validates the tmp-init fixture with --all --json', async () => {
     const projectDir = await prepareFixture('tmp-init');
     const result = await runCLI(['validate', '--all', '--json'], { cwd: projectDir });
     expect(result.exitCode).toBe(0);
@@ -119,6 +188,90 @@ describe('openspec CLI e2e basics', () => {
     expectJsonOnlyOutput(result);
   });
 
+  it.each([
+    { flags: ['--archived'], active: false },
+    { flags: ['--all'], active: true },
+    { flags: ['--archived', '--all'], active: true },
+  ])('lists archive entries as JSON with $flags', async ({ flags, active }) => {
+    const projectDir = await prepareFixture('tmp-init');
+    const archiveName = '2026-08-27-shipped';
+    const archiveDir = path.join(projectDir, 'openspec', 'changes', 'archive', archiveName);
+    await fs.mkdir(archiveDir, { recursive: true });
+    await fs.writeFile(path.join(archiveDir, 'tasks.md'), '- [x] Done\n- [ ] Deferred\n');
+
+    const result = await runCLI(['list', ...flags, '--sort', 'name', '--json'], { cwd: projectDir });
+
+    expectJsonOnlyOutput(result);
+    const output = JSON.parse(result.stdout);
+    expect(output.changes).toContainEqual(expect.objectContaining({
+      name: archiveName,
+      archived: true,
+      completedTasks: 1,
+      totalTasks: 2,
+      status: 'in-progress',
+    }));
+    expect(output.changes.some((change: { archived: boolean }) => !change.archived)).toBe(active);
+    expect(output.changes.map((change: { name: string }) => change.name)).toEqual(
+      output.changes.map((change: { name: string }) => change.name).sort((a: string, b: string) => a.localeCompare(b))
+    );
+    expect(realpathSync.native(output.root.path)).toBe(realpathSync.native(projectDir));
+  });
+
+  it.skipIf(process.platform === 'win32')('lists a change after archive leaves its relative notes link dangling', async () => {
+    const projectDir = await prepareFixture('tmp-init');
+    const changeName = '2026-08-28-linked-notes';
+    const changesDir = path.join(projectDir, 'openspec', 'changes');
+    const changeDir = path.join(changesDir, changeName);
+    await fs.mkdir(changeDir);
+    await fs.writeFile(path.join(changeDir, 'tasks.md'), '- [x] Done\n');
+    await fs.writeFile(path.join(changesDir, 'reference.md'), 'Shared notes\n');
+    await fs.symlink(path.join('..', 'reference.md'), path.join(changeDir, 'notes.md'));
+
+    const before = await runCLI(['list', '--json'], { cwd: projectDir });
+    expectJsonOnlyOutput(before);
+    const archived = await runCLI(['archive', changeName, '--skip-specs', '--yes'], { cwd: projectDir });
+    expect(archived.exitCode, archived.stderr).toBe(0);
+    const archivedNotes = path.join(changesDir, 'archive', changeName, 'notes.md');
+    expect((await fs.lstat(archivedNotes)).isSymbolicLink()).toBe(true);
+    await expect(fs.stat(archivedNotes)).rejects.toMatchObject({ code: 'ENOENT' });
+
+    const result = await runCLI(['list', '--archived', '--json'], { cwd: projectDir });
+
+    expectJsonOnlyOutput(result);
+    expect(JSON.parse(result.stdout).changes).toContainEqual(expect.objectContaining({
+      name: changeName, archived: true, completedTasks: 1, totalTasks: 1
+    }));
+  });
+
+  it.each(['--archived', '--all'])('rejects --specs with %s as a JSON error', async (flag) => {
+    const projectDir = await prepareFixture('tmp-init');
+    const result = await runCLI(['list', '--specs', flag, '--json'], { cwd: projectDir });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toBe('');
+    const output = JSON.parse(result.stdout);
+    expect(output.specs).toEqual([]);
+    expect(output.status).toEqual([expect.objectContaining({
+      severity: 'error',
+      code: 'list_error',
+      message: '--archived and --all can only be used when listing changes.',
+    })]);
+  });
+
+  it.each(['archive', ''])('reports malformed changes/%s as an error instead of an empty JSON list', async (entry) => {
+    const projectDir = await prepareFixture('tmp-init');
+    const malformedPath = path.join(projectDir, 'openspec', 'changes', entry);
+    await fs.rm(malformedPath, { recursive: true, force: true });
+    await fs.writeFile(malformedPath, 'not a directory\n');
+
+    const result = await runCLI(['list', '--archived', '--json'], { cwd: projectDir });
+
+    expect(result.exitCode).toBe(1);
+    const output = JSON.parse(result.stdout);
+    expect(output.changes).toEqual([]);
+    expect(output.status).toEqual([expect.objectContaining({ severity: 'error', code: 'list_error' })]);
+  });
+
   describe('legacy change list compatibility', () => {
     it.each([
       { args: [], output: 'c1\n' },
@@ -129,7 +282,7 @@ describe('openspec CLI e2e basics', () => {
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toBe(output);
-      expect(result.stderr).toContain('警告："openspec-cn change ..." 命令已弃用。请优先使用动词前置命令');
+      expect(result.stderr).toContain('Warning: "openspec change list" is deprecated. Use "openspec list".');
     });
 
     it('preserves JSON output and warns on stderr', async () => {
@@ -140,7 +293,7 @@ describe('openspec CLI e2e basics', () => {
       expect(JSON.parse(result.stdout)).toEqual([
         { id: 'c1', title: 'Test Change', deltaCount: 1, taskStatus: { total: 0, completed: 0 } },
       ]);
-      expect(result.stderr).toContain('警告："openspec-cn change ..." 命令已弃用。请优先使用动词前置命令');
+      expect(result.stderr).toContain('Warning: "openspec change list" is deprecated. Use "openspec list".');
     });
 
     it('rejects the unsupported --all option', async () => {
@@ -240,7 +393,7 @@ describe('openspec CLI e2e basics', () => {
     const projectDir = await prepareFixture('tmp-init');
     const result = await runCLI(['validate', 'does-not-exist'], { cwd: projectDir });
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain("未知项目 'does-not-exist'");
+    expect(result.stderr).toContain("Unknown item 'does-not-exist'");
   });
 
   describe('init command non-interactive options', () => {
@@ -259,9 +412,9 @@ describe('openspec CLI e2e basics', () => {
         path.join(emptyProjectDir, 'openspec', 'config.yaml'),
         'utf-8',
       );
-      expect(config).toContain('语言：French');
-      expect(config).toContain('所有制品必须用 French 编写。');
-      expect(config).toContain('OpenSpec 结构标题与 SHALL/MUST 关键字保持英文。');
+      expect(config).toContain('Language: French');
+      expect(config).toContain('All artifacts must be written in French.');
+      expect(config).toContain('Keep OpenSpec structural headings and SHALL/MUST keywords in English.');
 
       const created = await runCLI(['new', 'change', 'language-check'], {
         cwd: emptyProjectDir,
@@ -272,7 +425,7 @@ describe('openspec CLI e2e basics', () => {
         { cwd: emptyProjectDir },
       );
       expect(instructions.exitCode).toBe(0);
-      expect(JSON.parse(instructions.stdout).context).toContain('语言：French');
+      expect(JSON.parse(instructions.stdout).context).toContain('Language: French');
     });
 
     it('initializes with --tools all option', async () => {
@@ -289,7 +442,7 @@ describe('openspec CLI e2e basics', () => {
       });
       expect(result.timedOut).toBe(false);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec 设置完成');
+      expect(result.stdout).toContain('OpenSpec Setup Complete');
 
       // Check that skills were created for multiple tools
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/openspec-explore/SKILL.md');
@@ -310,7 +463,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec 设置完成');
+      expect(result.stdout).toContain('OpenSpec Setup Complete');
       expect(result.stdout).toContain('Claude Code');
 
       // New init creates skills, not CLAUDE.md
@@ -327,7 +480,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'agents'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec 设置完成');
+      expect(result.stdout).toContain('OpenSpec Setup Complete');
 
       const skillPath = path.join(emptyProjectDir, '.agents', 'skills', 'openspec-explore', 'SKILL.md');
       expect(await fileExists(skillPath)).toBe(true);
@@ -340,9 +493,9 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'zed'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec 设置完成');
+      expect(result.stdout).toContain('OpenSpec Setup Complete');
       expect(result.stdout).toContain('Zed Agent');
-      expect(result.stdout).not.toContain('请重启你的 IDE');
+      expect(result.stdout).not.toContain('Restart your IDE');
 
       const skillPath = path.join(emptyProjectDir, '.agents', 'skills', 'openspec-explore', 'SKILL.md');
       expect(await fileExists(skillPath)).toBe(true);
@@ -369,7 +522,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'none'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec 设置完成');
+      expect(result.stdout).toContain('OpenSpec Setup Complete');
 
       // With --tools none, no tool skills should be created
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/openspec-explore/SKILL.md');
@@ -386,8 +539,8 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'invalid-tool'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('无效工具：invalid-tool');
-      expect(result.stderr).toContain('可用值：');
+      expect(result.stderr).toContain('Invalid tool(s): invalid-tool');
+      expect(result.stderr).toContain('Available values:');
     });
 
     it('returns error when combining reserved keywords with explicit ids', async () => {
@@ -397,7 +550,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'all,claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('不能将保留值 "all" 或 "none" 与具体工具 ID 组合使用');
+      expect(result.stderr).toContain('Cannot combine reserved values "all" or "none" with specific tool IDs');
     });
   });
 
@@ -432,8 +585,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('无法从标准输入读取回答');
-      expect(output).toContain('openspec-cn archive add-greeting --yes');
+      expect(output).toContain('no answer could be read from stdin');
+      expect(output).toContain('openspec archive add-greeting --yes');
 
       // The change is untouched: nothing was archived or merged.
       expect(await fileExists(path.join(projectDir, 'openspec', 'changes', 'add-greeting', 'proposal.md'))).toBe(true);
@@ -447,8 +600,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('个未完成的任务');
-      expect(output).toContain('openspec-cn archive add-greeting --yes');
+      expect(output).toContain('1 incomplete task(s) found');
+      expect(output).toContain('openspec archive add-greeting --yes');
     });
 
     it('keeps the caller\'s own flags in the suggested rerun', async () => {
@@ -459,7 +612,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec-cn archive add-greeting --skip-specs --yes');
+      expect(output).toContain('openspec archive add-greeting --skip-specs --yes');
     });
 
     it('reports the skip-validation prompt the same way', async () => {
@@ -469,8 +622,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('跳过验证需要确认');
-      expect(output).toContain('openspec-cn archive add-greeting --no-validate --yes');
+      expect(output).toContain('Skipping validation requires confirmation');
+      expect(output).toContain('openspec archive add-greeting --no-validate --yes');
     });
 
     it('archives normally once that flag is passed', async () => {
@@ -487,7 +640,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('需要指定变更名');
+      expect(output).toContain('A change name is required');
       expect(await fileExists(path.join(projectDir, 'openspec', 'changes', 'add-greeting', 'proposal.md'))).toBe(true);
     });
 
@@ -522,7 +675,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec-cn archive add-greeting --yes --store team-store');
+      expect(output).toContain('openspec archive add-greeting --yes --store team-store');
     });
 
     it('keeps --store in front of the `--` for a dash-leading change name', async () => {
@@ -559,7 +712,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec-cn archive --yes --store team-store -- --force');
+      expect(output).toContain('openspec archive --yes --store team-store -- --force');
     });
   });
 });

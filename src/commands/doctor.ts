@@ -1,10 +1,8 @@
 /**
- * `openspec-cn doctor` (slice 3.6): the root-scoped relationship-health
+ * `openspec doctor` (slice 3.6): the root-scoped relationship-health
  * report. Read-only — it answers "are the roots this work relates to
  * available on this machine?" and never clones, syncs, or repairs.
  */
-import { Command, Option } from 'commander';
-
 import {
   resolveRootForCommand,
   type ResolvedOpenSpecRoot,
@@ -23,8 +21,6 @@ import {
   type InspectRelationshipsInput,
   type RelationshipHealth,
 } from '../core/relationship-health.js';
-import { COMMAND_REGISTRY } from '../core/completions/command-registry.js';
-import { COMMON_FLAGS } from '../core/completions/shared-flags.js';
 import { emitFailure, printJson } from './shared-output.js';
 import * as path from 'node:path';
 
@@ -115,7 +111,7 @@ function printDiagnosticLines(prefix: string, status: { message: string; fix?: s
   for (const entry of status) {
     console.log(`${prefix}- ${entry.message}`);
     if (entry.fix) {
-      console.log(`${prefix}  修复：${entry.fix}`);
+      console.log(`${prefix}  Fix: ${entry.fix}`);
     }
   }
 }
@@ -141,21 +137,21 @@ function printEntrySection<T extends { status: { message: string; fix?: string }
     for (const diagnostic of entry.status) {
       console.log(`  - ${idOf(entry)}: ${diagnostic.message}`);
       if (diagnostic.fix) {
-        console.log(`    修复：${diagnostic.fix}`);
+        console.log(`    Fix: ${diagnostic.fix}`);
       }
     }
   }
 }
 
 function printHumanHealth(health: RelationshipHealth, declaredReferenceCount: number): void {
-  console.log('诊断');
+  console.log('Doctor');
   console.log('');
-  console.log('根目录');
-  console.log(`  位置：${health.root.path}`);
-  console.log(`  OpenSpec 根目录：${health.root.healthy ? '正常' : '异常'}`);
+  console.log('Root');
+  console.log(`  Location: ${health.root.path}`);
+  console.log(`  OpenSpec root: ${health.root.healthy ? 'ok' : 'unhealthy'}`);
   if (health.store) {
-    const metadataNote = health.store.metadata.valid ? '元数据正常' : '元数据异常';
-    console.log(`  存储：${health.store.id} (${metadataNote})`);
+    const metadataNote = health.store.metadata.valid ? 'metadata ok' : 'metadata invalid';
+    console.log(`  Store: ${health.store.id} (${metadataNote})`);
   }
   printDiagnosticLines('  ', [...health.root.status, ...(health.store?.status ?? [])]);
 
@@ -163,10 +159,10 @@ function printHumanHealth(health: RelationshipHealth, declaredReferenceCount: nu
   // the index, so an emptied-by-omission list gets its own line.
   const referencesEmptyLine =
     health.references.length === 0 && declaredReferenceCount > 0
-      ? '(声明的引用全部解析到此根目录)'
-      : '(未声明)';
+      ? '(declared references all resolve to this root)'
+      : '(none declared)';
   printEntrySection(
-    '引用',
+    'References',
     health.references,
     referencesEmptyLine,
     (entry) => `${entry.store_id}: ok${entry.root ? ` (${entry.root})` : ''}`,
@@ -175,45 +171,37 @@ function printHumanHealth(health: RelationshipHealth, declaredReferenceCount: nu
 
   for (const entry of health.status) {
     console.log('');
-    console.log(`注意：${entry.message}`);
+    console.log(`Note: ${entry.message}`);
     if (entry.fix) {
-      console.log(`修复：${entry.fix}`);
+      console.log(`Fix: ${entry.fix}`);
     }
   }
 }
 
-export function registerDoctorCommand(program: Command): void {
-  const description =
-    COMMAND_REGISTRY.find((entry) => entry.name === 'doctor')?.description ??
-    '报告已解析的 OpenSpec 根目录的关系健康状况';
+export interface DoctorOptions {
+  store?: string;
+  storePath?: string;
+  json?: boolean;
+}
 
-  program
-    .command('doctor')
-    .description(description)
-    .option('--store <id>', COMMON_FLAGS.store.description)
-    .addOption(
-      new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
-    )
-    .option('--json', '以 JSON 格式输出')
-    .action(async (options: { store?: string; storePath?: string; json?: boolean }) => {
-      try {
-        const root = await resolveRootForCommand(
-          { store: options.store, storePath: options.storePath },
-          { json: options.json, failurePayload: FAILURE_PAYLOAD, allowImplicitRoot: false }
-        );
-        if (!root) {
-          return;
-        }
+export async function doctorCommand(options: DoctorOptions): Promise<void> {
+  try {
+    const root = await resolveRootForCommand(
+      { store: options.store, storePath: options.storePath },
+      { json: options.json, failurePayload: FAILURE_PAYLOAD, allowImplicitRoot: false }
+    );
+    if (!root) {
+      return;
+    }
 
-        const { health, declaredReferenceCount } = await gatherHealth(root);
+    const { health, declaredReferenceCount } = await gatherHealth(root);
 
-        if (options.json) {
-          printJson(health);
-          return;
-        }
-        printHumanHealth(health, declaredReferenceCount);
-      } catch (error) {
-        emitFailure(options.json, FAILURE_PAYLOAD, error, 'doctor_failed');
-      }
-    });
+    if (options.json) {
+      printJson(health);
+      return;
+    }
+    printHumanHealth(health, declaredReferenceCount);
+  } catch (error) {
+    emitFailure(options.json, FAILURE_PAYLOAD, error, 'doctor_failed');
+  }
 }

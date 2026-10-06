@@ -1,37 +1,37 @@
-# 项目配置（config.yaml）
+# Project configuration (config.yaml)
 
-> openspec/config.yaml 的每一个字段：这个项目规划时使用的 schema、上下文与规则。
+> Every field of openspec/config.yaml: the schema, context, and rules this project plans with.
 
-## 位置
+## Location
 
-每个 OpenSpec 项目都将配置文件保存在项目根目录的 `openspec/config.yaml`。
+Each OpenSpec project keeps its config file at `openspec/config.yaml`, in the project root.
 
-## 字段
+## Fields
 
-| 键 | 类型 | 必填 | 作用 |
+| Key | Type | Required | Effect |
 | --- | --- | --- | --- |
-| `schema` | string | Yes | 该项目变更遵循的工作流 schema |
-| `context` | string | No | 注入到每个制品的指令中 |
-| `rules` | map: artifact ID → list of strings | No | 添加到某个制品内置指引之上的额外规则 |
-| `operations` | map: operation → guidance list | No | 针对 apply 与 archive 工作的建议性指引 |
-| `store` | string | No | 当此 openspec/ 仅为纯配置时的回退 OpenSpec 根目录 |
-| `references` | list | No | 其 specs 被编入指令索引的 store |
+| `schema` | string | Yes | The workflow schema this project's changes follow |
+| `context` | string | No | Injected into every artifact, apply, and archive |
+| `rules` | map: artifact ID → list of strings | No | Extra rules added to one artifact's built-in guidance |
+| `operations` | map: operation → guidance list | No | Advisory guidance for apply and archive work |
+| `store` | string | No | Fallback OpenSpec root when this openspec/ is config-only |
+| `references` | list | No | Stores whose specs are indexed into instructions |
 
-无效字段永远不会让命令失败。每个字段单独校验，坏值会以警告方式丢弃。
+Invalid fields never fail a command. Each field is validated on its own, and a bad value is dropped with a warning.
 
-这些字段中该写什么，参见 [项目配置](../../customize/project-config.md)。
+What to write in these fields is covered in [Project configuration](../../customize/project-config.md).
 
 ### schema
 
-该项目中每个变更遵循的工作流 schema。有效值为 `spec-driven` 或项目自定义的 schema 名称。运行 [`openspec schemas`](../cli.md#openspec-schemas) 可列出可用的 schema 名称。
+The workflow schema every change in this project follows. Valid values are `spec-driven` or a schema name the project defines. Run [`openspec schemas`](../cli.md#openspec-schemas) to list the available schema names.
 
 ### context
 
-注入到每个制品的指令中的自由文本。上限为 50KB，更大的值会被忽略并发出警告。
+Free text injected into every artifact's instructions and supplied to apply and archive. The limit is 50KB, and a larger value is ignored with a warning.
 
 ### rules
 
-针对某个制品的额外规则，添加到 schema 的内置指引之上：
+Extra rules for one artifact, added to the schema's built-in guidance:
 
 ```yaml
 rules:
@@ -39,11 +39,11 @@ rules:
     - Keep proposals under 500 words
 ```
 
-制品 ID 不限于内置名称，因此自定义 schema 的制品也可以作为键。
+Artifact IDs are not restricted to the built-in names, so artifacts from custom schemas work as keys.
 
 ### operations
 
-针对 apply 与 archive 工作如何开展的建议性指引，与制品规则分开存放：
+Advisory guidance for how apply and archive work is conducted, separate from artifact rules:
 
 ```yaml
 operations:
@@ -52,15 +52,15 @@ operations:
       - Keep test summaries concise
 ```
 
-只读取 `apply` 和 `archive`。
+Only `apply` and `archive` are read.
 
 ### store
 
-用作 OpenSpec 根目录的 store id，仅当此 openspec/ 目录为纯配置（没有 specs/ 或 changes/）时才查询。它是回退，绝不是覆盖。完整的解析阶梯参见 [根目录解析](../../multi-repo/stores.md#where-artifacts-get-created-when-using-stores)。
+A store id used as the OpenSpec root, consulted only when this openspec/ directory is config-only (no specs/ or changes/). It is a fallback, never an override. The full ladder is [Root resolution](../../multi-repo/stores.md#where-artifacts-get-created-when-using-stores).
 
 ### references
 
-该项目工作所引用的 store id。每个 store 的 specs 索引（id、摘要、获取命令）会被添加到指令输出中。spec 内容绝不会内联，根目录解析也绝不受影响。条目是一个 store id，或一个包含 `id` 和可选 `remote` 克隆源的映射：
+Store ids whose specs this project's work draws on. An index of each store's specs (id, summary, fetch command) is added to instructions output. Spec content is never inlined, and root resolution is never affected. An entry is a store id or a map with `id` and an optional `remote` clone source:
 
 ```yaml
 references:
@@ -69,22 +69,21 @@ references:
     remote: git@github.com:acme/billing-specs.git
 ```
 
-## 示例
+## Example
 
-一个填写完整的 config.yaml：
+A filled-in config.yaml:
 
 ```yaml
 schema: spec-driven
 
 context: |
-  Tech stack: TypeScript, React, Node.js
-  We use conventional commits
-  Domain: e-commerce platform
+  Designs and tasks must cover Windows, macOS, and Linux
+  Write all artifacts in Spanish
 
 rules:
   proposal:
     - Keep proposals under 500 words
-    - Always include a "Non-goals" section
+    - Always state what is out of scope
   tasks:
     - Break tasks into chunks of max 2 hours
 
@@ -97,6 +96,6 @@ operations:
       - Summarize the archive outcome before finishing
 ```
 
-## 旧名称
+## Legacy names
 
-当 `config.yaml` 不存在时，`openspec/config.yml` 会被作为别名读取。当两个文件都存在时，`config.yaml` 优先，`config.yml` 被忽略。`openspec-cn init` 创建的是 `config.yaml`。
+`openspec/config.yml` is read as an alias when `config.yaml` does not exist. When both files exist, `config.yaml` wins and `config.yml` is ignored. `openspec init` creates `config.yaml`.

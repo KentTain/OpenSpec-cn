@@ -1,21 +1,21 @@
 # spec-driven
 
-> 默认工作流的制品：它们的顺序、格式，以及它们产生的变更目录。
+> The default workflow's artifacts: their order, their formats, and the change folder they produce.
 
-`spec-driven` 是 OpenSpec 内置的默认 schema。[schema.yaml](../schema-yaml.md) 定义了它所设置的字段。
+`spec-driven` is OpenSpec's built-in default schema. [schema.yaml](../schema-yaml.md) defines the fields it sets.
 
-## 制品
+## Artifacts
 
-该工作流起草四个制品：
+The workflow drafts four artifacts:
 
-| 制品 | 文件 | 用途 |
+| Artifact | File | Purpose |
 |---|---|---|
-| [`proposal`](#proposalmd) | `proposal.md` | 为什么需要这个变更 |
-| [`specs`](#delta-specs-specmd) | `specs/<capability-path>/spec.md`，每个能力一个 | 行为发生了什么变化 |
-| [`design`](#designmd) | `design.md` | 如何构建它 |
-| [`tasks`](#tasksmd) | `tasks.md` | 实现清单 |
+| [`proposal`](#proposalmd) | `proposal.md` | Why the change is needed |
+| [`specs`](#delta-specs-specmd) | `specs/<capability-path>/spec.md`, one per capability | What behavior changes |
+| [`design`](#designmd) | `design.md` | How to build it |
+| [`tasks`](#tasksmd) | `tasks.md` | The implementation checklist |
 
-## 起草顺序
+## Drafting order
 
 ```text
              ┌─ specs ──┐
@@ -23,16 +23,16 @@ proposal ────┤          ├── tasks ── apply
              └─ design ─┘
 ```
 
-proposal 在最前。specs 和 design 随后，顺序不分先后，而 tasks 两者都需要。实现（[apply](#apply)）在 `tasks.md` 就位后开始。
+Proposal comes first. Specs and design follow in either order, and tasks needs both. Implementation ([apply](#apply)) starts once `tasks.md` is in place.
 
-有两个制品可以被跳过：
+Two artifacts can be skipped:
 
-- **`design`**：当它的[条件](#designmd)都不满足时，Agent 会略过它，仍起草 `tasks`。
-- **`specs`**：在变更的 `.openspec.yaml` 中设置 [`skip_specs: true`](../../configuration/change-metadata.md#skip_specs)。
+- **`design`**: when none of [its conditions](#designmd) apply, the agent leaves it out and drafts `tasks` anyway.
+- **`specs`**: set [`skip_specs: true`](../../configuration/change-metadata.md#skip_specs) in the change's `.openspec.yaml`.
 
-## 示例变更目录
+## Example change folder
 
-一个名为 `add-user-auth` 的变更，起草了全部制品：
+A change named `add-user-auth`, with every artifact drafted:
 
 ```text
 openspec/changes/add-user-auth/
@@ -47,11 +47,11 @@ openspec/changes/add-user-auth/
 
 ## proposal.md
 
-确立为什么需要这个变更。
+Establishes why the change is needed.
 
-### 结构
+### Structure
 
-Agent 作为输出格式收到的模板（[templates/proposal.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/proposal.md)）：
+The template the agent receives as the output format ([templates/proposal.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/proposal.md)):
 
 ```md
 # Proposal
@@ -67,9 +67,12 @@ Agent 作为输出格式收到的模板（[templates/proposal.md](https://github
 ## Capabilities
 
 ### New Capabilities
-<!-- Capabilities being introduced. Use kebab-case for path segments you introduce
-     (e.g., user-auth or identity/user-auth) that follow the project's existing
-     spec organization. Each creates specs/<capability-path>/spec.md. -->
+<!-- Capabilities being introduced. Name each capability for a cohesive system
+     behavior that can own related requirements as the system evolves. Do not name
+     implementation tasks or proposal sections. Avoid broad catch-all names. Use
+     kebab-case for path segments you introduce (e.g., user-auth or identity/user-auth)
+     that follow the project's existing spec organization. Each creates
+     specs/<capability-path>/spec.md. -->
 - `<capability-path>`: <brief description of what this capability covers>
 
 ### Modified Capabilities
@@ -87,56 +90,60 @@ Agent 作为输出格式收到的模板（[templates/proposal.md](https://github
 <!-- Affected code, APIs, dependencies, systems -->
 ```
 
-### 指令
+### Instructions
 
-Agent 起草该制品时收到的指令（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The instruction sent to the agent when it drafts this artifact (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ```md
-创建 proposal 文档，说明为什么（WHY）需要这次变更。
+Create the proposal document that establishes WHY this change is needed.
 
-章节：
-- **Why**：用 1-2 句话说明问题或机会。这解决了什么问题？为什么是现在？
-- **What Changes**：以列表形式描述变更。明确写出新增能力、修改内容或移除项。破坏性变更用 **BREAKING** 标注。
-- **Capabilities**：指出哪些 specs 将被创建或修改：
-  - **New Capabilities**：列出引入的新能力。每一项对应一个新的 `specs/<capability-path>/spec.md`。你新引入的路径片段使用 kebab-case（例如 `user-auth` 或 `identity/user-auth`），并遵循项目现有的 spec 组织方式。
-  - **Modified Capabilities**：列出需求（REQUIREMENTS）发生变化的既有能力。仅当 spec 层面的行为发生变化时才列出（只改实现细节不算）。每一项都需要一个增量规范（delta spec）文件。使用 `openspec/specs/` 下已存在的精确路径。若没有需求变化则留空。
-- **Impact**：受影响的代码、API、依赖或系统。
+Sections:
+- **Why**: 1-2 sentences on the problem or opportunity. What problem does this solve? Why now?
+- **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.
+- **Capabilities**: Identify which specs will be created or modified:
+  - **New Capabilities**: List capabilities being introduced. Each becomes a new `specs/<capability-path>/spec.md`. Name each capability for a durable system behavior (for example, `user-auth`), not the work in this change (for example, `add-login-endpoint`). Choose a cohesive boundary that can own related requirements as the system evolves; avoid broad catch-all capabilities. Use kebab-case for path segments you introduce (e.g., `user-auth` or `identity/user-auth`) and follow the project's existing spec organization.
+  - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each needs a delta spec file. Use the exact existing path under `openspec/specs/`. Leave empty if no requirement changes.
+- **Impact**: Affected code, APIs, dependencies, or systems.
 
-重要：Capabilities 章节至关重要。它构成 proposal 阶段与 specs 阶段之间的契约。
-填写前请先调研既有的 specs：运行 `openspec-cn list --specs` 获取项目的能力清单，
-然后对其中看起来相关的项运行 `openspec-cn show "<spec-id>" --type spec --json --no-scenarios`
-—— 它会返回某个能力的 Purpose 与需求文本，而不会把整个 spec 文件拉进上下文。
-仅当目标是已注册的独立 store 时，才给这两条命令追加 `--store "<id>"`，并保留 `--type
-spec`：否则同名的一个变更和一个 spec 会触发 ambiguous-item 错误。不带 `--specs` 的
-`openspec-cn list` 列出的是进行中的变更而非 specs —— 它永远不会显示项目已覆盖的内容。
-应复用既有能力的精确路径，而不是引入近似重复的名称。
-这种带过滤的读取只是一份概览。在判断哪些内容已被覆盖或应当变更之前，请用
-`openspec-cn show "<spec-id>" --type spec`（`--store` 规则同上）完整阅读每个相关
-spec，包括其中的场景。
-此处列出的每个能力都需要一个对应的 spec 文件。
+IMPORTANT: The Capabilities section is critical. It creates the contract between
+proposal and specs phases. Research existing specs before filling this in:
+run `openspec list --specs` for the project's capability inventory, then
+`openspec show "<spec-id>" --type spec --json --no-scenarios` for any that
+look related - that returns a capability's purpose and requirement texts
+without pulling whole spec files into context. Append `--store "<id>"` to
+both commands only for a registered standalone store, and keep `--type
+spec`: a change and a spec sharing a name is otherwise an ambiguous-item
+error. `openspec list` without `--specs` lists in-flight changes, not
+specs - it never shows what the project already covers. Reuse an existing
+capability's exact path instead of introducing a near-duplicate name.
+The filtered read is only an overview. Before deciding what is already
+covered or what should change, read each relevant spec in full, including
+scenarios, with `openspec show "<spec-id>" --type spec` (same `--store` rule).
+Each capability listed here will need a corresponding spec file.
 
-每个变更要么至少声明一个能力（新增或修改），要么显式声明不需要 specs：
-`openspec-cn validate` 会拒绝零 delta 的变更，除非该变更的 `.openspec.yaml`
-设置了 `skip_specs: true`。仅当确实没有 spec 层面的行为变化时（纯重构、
-工具链、文档）才使用 `skip_specs: true` —— specs 描述的是行为，
-所以如果行为没有变化，也就不应该有 spec 变化。
-不要为了通过校验而臆造需求。
+Every change must either declare at least one capability (new or
+modified) or explicitly opt out of specs: `openspec validate` rejects a
+change with zero deltas unless the change's `.openspec.yaml` sets
+`skip_specs: true`. Use `skip_specs: true` only when no spec-level
+behavior changes (pure refactor, tooling, docs) - specs describe
+behavior, so if behavior does not change, no spec should change either.
+Do not invent a requirement just to satisfy validation.
 
-保持简洁（1-2 页）。聚焦于"为什么"而非"怎么做" ——
-实现细节应写在 design.md 中。
+Keep it concise (1-2 pages). Focus on the "why" not the "how" -
+implementation details belong in design.md.
 
-这是整个流程的基础 —— specs、design 和 tasks 都建立在它之上。
+This is the foundation - specs, design, and tasks all build on this.
 ```
 
-<a id="delta-specs-specmd"></a>
+## Delta specs (spec.md)
 
-## 增量规范（Delta specs / spec.md）
+Defines what behavior changes, with one delta spec per capability the proposal lists.
 
-定义行为发生什么变化，proposal 列出的每个能力对应一个增量规范（delta spec）。每个增量规范都是其能力文件夹里的 `spec.md`。`openspec validate` 和 `openspec archive` 会拒绝写在 `specs/` 下任何其他文件中的 delta 区块，例如 `specs/user-auth.md`，因为归档永远不会合并它们。
+Each delta spec is the `spec.md` inside its capability folder. `openspec validate` and `openspec archive` reject delta sections written in any other file under `specs/`, such as `specs/user-auth.md`, because archive never merges them.
 
-### 结构
+### Structure
 
-Agent 作为输出格式收到的模板（[templates/spec.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/spec.md)）：
+The template the agent receives as the output format ([templates/spec.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/spec.md)):
 
 ```md
 # Spec Delta
@@ -154,85 +161,98 @@ Agent 作为输出格式收到的模板（[templates/spec.md](https://github.com
 - **THEN** <!-- expected outcome -->
 ```
 
-### 指令
+### Instructions
 
-Agent 起草该制品时收到的指令（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The instruction sent to the agent when it drafts this artifact (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ````md
-创建规范文件，定义系统应该做什么（WHAT）。
+Create specification files that define WHAT the system should do.
 
-spec 是行为契约，不是实现计划。
+A spec is a behavior contract, not an implementation plan.
 
-好的 spec 内容包含：
-- 用户或下游系统所依赖的可观测行为
-- 输入、输出与错误条件
-- 外部约束（安全性、隐私、可靠性、兼容性）
-- 可被测试或显式验证的场景
+Good spec content:
+- Observable behavior users or downstream systems rely on
+- Inputs, outputs, and error conditions
+- External constraints (security, privacy, reliability, compatibility)
+- Scenarios that can be tested or explicitly validated
 
-spec 中应避免：
-- 内部类名/函数名
-- 库或框架的选型
-- 逐步的实现细节
-- 详细的执行计划（这些属于 design.md 或 tasks.md）
+Avoid in specs:
+- Internal class/function names
+- Library or framework choices
+- Step-by-step implementation details
+- Detailed execution plans (those belong in design.md or tasks.md)
 
-快速判断法：如果实现可以变化而不改变外部可见行为，那它很可能不属于 spec。
+Quick test: if the implementation can change without changing externally
+visible behavior, it likely does not belong in the spec.
 
-为 proposal 的 Capabilities 章节中列出的每个能力创建一个 spec 文件。
-`<capability-path>` 是相对于 `specs/` 的 spec 目录（例如
-`user-auth` 或 `identity/user-auth`）。请保留完整路径：
-- 新能力：使用 proposal 中给出的精确路径，创建于 `specs/<capability-path>/spec.md`。proposal 中新引入的任何路径片段都必须是 kebab-case。遵循项目现有的组织方式；当项目采用扁平布局时，不要新增一层领域目录。
-- 修改的能力：在 `specs/<capability-path>/spec.md` 创建 delta 时，使用 `openspec/specs/<capability-path>/` 下已存在的精确路径。写 delta 前先运行 `openspec-cn list --specs` 确认该路径，仅当目标是已注册的独立 store 时才追加 `--store "<id>"` —— 路径拼错或臆造会指向一个不存在的能力，而不是你想要的那个。不要移动或重命名该能力。
+Create one spec file per capability listed in the proposal's Capabilities section.
+`<capability-path>` is the spec directory relative to `specs/` (for example,
+`user-auth` or `identity/user-auth`). Preserve the full path:
+- New capabilities: use the exact path from the proposal at `specs/<capability-path>/spec.md`. Any path segment newly introduced in the proposal must be kebab-case. Follow the project's existing organization; do not add a new domain level when the project uses a flat layout.
+- Modified capabilities: use the exact existing path from `openspec/specs/<capability-path>/` when creating the delta at `specs/<capability-path>/spec.md`. Run `openspec list --specs` to confirm that path before writing the delta, appending `--store "<id>"` only for a registered standalone store - a mistyped or invented path targets a capability that does not exist rather than the one you meant. Do not move or rename the capability.
 
-必须至少有一个 spec 文件，除非该变更的 `.openspec.yaml`
-设置了 `skip_specs: true`（表示没有 spec 层面的行为变化）——
-`openspec-cn validate` 会拒绝没有该标记的零 delta 变更。
-如果 proposal 未列出任何能力且未设置 `skip_specs`，请先回头修订 proposal。
+Write the spec files one at a time, so the user sees progress and an
+interrupted run keeps the files it already wrote:
+- Before writing anything, compare the capabilities the proposal lists
+  with the `specs/<capability-path>/spec.md` files that already exist,
+  and start with the first capability that has no file. Do not rewrite
+  an existing file unless the user asks you to.
+- Before each file, say in one line which capability you are writing.
+- Write each file as soon as you have drafted it. Do not plan every file
+  before writing the first.
+- Stop when every capability the proposal lists has its file.
 
-Delta 操作（使用 ## 标题）：
-- **ADDED Requirements**：新增能力
-- **MODIFIED Requirements**：变更的行为 —— 必须（MUST）包含完整的更新后内容
-- **REMOVED Requirements**：废弃的特性 —— 必须（MUST）包含 **Reason** 与 **Migration**
-- **RENAMED Requirements**：仅名称变更 —— 使用 FROM:/TO: 格式
+There must be at least one spec file unless the change's `.openspec.yaml`
+sets `skip_specs: true` (no spec-level behavior change) - `openspec validate`
+rejects a zero-delta change without that marker. If the proposal lists no
+capabilities and `skip_specs` is not set, revisit the proposal first.
 
-格式要求：
-- 每条需求：`### Requirement: <名称>`，其后接描述
-- 规范性需求使用 SHALL/MUST（避免 should/may）
-- 每个场景：`#### Scenario: <名称>`，采用 WHEN/THEN 格式
-- **关键**：场景必须（MUST）正好使用 4 个井号（`####`）。使用 3 个井号或列表项会静默失败。
-- 每条需求必须（MUST）至少包含一个场景。
+Delta operations (use ## headers):
+- **ADDED Requirements**: New capabilities
+- **MODIFIED Requirements**: Changed behavior - MUST include full updated content
+- **REMOVED Requirements**: Deprecated features - MUST include **Reason** and **Migration**
+- **RENAMED Requirements**: Name changes only - use FROM:/TO: format
 
-仅限新能力：增量规范以 `## Purpose` 章节开头 ——
-用一到两句话（50 个字符以上，否则 `openspec-cn validate --strict`
-会报告其过于简略）描述该能力的用途。归档时会将其
-复制到所创建的主 spec 中；缺少它时，新的主 spec 会留下
-`TBD - created by archiving change <name>. Update Purpose after archive.`
-占位符，需要手工填写。
-不要为既有能力的 delta 添加 `## Purpose` ——
-该 spec 已经有一个，delta 中的会被忽略。要修改
-既有能力的 Purpose（包括残留的 `TBD` 占位符），
-请直接编辑 `<planningHome.root>/openspec/specs/<capability-path>/spec.md`。
-`planningHome.root` 来自 `openspec-cn instructions ... --json` 响应。
-始终使用它而不是仓库相对路径：只要变更位于某个 store 中
-—— 无论该 store 来自 `--store`、项目中的 `store:` 指针，
-还是全局默认 store —— 它都会解析到该 store；否则解析到当前仓库。
-无需自行判断属于哪种情况，该字段已经处理好。
+Format requirements:
+- Each requirement: `### Requirement: <name>` followed by description
+- Use SHALL/MUST for normative requirements (avoid should/may)
+- Each scenario: `#### Scenario: <name>` with WHEN/THEN format
+- **CRITICAL**: Scenarios MUST use exactly 4 hashtags (`####`). Using 3 hashtags or bullets will fail silently.
+- Every requirement MUST have at least one scenario.
+- Keep each requirement's description (the text between `### Requirement:` and its first scenario) to 500 characters or fewer. `openspec validate` flags longer descriptions in ADDED requirements and in the main spec. This is a warning: normal validation still passes, but `openspec validate --strict` fails on it. When writing a new requirement, state one behavior per requirement: move examples and edge cases into scenarios, and split a requirement that covers several behaviors into separate `### Requirement:` blocks, each with its own scenarios. Under MODIFIED, keep the existing requirement block whole; never split, trim or rewrite existing text just to meet the length. Split an existing long requirement only when the user asks for it, in a change made for that purpose: under MODIFIED, keep its header and every scenario and cut its description down to one behavior without changing its meaning, then add each behavior you removed as its own ADDED requirement with its own scenarios.
 
-MODIFIED 需求的工作流程：
-1. 在 `<planningHome.root>/openspec/specs/<capability-path>/spec.md` 中定位既有需求（与上面相同的 store-aware 根目录）
-2. 复制整个需求块（从 `### Requirement:` 到其所有场景）
-3. 粘贴到 `## MODIFIED Requirements` 下，并编辑以反映新行为
-4. 确保标题文本完全一致（忽略空白差异）
+New capabilities only: the delta spec's first section is `## Purpose` -
+one or two sentences (50+ characters, or `openspec validate --strict`
+reports it as too brief) describing what the capability is for. Archive
+copies it into the main spec it creates; without it the new main spec is
+left with a `TBD ... Update Purpose after archive` placeholder to fill in
+by hand. Do NOT add `## Purpose` to a delta for an existing capability -
+that spec already has one and the delta's is ignored. To change an
+existing capability's Purpose - including a leftover `TBD` placeholder -
+edit `<planningHome.root>/openspec/specs/<capability-path>/spec.md`
+directly. `planningHome.root` comes from the `openspec instructions ...
+--json` response. Always use it rather than a repo-relative path: it
+resolves to the store whenever the change lives in one - whether that
+came from `--store`, a project `store:` pointer, or a global default
+store - and to the current repository otherwise. Do not try to work out
+which case applies; the field already has.
 
-常见陷阱：MODIFIED 只写部分内容会在归档时丢失细节。
-如果是在不改变既有行为的前提下新增关注点，请改用 ADDED。
+MODIFIED requirements workflow:
+1. Locate the existing requirement in `<planningHome.root>/openspec/specs/<capability-path>/spec.md` (the same store-aware root as above)
+2. Copy the ENTIRE requirement block (from `### Requirement:` through all scenarios)
+3. Paste under `## MODIFIED Requirements` and edit to reflect new behavior
+4. Ensure header text matches exactly (whitespace-insensitive)
 
-示例（一个新能力，因此以 `## Purpose` 开头）：
+Common pitfall: Using MODIFIED with partial content loses detail at archive time.
+If adding new concerns without changing existing behavior, use ADDED instead.
+
+Example (a new capability, so its first section is `## Purpose`):
 ```
 # Spec Delta
 
 ## Purpose
 
-让用户以可移植的格式导出自己在产品中的数据。
+Lets users take their data out of the product in a portable format.
 
 ## ADDED Requirements
 
@@ -250,16 +270,16 @@ The system SHALL allow users to export their data in CSV format.
 **Migration**: Use new export endpoint at /api/v2/export
 ```
 
-specs 应当是可测试的 —— 每个场景都是一个潜在的测试用例。
+Specs should be testable - each scenario is a potential test case.
 ````
 
 ## design.md
 
-说明如何实现该变更。只在变更需要时起草。
+Explains how to implement the change. Drafted only when the change needs one.
 
-### 结构
+### Structure
 
-Agent 作为输出格式收到的模板（[templates/design.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/design.md)）：
+The template the agent receives as the output format ([templates/design.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/design.md)):
 
 ```md
 # Design
@@ -285,47 +305,47 @@ Agent 作为输出格式收到的模板（[templates/design.md](https://github.c
 <!-- Known risks and trade-offs -->
 ```
 
-### 指令
+### Instructions
 
-Agent 起草该制品时收到的指令（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The instruction sent to the agent when it drafts this artifact (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ```md
-创建 design 文档，说明如何（HOW）实现这次变更。
+Create the design document that explains HOW to implement the change.
 
-何时需要 design.md（满足任一条件才创建）：
-- 横切变更（涉及多个服务/模块）或引入新的架构模式
-- 新增外部依赖或数据模型有重大变化
-- 涉及安全、性能或迁移复杂度
-- 存在歧义，需要在编码前先做技术决策
+When to include design.md (create only if any apply):
+- Cross-cutting change (multiple services/modules) or new architectural pattern
+- New external dependency or significant data model changes
+- Security, performance, or migration complexity
+- Ambiguity that benefits from technical decisions before coding
 
-章节：
-- **Context**：仅写解释该方案所必需的现状与约束。动机部分引用 proposal 而不要复述（例如"参见 proposal.md - Why"）。
-- **Goals / Non-Goals**：本设计要达成什么、明确排除什么。不要复述 proposal 的范围 —— 只补充设计层面的边界。
-- **Decisions**：关键技术选型及其理由（为什么选 X 而不是 Y？）。为每个决策附上考虑过的备选方案。
-- **Risks / Trade-offs**：已知的局限、可能出问题的地方。格式：[风险] → 缓解措施
-- **Migration Plan**：部署步骤、回滚策略（如适用）
-- **Open Questions**：可以安全地留待以后回答、且不会改变 specs、
-  方案或任务拆分的未知项。若没有则省略。
+Sections:
+- **Context**: Only the current state and constraints needed to explain the approach. Reference the proposal for motivation instead of restating it (e.g., "See proposal.md - Why").
+- **Goals / Non-Goals**: What this design achieves and explicitly excludes. Don't restate the proposal's scope - add only design-level boundaries.
+- **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision.
+- **Risks / Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
+- **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
+- **Open Questions**: Unknowns that can safely be answered later without
+  changing the specs, the approach, or the task breakdown. Omit if none.
 
-Open Questions 用于真正可延后的未知项，而不是你跳过的决策。
-如果某个问题会改变 specs、既定方案或任务拆分，
-现在就要解决它 —— 去询问用户，而不是靠猜。
+Open questions are for genuinely deferrable unknowns, not decisions you
+skipped. If a question would change the specs, the chosen approach, or
+the task breakdown, resolve it now - ask the user instead of guessing.
 
-聚焦于架构与方案，而非逐行实现。
-proposal 讲清为什么和做什么；design 讲清怎么做。动机引用
-proposal，specs 写好后需求引用 specs ——
-如果某个章节只是复述它们，那就直接指向它们。
+Focus on architecture and approach, not line-by-line implementation.
+The proposal covers why and what; design covers how. Reference the
+proposal for motivation and, once written, the specs for requirements -
+if a section would only restate them, point to them instead.
 
-好的设计文档会解释技术决策背后的"为什么"。
+Good design docs explain the "why" behind technical decisions.
 ```
 
 ## tasks.md
 
-把实现拆分为可勾选的任务。[apply](#apply) 在此跟踪进度。
+Breaks the implementation into checkable tasks. [apply](#apply) tracks progress here.
 
-### 结构
+### Structure
 
-Agent 作为输出格式收到的模板（[templates/tasks.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/tasks.md)）：
+The template the agent receives as the output format ([templates/tasks.md](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/templates/tasks.md)):
 
 ```md
 # Tasks
@@ -341,69 +361,84 @@ Agent 作为输出格式收到的模板（[templates/tasks.md](https://github.co
 - [ ] 2.2 <!-- Task description -->
 ```
 
-### 指令
+### Instructions
 
-Agent 起草该制品时收到的指令（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The instruction sent to the agent when it drafts this artifact (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ````md
-创建任务列表，拆解实现工作。
+Create the task list that breaks down the implementation work.
 
-编写任务前，检查 design.md 中的 Open Questions。如果其中任何一项
-会改变要构建的内容，先与用户一起解决 —— 不要
-把未言明的假设固化进任务列表。
+Before writing tasks, check design.md for Open Questions. If any of them
+would change what gets built, resolve them with the user first - do not
+bake an unstated assumption into the task list.
 
-**重要：严格遵循下面的模板。** apply 阶段通过解析
-复选框格式来追踪进度。只有 `x` 的方框计为已完成，
-不区分大小写与空格，因此 `- [ x]` 也算完成。其他
-任何标记，包括 `- [~]`、`- [-]` 和空的 `- []`，都读作
-未完成。没有复选框的行完全不会被追踪。
+**IMPORTANT: Follow the template below for tracked tasks.** The apply phase parses
+checkbox format to track progress. A box holding only `x` counts as done,
+upper or lower case and with any spacing, so `- [ x]` is done too. Every
+other marker, including `- [~]`, `- [-]` and an empty `- []`, reads as
+unfinished. A line with no checkbox is not tracked at all.
 
-指引：
-- 将相关任务归入 ## 编号标题下
-- 每个任务必须（MUST）是复选框：`- [ ] X.Y 任务描述`
-- 任务应足够小，可在一次会话内完成
-- 按依赖关系排序（什么必须先做？）
-- 每个任务必须（MUST）说明如何验证其已完成（测试、命令、
-  可观察行为或交付的产物）。把验证方式写进该任务的复选框描述。
-  只有当需要检查跨越多个实现任务的整体集成或系统行为时，
-  才单独使用一个验证任务。
-- 每个任务组必须（MUST）把其自身工作所需的测试和文档一并完成。
-  不要（NOT）把测试或文档堆积到最后一个任务组 —— 当后面的组
-  首次动到前面组的成果时，失败会级联回中间的每一个组，
-  迫使返工。既不需要测试也不需要文档的组（如脚手架或依赖安装）
-  则两者皆可省略。最后一个任务组只用于集成检查，
-  不用来偿还前面组欠下的测试和文档。
+Guidelines:
+- Group related tracked tasks under ## numbered headings
+- Each tracked task MUST be a checkbox: `- [ ] X.Y Task description`
+- Tasks should be small enough to complete in one session
+- Order tasks by dependency (what must be done first?)
+- Track implementation and verification work that can be completed before
+  archive. If the requested workflow includes archive or work that requires
+  this change to be archived, preserve those steps as plain bullets in an
+  optional `## Workflow follow-up` section at the end of tasks.md. These
+  bullets are reference information outside tracked task progress.
+- Each task MUST state how to verify completion (a test, command,
+  observable behavior, or delivered artifact). Put the verification in
+  that task's checkbox description. Use a separate verification task only
+  when it checks broader integration or system behavior that spans
+  multiple implementation tasks.
+- Each task group MUST land the tests and documentation its own work
+  calls for. Do NOT collect testing or documentation into a final group -
+  when a late group first exercises work from an early one, the failures
+  cascade back through every group in between and force rework. A group
+  whose work calls for neither, such as scaffolding or dependency setup,
+  carries neither. A final group is for integration checks only, not for
+  the tests and docs an earlier group owed.
 
-示例：
+Example:
 ```
 # Tasks
 
-## 1. 准备工作
+## 1. Setup
 
-- [ ] 1.1 创建新的模块结构，并验证预期文件已存在
-- [ ] 1.2 在 package.json 中添加依赖，并验证包安装成功
+- [ ] 1.1 Create new module structure and verify expected files are present
+- [ ] 1.2 Add dependencies to package.json and verify package installation succeeds
 
-## 2. 核心实现
+## 2. Core Implementation
 
-- [ ] 2.1 实现数据导出函数，并验证导出测试通过
-- [ ] 2.2 添加 CSV 格式化工具，并验证单元测试覆盖引号和分隔符
-- [ ] 2.3 在 docs/export.md 中编写导出 API 文档，并验证文档中的命令可按原样成功运行
+- [ ] 2.1 Implement data export function and verify the export test passes
+- [ ] 2.2 Add CSV formatting utilities and verify unit tests cover quoting and delimiters
+- [ ] 2.3 Document the export API in docs/export.md and verify the documented command runs as written
 ```
 
-需要构建什么参考 specs，怎么构建参考 design。
+When applicable, append workflow follow-up as plain bullets, for example:
+```
+## Workflow follow-up
+
+- Archive the change after the project's review requirements are satisfied.
+- Verify the archived result.
+```
+
+Reference specs for what needs to be built, design for how to build it.
 ````
 
 ## Apply
 
-从规划到实现的交接。Apply 是推进 `tasks.md` 的阶段，不是制品。
+The handoff from planning to implementation. Apply is the phase that works through `tasks.md`, not an artifact.
 
-- **开始**：一旦 `tasks.md` 存在并列出至少一个任务。
-- **跟踪**：`tasks.md` 中的复选框。勾选它们就是进度记录。
-- **结束**：每个复选框都已勾选。OpenSpec 随后建议归档该变更。
+- **Starts**: once `tasks.md` exists and lists at least one task.
+- **Tracks**: the checkboxes in `tasks.md`. Checking them off is the progress record.
+- **Ends**: every checkbox checked. OpenSpec then suggests archiving the change.
 
-### 设置
+### Settings
 
-apply 设置（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The apply settings (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ```yaml
 apply:
@@ -412,18 +447,18 @@ apply:
   # instruction: shown below
 ```
 
-### 指令
+### Instructions
 
-实现开始时发给 Agent 的指令（来自 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)）：
+The instruction sent to the agent when implementation starts (from [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)):
 
 ```md
-阅读上下文文件，逐项完成待办任务，边做边标记完成。
-遇到阻塞或需要澄清时暂停。
+Read context files, work through pending tasks, mark complete as you go.
+Pause if you hit blockers or need clarification.
 ```
 
 ## schema.yaml
 
-完整的 [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml)，指令正文已省略。每段都完整展示在对应小节的上面。
+The complete [schema.yaml](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml), with instruction bodies elided. Each is shown in full in its section above.
 
 ```yaml
 name: spec-driven

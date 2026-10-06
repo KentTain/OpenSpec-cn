@@ -9,7 +9,6 @@
 import * as os from 'node:os';
 import { createRequire } from 'node:module';
 import type { spawn as nodeSpawn } from 'node:child_process';
-import { Command, Option } from 'commander';
 
 import {
   buildWorksetCodeWorkspaceJson,
@@ -64,7 +63,6 @@ import {
   promptOpenNow,
   promptToolFromChoices,
 } from './workset-prompts.js';
-import { COMMAND_REGISTRY } from '../core/completions/command-registry.js';
 
 // cross-spawn is CJS with no types and only `workset open` needs it -
 // loaded lazily so every other CLI invocation skips its module graph.
@@ -77,18 +75,18 @@ function defaultSpawn(): typeof nodeSpawn {
   return cachedSpawn;
 }
 
-interface WorksetCreateOptions {
+export interface WorksetCreateOptions {
   member?: string[];
   tool?: string;
   json?: boolean;
 }
 
-interface WorksetOpenOptions {
+export interface WorksetOpenOptions {
   tool?: string;
   json?: boolean;
 }
 
-interface WorksetRemoveOptions {
+export interface WorksetRemoveOptions {
   yes?: boolean;
   json?: boolean;
 }
@@ -102,11 +100,11 @@ function worksetCliOpenerDisabledError(
   name: string
 ): StoreError {
   return new StoreError(
-    `在 ${opener.label} 中打开 workset 已暂时禁用（CLI 代理打开方式正在重构）。worksets 暂时在 IDE 中打开。`,
+    `Opening a workset in ${opener.label} is temporarily disabled while CLI-agent opening is reworked. Worksets open in an IDE for now.`,
     'workset_cli_opener_disabled',
     {
       target: 'workset.tool',
-      fix: `在 VS Code 或 Cursor 中打开：openspec-cn workset open ${name} --tool code`,
+      fix: `Open in VS Code or Cursor: openspec workset open ${name} --tool code`,
     }
   );
 }
@@ -138,11 +136,11 @@ export function launchOpenerCommand(
   return new Promise((resolve, reject) => {
     const launchFailure = (error: unknown): StoreError =>
       new StoreError(
-        `无法启动 ${command.label}：${asErrorMessage(error)}`,
+        `Could not launch ${command.label}: ${asErrorMessage(error)}`,
         'workset_launch_failed',
         {
           target: 'workset.tool',
-          fix: `请确认 '${command.executable}' 能在此终端运行，或使用 --tool 指定其他已安装的工具。`,
+          fix: `Check that '${command.executable}' runs from this terminal, or pass --tool with another installed tool.`,
         }
       );
 
@@ -198,7 +196,7 @@ interface PreparedOpen {
   codeWorkspacePath: string;
 }
 
-class WorksetCommand {
+export class WorksetCommand {
   async create(
     name: string | undefined,
     options: WorksetCreateOptions = {}
@@ -228,7 +226,7 @@ class WorksetCommand {
 
       console.log('');
       console.log(
-        `已保存 workset '${workset.name}' (${workset.members.length} 个成员) 到本机。`
+        `Saved workset '${workset.name}' (${workset.members.length} member${workset.members.length === 1 ? '' : 's'}) to your machine.`
       );
 
       if (interactive && workset.tool !== undefined && table !== undefined) {
@@ -252,7 +250,7 @@ class WorksetCommand {
       }
 
       console.log(
-        `随时通过以下命令打开: openspec-cn workset open ${workset.name}`
+        `Open it any time with: openspec workset open ${workset.name}`
       );
     } catch (error) {
       emitFailure(options.json, { workset: null, status: [] }, error, 'workset_error');
@@ -264,9 +262,9 @@ class WorksetCommand {
     options: WorksetCreateOptions
   ): Promise<Workset> {
     if (!name) {
-      throw new StoreError('请提供 workset 名称。', 'workset_name_required', {
+      throw new StoreError('Pass a workset name.', 'workset_name_required', {
         target: 'workset.name',
-        fix: 'openspec-cn workset create <name> --member <path>',
+        fix: 'openspec workset create <name> --member <path>',
       });
     }
 
@@ -275,11 +273,11 @@ class WorksetCommand {
     const memberFlags = options.member ?? [];
     if (memberFlags.length === 0) {
       throw new StoreError(
-        '请至少提供一个成员文件夹。',
+        'Pass at least one member folder.',
         'workset_members_required',
         {
           target: 'workset.member',
-          fix: `openspec-cn workset create ${name} --member <path> --member <name>=<path>`,
+          fix: `openspec workset create ${name} --member <path> --member <name>=<path>`,
         }
       );
     }
@@ -309,7 +307,7 @@ class WorksetCommand {
 
       if (worksets.length === 0) {
         console.log(
-          '没有已保存的 worksets。通过以下命令创建: openspec-cn workset create'
+          'No worksets saved. Create one with: openspec workset create'
         );
         return;
       }
@@ -321,7 +319,7 @@ class WorksetCommand {
       for (const workset of worksets) {
         const toolLabel =
           workset.tool !== undefined
-            ? `  （在 ${findOpener(table, workset.tool)?.label ?? workset.tool} 中打开）`
+            ? `  (opens in ${findOpener(table, workset.tool)?.label ?? workset.tool})`
             : '';
         console.log(`${workset.name}${toolLabel}`);
         for (const row of formatMemberRows(workset.members)) {
@@ -339,11 +337,11 @@ class WorksetCommand {
     try {
       if (options.json) {
         throw new StoreError(
-          'workset open 会将此终端移交给所选工具，不支持 JSON 模式。',
+          'workset open hands this terminal to the chosen tool and has no JSON mode.',
           'workset_open_json_unsupported',
           {
             target: 'workset.tool',
-            fix: '使用以下命令查看 worksets：openspec-cn workset list --json',
+            fix: 'Inspect worksets with: openspec workset list --json',
           }
         );
       }
@@ -371,11 +369,11 @@ class WorksetCommand {
 
         if (surviving.length === 0) {
           throw new StoreError(
-            `Workset '${name}' 在此机器上不存在任何成员文件夹。`,
+            `No member folder of workset '${name}' exists on this machine.`,
             'workset_no_members_available',
             {
               target: 'workset.member',
-              fix: `重新组合：openspec-cn workset remove ${name} --yes && openspec-cn workset create ${name} --member <path>`,
+              fix: `Recompose it: openspec workset remove ${name} --yes && openspec workset create ${name} --member <path>`,
             }
           );
         }
@@ -391,13 +389,13 @@ class WorksetCommand {
 
       for (const member of prepared.skipped) {
         console.error(
-          `已跳过 '${member.name}'（${member.path} 不可用）。`
+          `Skipped '${member.name}' (${member.path} is not available).`
         );
       }
       if (prepared.workset.members[0] !== prepared.surviving[0]) {
         const primary = prepared.surviving[0];
         console.error(
-          `使用 '${primary.name}'（${primary.path}）作为此次打开的主成员。`
+          `Using '${primary.name}' (${primary.path}) as the primary for this open.`
         );
       }
 
@@ -420,11 +418,11 @@ class WorksetCommand {
       } else {
         if (!isInteractive()) {
           throw new StoreError(
-            `Workset '${name}' 未保存工具。`,
+            `Workset '${name}' has no saved tool.`,
             'workset_tool_required',
             {
               target: 'workset.tool',
-              fix: `openspec-cn workset open ${name} --tool <id>`,
+              fix: `openspec workset open ${name} --tool <id>`,
             }
           );
         }
@@ -450,11 +448,11 @@ class WorksetCommand {
 
       if (opener.style === 'workspace-file') {
         console.log(
-          `正在 ${opener.label} 中打开 '${name}'（将打开一个窗口；此命令返回）。`
+          `Opening '${name}' in ${opener.label} (a window opens; this command returns).`
         );
       } else {
         console.log(
-          `将此终端移交给 ${opener.label} 以处理 '${name}'（退出时会话结束）。`
+          `Handing this terminal to ${opener.label} for '${name}' (the session ends when you exit).`
         );
       }
 
@@ -472,7 +470,7 @@ class WorksetCommand {
           if (alternative !== null) {
             throw new StoreError(error.message, 'workset_launch_failed', {
               target: 'workset.tool',
-              fix: `运行：openspec-cn workset open ${name} --tool ${alternative}`,
+              fix: `Run: openspec workset open ${name} --tool ${alternative}`,
             });
           }
         }
@@ -494,9 +492,9 @@ class WorksetCommand {
         prepared !== undefined &&
         !isPromptCancellationError(error)
       ) {
-        console.error('手动打开：');
-        console.error(`  工作区文件：${prepared.codeWorkspacePath}`);
-        console.error('  成员：');
+        console.error('Open manually:');
+        console.error(`  Workspace file: ${prepared.codeWorkspacePath}`);
+        console.error('  Members:');
         for (const row of formatMemberRows(prepared.surviving)) {
           console.error(`    ${row}`);
         }
@@ -518,11 +516,11 @@ class WorksetCommand {
 
         if (options.json || !isInteractive()) {
           throw new StoreError(
-            '非交互式删除 workset 需使用 --yes。',
+            'Pass --yes to remove a workset non-interactively.',
             'workset_remove_confirmation_required',
             {
               target: 'workset.name',
-              fix: `openspec-cn workset remove ${name} --yes`,
+              fix: `openspec workset remove ${name} --yes`,
             }
           );
         }
@@ -530,11 +528,11 @@ class WorksetCommand {
         const confirmed = await confirmRemoveInteractively(workset);
         if (!confirmed) {
           throw new StoreError(
-            'Workset 删除已取消。',
+            'Workset remove cancelled.',
             'workset_remove_cancelled',
             {
               target: 'workset.name',
-              fix: '准备好后重新运行删除。',
+              fix: 'Rerun remove when you are ready.',
             }
           );
         }
@@ -547,111 +545,9 @@ class WorksetCommand {
         return;
       }
 
-      console.log(`已删除 workset '${name}'。成员文件夹未被触及。`);
+      console.log(`Removed workset '${name}'. Member folders were not touched.`);
     } catch (error) {
       emitFailure(options.json, { removed: null, status: [] }, error, 'workset_error');
     }
   }
-}
-
-function collectMember(value: string, previous: string[]): string[] {
-  return [...previous, value];
-}
-
-export function registerWorksetCommand(program: Command): void {
-  const worksetCommand = new WorksetCommand();
-  const groupDescription =
-    COMMAND_REGISTRY.find((entry) => entry.name === 'workset')?.description ??
-    '组合、保存和打开个人工作视图（纯本地）';
-  const workset = program.command('workset').description(groupDescription);
-  // Parsed at the group level so `openspec-cn workset --json` keeps the
-  // one-JSON-document contract instead of a raw Commander error. The
-  // parent option matches anywhere; actions read optsWithGlobals().
-  workset.addOption(new Option('--json', '以 JSON 格式输出').hideHelp());
-
-  workset
-    .command('create [name]')
-    .description('组合并保存一个您选择的文件夹命名工作视图')
-    .option(
-      '--member <member>',
-      '成员文件夹，格式为 <path> 或 <name>=<path>；可重复，第一个为主目录',
-      collectMember,
-      [] as string[]
-    )
-    .option('--tool <id>', '打开此 workset 的首选工具')
-    .option('--json', '以 JSON 格式输出')
-    .action(async (name: string | undefined, _options: WorksetCreateOptions, command: Command) => {
-      await worksetCommand.create(name, command.optsWithGlobals());
-    });
-
-  workset
-    .command('list')
-    .alias('ls')
-    .description('显示已保存的 worksets 及其成员')
-    .option('--json', '以 JSON 格式输出')
-    .action(async (_options: { json?: boolean }, command: Command) => {
-      await worksetCommand.list(command.optsWithGlobals());
-    });
-
-  workset
-    .command('open <name>')
-    .description('在您的工具中打开已保存的 workset（编辑器窗口或代理会话）')
-    .option('--tool <id>', '仅本次使用此工具打开')
-    .addOption(
-      // Parsed so Commander never owns the error; rejected in the
-      // action with one JSON document. Hidden because help should not
-      // advertise a mode that only rejects.
-      new Option('--json', 'open 不支持').hideHelp()
-    )
-    .action(async (name: string, _options: WorksetOpenOptions, command: Command) => {
-      await worksetCommand.open(name, command.optsWithGlobals());
-    });
-
-  workset
-    .command('remove <name>')
-    .description('删除已保存的 workset（成员文件夹不会被触及）')
-    .option('--yes', '非交互式确认删除')
-    .option('--json', '以 JSON 格式输出')
-    .action(async (name: string, _options: WorksetRemoveOptions, command: Command) => {
-      await worksetCommand.remove(name, command.optsWithGlobals());
-    });
-
-  const subcommandsLine = workset.commands
-    .map((subcommand) => {
-      const aliases = subcommand.aliases();
-      return aliases.length > 0
-        ? `${subcommand.name()} (${aliases.join(', ')})`
-        : subcommand.name();
-    })
-    .join(', ');
-
-  // One handler owns missing AND unknown subcommands: known
-  // subcommands dispatch above; everything else lands in this action
-  // (allowExcessArguments routes the unknown operand here), keeping
-  // the one-JSON-document contract for `--json` probes.
-  workset.allowExcessArguments(true);
-  workset.action(() => {
-    const attempted = workset.args.filter(
-      (operand) => !operand.startsWith('-')
-    );
-    const message =
-      attempted.length > 0
-        ? `未知命令 '${attempted[0]}'（属于 'openspec-cn workset'）。workset 子命令：${subcommandsLine}。`
-        : `缺少子命令（'openspec-cn workset'）。workset 子命令：${subcommandsLine}。`;
-    if (workset.opts().json) {
-      printJson({
-        status: [
-          {
-            severity: 'error',
-            code: 'unknown_workset_subcommand',
-            message,
-            fix: '运行 workset 的某个子命令。',
-          } satisfies StoreDiagnostic,
-        ],
-      });
-    } else {
-      console.error(`错误：${message}`);
-    }
-    process.exitCode = 1;
-  });
 }

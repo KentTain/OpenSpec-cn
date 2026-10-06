@@ -1,6 +1,6 @@
-# 从旧版工作流迁移
+# Migrating from the legacy workflow
 
-> 从旧版 `/openspec:*` 命令迁移到 OPSX。
+> Moving from the legacy `/openspec:*` commands to OPSX.
 
 <!-- WIP, on the todo list: this page is not written yet and is held back from the
 site (its section is commented out in website/docs.sync.config.mjs, 2026-08-21). The
@@ -9,10 +9,18 @@ once the prose lands. -->
 
 <!-- Skeleton: headings only. -->
 
-## 发生了什么变化，为什么
+## What changed and why
 
-## 命令映射
+## Command mapping
 
-## 迁移项目
+## Migrating a project
 
-## 行为差异
+### Back up custom content before cleanup
+
+Files listed under **Files to remove** are deleted entirely. Back up any custom content before accepting cleanup.
+
+- **`openspec/AGENTS.md`**: detected by existence alone; cleanup does not inspect its contents.
+- **Root-level `AGENTS.md`, `CLAUDE.md`, and other config files**: cleanup removes OpenSpec marker blocks and preserves content outside those blocks.
+- **Legacy command directories**: cleanup preserves files it does not recognize as generated commands.
+
+## Behavior differences

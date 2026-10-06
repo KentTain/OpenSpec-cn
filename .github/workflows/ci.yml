@@ -184,6 +184,11 @@ jobs:
 
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@84c0677f58dcedf3b91f8223ce36a9ea5b3c84b7 # v15
+        with:
+          # Dependabot runs cannot access the FlakeHub credentials available to
+          # regular CI, so keep those runs on the GitHub Actions cache.
+          use-flakehub: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'disabled' || 'no-preference' }}
+          use-gha-cache: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'enabled' || 'no-preference' }}
 
       # Run the update script before `nix build`, not after. The script recomputes
       # the pnpmDeps hash from pnpm-lock.yaml and rewrites flake.nix in place, so a
@@ -209,6 +214,42 @@ jobs:
       - name: Restore flake.nix
         if: always()
         run: git checkout -- flake.nix || true
+
+      - name: Test downstream overlay composition
+        run: |
+          # Interpolation belongs to Nix, not the shell.
+          # shellcheck disable=SC2016
+          nix eval --impure --expr '
+            let
+              flake = builtins.getFlake (toString ./.);
+              system = builtins.currentSystem;
+              pkgs = import flake.inputs.nixpkgs {
+                inherit system;
+                overlays = [ flake.overlays.default ];
+              };
+              composed = import flake.inputs.nixpkgs {
+                inherit system;
+                overlays = [
+                  flake.overlays.default
+                  (_final: prev: {
+                    nodejs_22 = prev.nodejs_22.overrideAttrs (_: {
+                      pname = "openspec-test-nodejs";
+                    });
+                  })
+                ];
+              };
+              overridden = pkgs.openspec.overrideAttrs (_: { version = "0.0.0-test"; });
+            in
+            assert pkgs.openspec.drvPath == flake.packages.${system}.default.drvPath;
+            assert pkgs.openspec.drvPath == flake.packages.${system}.openspec.drvPath;
+            # stdenv selects the dev output of multi-output native build inputs.
+            assert builtins.any (input: input.drvPath == composed.nodejs_22.drvPath)
+              composed.openspec.nativeBuildInputs;
+            assert composed.openspec.drvPath != pkgs.openspec.drvPath;
+            assert overridden.version == "0.0.0-test";
+            assert overridden.pnpmDeps.version == "0.0.0-test";
+            true
+          '
 
       - name: Build with Nix
         run: nix build

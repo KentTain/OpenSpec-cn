@@ -121,7 +121,7 @@ export async function instructionsCommand(
     return;
   }
 
-  const spinner = options.json ? undefined : ora('正在生成指令...').start();
+  const spinner = options.json ? undefined : ora('Generating instructions...').start();
 
   try {
     const planningHome = toPlanningHome(root);
@@ -130,7 +130,7 @@ export async function instructionsCommand(
       options.change,
       projectRoot,
       root.changesDir,
-      { newChangeHint: withStoreFlag(root, 'openspec-cn new change <name>') }
+      { newChangeHint: withStoreFlag(root, 'openspec new change <name>') }
     );
 
     // Validate schema if explicitly provided
@@ -151,7 +151,7 @@ export async function instructionsCommand(
       spinner?.stop();
       const validIds = context.graph.getAllArtifacts().map((a) => a.id);
       throw new Error(
-        `缺少必要参数 <artifact>。可用产出物：\n  ${validIds.join('\n  ')}`
+        `Missing required argument <artifact>. Valid artifacts:\n  ${validIds.join('\n  ')}`
       );
     }
 
@@ -161,7 +161,7 @@ export async function instructionsCommand(
       spinner?.stop();
       const validIds = context.graph.getAllArtifacts().map((a) => a.id);
       throw new Error(
-        `在 schema '${context.schemaName}' 中未找到产出物 '${artifactId}'。可用产出物：\n  ${validIds.join('\n  ')}`
+        `Artifact '${artifactId}' not found in schema '${context.schemaName}'. Valid artifacts:\n  ${validIds.join('\n  ')}`
       );
     }
 
@@ -211,12 +211,21 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   );
   console.log();
 
+  if (instructions.warnings) {
+    for (const warning of instructions.warnings) {
+      console.log('<warning>');
+      console.log(escapeEnvelopeTags(warning));
+      console.log('</warning>');
+      console.log();
+    }
+  }
+
   // Artifacts skipped via skip_specs get no creation directive: emitting the
   // task/template anyway would prompt an agent to write spec files that
   // validate then rejects as conflicting with the marker.
   if (instructions.skipped) {
     console.log('<warning>');
-    console.log(instructions.warning ?? '此制品已跳过（.openspec.yaml 中设置了 skip_specs）。');
+    console.log(instructions.warning ?? 'This artifact is skipped (skip_specs is set in .openspec.yaml).');
     console.log('</warning>');
     console.log();
     console.log('</artifact>');
@@ -227,8 +236,8 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   if (isBlocked) {
     const missing = dependencies.filter((d) => !d.done).map((d) => d.id);
     console.log('<warning>');
-    console.log('此产出物有未满足的依赖。请先完成它们，或谨慎继续。');
-    console.log(`缺失：${missing.join(', ')}`);
+    console.log('This artifact has unmet dependencies. Complete them first or proceed with caution.');
+    console.log(`Missing: ${missing.join(', ')}`);
     console.log('</warning>');
     console.log();
   }
@@ -236,7 +245,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Task directive
   console.log('<task>');
   console.log(
-    `为变更 "${escapeEnvelopeTags(changeName)}" 创建 ${escapeEnvelopeTags(artifactId)} 产出物。`
+    `Create the ${escapeEnvelopeTags(artifactId)} artifact for change "${escapeEnvelopeTags(changeName)}".`
   );
   console.log(escapeEnvelopeTags(description));
   console.log('</task>');
@@ -245,7 +254,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Project context (AI constraint - do not include in output)
   if (context) {
     console.log('<project_context>');
-    console.log('<!-- 以下是供你参考的背景信息。请勿将其包含在你的输出中。 -->');
+    console.log('<!-- This is background information for you. Do NOT include this in your output. -->');
     console.log(escapeEnvelopeTags(context));
     console.log('</project_context>');
     console.log();
@@ -260,7 +269,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Rules (AI constraint - do not include in output)
   if (rules && rules.length > 0) {
     console.log('<rules>');
-    console.log('<!-- 以下是你需要遵守的约束条件。请勿将其包含在你的输出中。 -->');
+    console.log('<!-- These are constraints for you to follow. Do NOT include this in your output. -->');
     for (const rule of rules) {
       // Flattened so a newline cannot forge a sibling bullet, but never
       // truncated: these are instructions an agent has to follow in full.
@@ -273,7 +282,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
   // Dependencies (files to read for context)
   if (dependencies.length > 0) {
     console.log('<dependencies>');
-    console.log('请先阅读以下文件的当前内容，然后再创建此制品（即使之前看到过，也请重新从磁盘读取——它们可能已被编辑过）：');
+    console.log('Read the current contents of these files before creating this artifact (re-read them from disk even if you saw them earlier - they may have been edited):');
     console.log();
     for (const dep of dependencies) {
       // A dependency satisfied via skip_specs has no files by design: telling
@@ -281,7 +290,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
       // for spec files that must not exist.
       if (dep.skipped) {
         console.log(`<dependency id="${dep.id}" status="skipped">`);
-        console.log(`  <description>已跳过：该变更声明了 skip_specs，因此此制品没有需要阅读的文件。</description>`);
+        console.log(`  <description>Skipped: the change declares skip_specs, so this artifact has no files to read.</description>`);
         console.log('</dependency>');
         continue;
       }
@@ -298,7 +307,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 
   // Output location
   console.log('<output>');
-  console.log(`写入：${resolvedOutputPath}`);
+  console.log(`Write to: ${resolvedOutputPath}`);
   console.log('</output>');
   console.log();
 
@@ -322,14 +331,14 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 
   // Success criteria placeholder
   console.log('<success_criteria>');
-  console.log('<!-- 具体内容由 schema 校验规则定义 -->');
+  console.log('<!-- To be defined in schema validation rules -->');
   console.log('</success_criteria>');
   console.log();
 
   // Unlocks
   if (unlocks.length > 0) {
     console.log('<unlocks>');
-    console.log(`完成此产出物后将启用：${unlocks.join(', ')}`);
+    console.log(`Completing this artifact enables: ${unlocks.join(', ')}`);
     console.log('</unlocks>');
     console.log();
   }
@@ -342,6 +351,23 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
 // Apply Instructions Command
 // -----------------------------------------------------------------------------
 
+interface LocatedTask extends ParsedTask {
+  sourcePath: string;
+  line: number;
+}
+
+/** Adds one-based source locations to parsed tasks without changing task parsing. */
+function parseLocatedTasks(content: string, sourcePath: string): LocatedTask[] {
+  const tasks: LocatedTask[] = [];
+
+  for (const [index, line] of content.split('\n').entries()) {
+    const [task] = parseTaskLines(line);
+    if (task) tasks.push({ ...task, sourcePath, line: index + 1 });
+  }
+
+  return tasks;
+}
+
 /**
  * Turns parsed task lines into the listed task items.
  *
@@ -353,7 +379,7 @@ export function printInstructionsText(instructions: ArtifactInstructions, isBloc
  * what puts apply in its "nothing to work on" state, so a file of nothing but
  * text-less checkboxes asks to be rewritten instead of being called done.
  */
-function toTaskItems(parsed: ParsedTask[]): TaskItem[] {
+function toTaskItems(parsed: LocatedTask[]): TaskItem[] {
   const tasks: TaskItem[] = [];
 
   for (const task of parsed) {
@@ -362,6 +388,8 @@ function toTaskItems(parsed: ParsedTask[]): TaskItem[] {
       id: `${tasks.length + 1}`,
       description: task.description,
       done: task.done,
+      sourcePath: task.sourcePath,
+      line: task.line,
     });
   }
 
@@ -381,10 +409,10 @@ function describeArtifactRemedy(
   options: { many?: boolean } = {}
 ): string {
   const target = artifactId ?? '<artifact>';
-  const verb = options.many ? '请分别用' : '请用';
+  const verb = options.many ? 'Create each with' : 'Create it with';
   return (
-    `${verb} \`openspec instructions ${target} --change ${changeName}\` 创建` +
-    `（\`openspec status --change ${changeName}\` 会显示还剩什么）。`
+    `${verb} \`openspec instructions ${target} --change ${changeName}\`` +
+    ` (\`openspec status --change ${changeName}\` shows what is left).`
   );
 }
 
@@ -492,9 +520,9 @@ async function collectApplyWarnings(input: {
   const specTarget = specArtifacts.length === 1 ? specArtifacts[0].id : '<artifact-id>';
   return [
     ...warnings,
-    `此变更没有增量规范（delta specs），也未声明 \`skip_specs: true\`，因此 \`openspec-cn validate ${changeName}\` 会校验失败。` +
-      `在实现前先编写增量规范（\`openspec-cn instructions ${specTarget} --change ${changeName}\`），` +
-      `或者，如果此变更确实没有改变任何已指定的行为，则在 ${metadataPath} 中添加 \`skip_specs: true\`。`,
+    `This change has no delta specs and does not declare \`skip_specs: true\`, so \`openspec validate ${changeName}\` fails on it. ` +
+      `Write the delta specs before implementing (\`openspec instructions ${specTarget} --change ${changeName}\`), ` +
+      `or add \`skip_specs: true\` to ${metadataPath} if this change really changes no specified behavior.`,
   ];
 }
 
@@ -571,7 +599,7 @@ export async function generateApplyInstructions(
   // Parse every concrete file matched by apply.tracks. A tracking path may be
   // a glob owned by an artifact with any ID, so treating it as one literal
   // path loses task evidence for valid custom schemas.
-  let parsedTasks: ParsedTask[] = [];
+  let parsedTasks: LocatedTask[] = [];
   const unavailableTrackingFiles: Array<{ path: string; reason: string }> = [];
   let tracksFileExists = false;
   if (tracksFile) {
@@ -580,7 +608,7 @@ export async function generateApplyInstructions(
     for (const tracksPath of tracksPaths) {
       try {
         const tasksContent = await fs.promises.readFile(tracksPath, 'utf-8');
-        parsedTasks.push(...parseTaskLines(tasksContent));
+        parsedTasks.push(...parseLocatedTasks(tasksContent, tracksPath));
       } catch (error) {
         const code = (error as NodeJS.ErrnoException)?.code;
         const message = error instanceof Error ? error.message : String(error);
@@ -607,11 +635,11 @@ export async function generateApplyInstructions(
     state = 'blocked';
     const chain =
       missingPrerequisites.length > missingArtifacts.length
-        ? `\n尚未创建，按构建顺序：${missingPrerequisites.join(', ')}。` +
-          ` 在应用前先构建此变更所需的部分 - schema 会指明哪些是条件性的。`
+        ? `\nNot created yet, in build order: ${missingPrerequisites.join(', ')}.` +
+          ` Build the ones this change needs before applying - the schema says which are conditional.`
         : '';
     instruction =
-      `暂时无法应用此变更。缺少产出物：${missingArtifacts.join(', ')}。${chain}` +
+      `Cannot apply this change yet. Missing artifacts: ${missingArtifacts.join(', ')}.${chain}` +
       `\n${describeArtifactRemedy(
         changeName,
         // Only name one when one is left: the first of several would be the
@@ -624,19 +652,19 @@ export async function generateApplyInstructions(
     const tracksFilename = path.basename(tracksFile);
     state = 'blocked';
     instruction =
-      `${tracksFilename} 文件缺失，必须先创建。` +
+      `The ${tracksFilename} file is missing and must be created.` +
       `\n${describeArtifactRemedy(changeName, findArtifactIdFor(schema, tracksFile))}`;
   } else if (tracksFile && unavailableTrackingFiles.length > 0 && tasks.length === 0) {
     state = 'blocked';
-    instruction = '没有可读取的任务描述。';
+    instruction = 'No readable task descriptions are available.';
   } else if (tracksFile && tracksFileExists && tasks.length === 0) {
     // Tracking file exists but lists nothing an agent can work on: either no
     // checkboxes at all, or only checkboxes with no text after them.
     const tracksFilename = path.basename(tracksFile);
     state = 'blocked';
     instruction =
-      `${tracksFilename} 文件已存在，但其中没有可执行的任务。` +
-      `\n向 ${tracksFilename} 中添加任务，或重建它：${describeArtifactRemedy(changeName, findArtifactIdFor(schema, tracksFile))}`;
+      `The ${tracksFilename} file exists but contains no tasks to work on.` +
+      `\nAdd tasks to ${tracksFilename}, or rebuild it: ${describeArtifactRemedy(changeName, findArtifactIdFor(schema, tracksFile))}`;
   } else if (
     tracksFile &&
     unavailableTrackingFiles.length === 0 &&
@@ -644,30 +672,33 @@ export async function generateApplyInstructions(
     total > 0
   ) {
     state = 'all_done';
-    instruction = '所有任务已完成！此变更可以归档了。\n归档前请考虑运行测试并审查变更。';
+    instruction = 'All tracked tasks are complete.\nReview or verify the change as appropriate before archiving.';
   } else if (!tracksFile) {
     // No tracking file configured in schema - ready to apply
     state = 'ready';
-    instruction = schemaInstruction?.trim() ?? '所有必需的产出物已完成。可以开始实现。';
+    instruction = schemaInstruction?.trim() ?? 'All required artifacts complete. Proceed with implementation.';
   } else {
     state = 'ready';
-    instruction = schemaInstruction?.trim() ?? '阅读上下文文件，按顺序处理待办任务，完成一项就标记一项。\n遇到阻塞或需要澄清时暂停。';
+    instruction = schemaInstruction?.trim() ?? 'Read context files, work through pending tasks, mark complete as you go.\nPause if you hit blockers or need clarification.';
   }
 
   if (unavailableTrackingFiles.length > 0) {
     const unavailableDetails = unavailableTrackingFiles
       .map((file) => `- ${file.path}: ${file.reason}`)
       .join('\n');
-    instruction += `\n由于无法获取任务追踪证据，任务完成情况未被校验：\n${unavailableDetails}`;
+    instruction += `\nTask completion is not verified because tracking evidence was unavailable:\n${unavailableDetails}`;
   }
 
-  const warnings = await collectApplyWarnings({
-    state,
-    schema,
-    changeDir,
-    changeName,
-    skippedArtifacts: context.skippedArtifacts,
-  });
+  const warnings = [
+    ...(context.warnings ?? []),
+    ...(await collectApplyWarnings({
+      state,
+      schema,
+      changeDir,
+      changeName,
+      skippedArtifacts: context.skippedArtifacts,
+    })),
+  ];
 
   return {
     changeName,
@@ -695,7 +726,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
     return;
   }
 
-  const spinner = options.json ? undefined : ora('正在生成应用指令...').start();
+  const spinner = options.json ? undefined : ora('Generating apply instructions...').start();
 
   try {
     const planningHome = toPlanningHome(root);
@@ -704,7 +735,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
       options.change,
       projectRoot,
       root.changesDir,
-      { newChangeHint: withStoreFlag(root, 'openspec-cn new change <name>') }
+      { newChangeHint: withStoreFlag(root, 'openspec new change <name>') }
     );
 
     // Validate schema if explicitly provided
@@ -739,7 +770,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   const { changeName, schemaName, contextFiles, progress, tasks, state, missingArtifacts, warnings, instruction } = instructions;
 
   console.log(`## Apply: ${changeName}`);
-  console.log(`Schema：${schemaName}`);
+  console.log(`Schema: ${schemaName}`);
   console.log();
 
   if (instructions.references && instructions.references.length > 0) {
@@ -749,22 +780,22 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Warning for blocked state
   if (state === 'blocked' && missingArtifacts) {
-    console.log('### ⚠️ 已阻塞');
+    console.log('### ⚠️ Blocked');
     console.log();
-    console.log(`缺失的产出物：${missingArtifacts.join(', ')}`);
+    console.log(`Missing artifacts: ${missingArtifacts.join(', ')}`);
     if (
       instructions.missingPrerequisites &&
       instructions.missingPrerequisites.length > missingArtifacts.length
     ) {
       console.log(
-        `尚未创建，按构建顺序：${instructions.missingPrerequisites.join(', ')}`
+        `Not created yet, in build order: ${instructions.missingPrerequisites.join(', ')}`
       );
     }
     console.log();
   }
 
   if (warnings && warnings.length > 0) {
-    console.log('### ⚠️ 警告');
+    console.log('### ⚠️ Warnings');
     console.log();
     for (const warning of warnings) {
       console.log(`- ${warning}`);
@@ -775,7 +806,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   // Context files (dynamically from schema)
   const contextFileEntries = Object.entries(contextFiles);
   if (contextFileEntries.length > 0) {
-    console.log('### 上下文文件');
+    console.log('### Context Files');
     for (const [artifactId, filePaths] of contextFileEntries) {
       for (const filePath of filePaths) {
         console.log(`- ${artifactId}: ${filePath}`);
@@ -786,18 +817,18 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
 
   // Progress (only show if we have tracking)
   if (progress.total > 0 || tasks.length > 0) {
-    console.log('### 进度');
+    console.log('### Progress');
     if (state === 'all_done') {
-      console.log(`${progress.complete}/${progress.total} 已完成 ✓`);
+      console.log(`${progress.complete}/${progress.total} complete ✓`);
     } else {
-      console.log(`${progress.complete}/${progress.total} 已完成`);
+      console.log(`${progress.complete}/${progress.total} complete`);
     }
     console.log();
   }
 
   // Tasks
   if (tasks.length > 0) {
-    console.log('### 任务');
+    console.log('### Tasks');
     for (const task of tasks) {
       const checkbox = task.done ? '[x]' : '[ ]';
       console.log(`- ${checkbox} ${task.description}`);
@@ -806,7 +837,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   }
 
   // Instruction
-  console.log('### 指令');
+  console.log('### Instruction');
   console.log(instruction);
   console.log();
 
@@ -831,14 +862,14 @@ export async function archiveInstructionsCommand(
     return;
   }
 
-  const spinner = options.json ? undefined : ora('正在加载归档输入...').start();
+  const spinner = options.json ? undefined : ora('Loading archive inputs...').start();
 
   try {
     const changeName = await validateChangeExists(
       options.change,
       root.path,
       root.changesDir,
-      { newChangeHint: withStoreFlag(root, 'openspec-cn new change <name>') }
+      { newChangeHint: withStoreFlag(root, 'openspec new change <name>') }
     );
     const projectConfig = readProjectConfig(root.path);
     const instructions = generateArchiveInstructions(changeName, projectConfig);
@@ -858,7 +889,7 @@ export async function archiveInstructionsCommand(
 }
 
 export function printArchiveInstructionsText(instructions: ArchiveInstructions): void {
-  console.log(`## 归档输入：${instructions.changeName}`);
+  console.log(`## Archive Inputs: ${instructions.changeName}`);
   console.log();
   printOperationInputsText(instructions);
 }
@@ -868,7 +899,7 @@ function printOperationInputsText(inputs: {
   operationGuidance?: string[];
 }): void {
   if (inputs.context) {
-    console.log('### 项目上下文（必填的指令输入）');
+    console.log('### Project Context (required instruction input)');
     // Printed verbatim on purpose. Escaping a leading `#` would also fire inside
     // fenced code (`# install deps`), so heading forgery is not guarded here.
     console.log(inputs.context);
@@ -876,7 +907,7 @@ function printOperationInputsText(inputs: {
   }
 
   if (inputs.operationGuidance && inputs.operationGuidance.length > 0) {
-    console.log('### 操作指引（建议性）');
+    console.log('### Operation Guidance (advisory)');
     for (const guidance of inputs.operationGuidance) {
       console.log(`- ${sanitizeInline(guidance, Infinity)}`);
     }
@@ -884,6 +915,6 @@ function printOperationInputsText(inputs: {
   }
 
   if (!inputs.context && !inputs.operationGuidance) {
-    console.log('未配置项目上下文或操作指南。');
+    console.log('No project context or operation guidance configured.');
   }
 }

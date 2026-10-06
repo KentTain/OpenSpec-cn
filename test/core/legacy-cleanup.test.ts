@@ -834,9 +834,9 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatCleanupSummary(result);
-      expect(summary).toContain('已清理旧版文件：');
-      expect(summary).toContain('✓ 已移除 CLAUDE.md');
-      expect(summary).toContain('✓ 已移除 CLINE.md');
+      expect(summary).toContain('Cleaned up legacy files:');
+      expect(summary).toContain('✓ Removed CLAUDE.md');
+      expect(summary).toContain('✓ Removed CLINE.md');
     });
 
     it('should format deleted directories', () => {
@@ -849,7 +849,7 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatCleanupSummary(result);
-      expect(summary).toContain('✓ 已移除 .claude/commands/openspec/（已由 OpenSpec skills 与命令取代）');
+      expect(summary).toContain('✓ Removed .claude/commands/openspec/ (replaced by OpenSpec skills and commands)');
     });
 
     it('should format modified files', () => {
@@ -862,7 +862,7 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatCleanupSummary(result);
-      expect(summary).toContain('✓ 已从 AGENTS.md 移除 OpenSpec 标记');
+      expect(summary).toContain('✓ Removed OpenSpec markers from AGENTS.md');
     });
 
     it('should include migration hint for project.md', () => {
@@ -875,7 +875,7 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatCleanupSummary(result);
-      expect(summary).toContain('需要您注意');
+      expect(summary).toContain('Needs your attention');
       expect(summary).toContain('openspec/project.md');
       expect(summary).toContain('config.yaml');
     });
@@ -890,7 +890,7 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatCleanupSummary(result);
-      expect(summary).toContain('清理过程中的错误：');
+      expect(summary).toContain('Errors during cleanup:');
       expect(summary).toContain('Failed to delete CLAUDE.md');
     });
 
@@ -923,9 +923,9 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('升级到新版 OpenSpec');
+      expect(summary).toContain('Upgrading to the new OpenSpec');
       expect(summary).toContain('agent skills');
-      expect(summary).toContain('一切照常工作');
+      expect(summary).toContain('keeping everything working');
     });
 
     it('should format config files as files to update (never remove)', () => {
@@ -942,11 +942,12 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      // Config files should be in "待更新文件", not "待移除文件"
-      expect(summary).toContain('待更新文件');
+      // Config files should be in "Files to update", not "Files to remove"
+      expect(summary).toContain('Files to update');
       expect(summary).toContain('• CLAUDE.md');
       // Should NOT be in removals
-      expect(summary).not.toContain('No user content to preserve');
+      expect(summary).not.toContain('Files to remove');
+      expect(summary).not.toContain('Back up any custom content');
     });
 
     it('should format files to be updated', () => {
@@ -963,9 +964,9 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('待更新文件');
-      expect(summary).toContain('标记将被移除');
-      expect(summary).toContain('您的内容会保留');
+      expect(summary).toContain('Files to update');
+      expect(summary).toContain('markers will be removed');
+      expect(summary).toContain('your content preserved');
       expect(summary).toContain('• CLINE.md');
     });
 
@@ -983,8 +984,9 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('待移除文件');
+      expect(summary).toContain('Files to remove');
       expect(summary).toContain('• .claude/commands/openspec/');
+      expect(summary).toContain('These files will be deleted entirely. Back up any custom content before proceeding:');
     });
 
     it('should format slash command files', () => {
@@ -1001,11 +1003,12 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('待移除文件');
+      expect(summary).toContain('Files to remove');
       expect(summary).toContain('• .cursor/commands/openspec-proposal.md');
+      expect(summary).toContain('These files will be deleted entirely. Back up any custom content before proceeding:');
     });
 
-    it('should format openspec/AGENTS.md', () => {
+    it('should warn that openspec/AGENTS.md will be deleted entirely without claiming it has no user content', () => {
       const detection = {
         configFiles: [],
         configFilesToUpdate: [],
@@ -1019,8 +1022,10 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('待移除文件');
+      expect(summary).toContain('Files to remove');
       expect(summary).toContain('• openspec/AGENTS.md');
+      expect(summary).toContain('These files will be deleted entirely. Back up any custom content before proceeding:');
+      expect(summary).not.toContain('No user content to preserve');
     });
 
     it('should include attention section for project.md', () => {
@@ -1037,11 +1042,12 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      expect(summary).toContain('需要您注意');
+      expect(summary).toContain('Needs your attention');
       expect(summary).toContain('• openspec/project.md');
-      expect(summary).toContain('我们不会删除此文件');
+      expect(summary).toContain('won\'t delete this file');
       expect(summary).toContain('config.yaml');
-      expect(summary).toContain('"context:"');
+      expect(summary).toContain('Ask your AI assistant');
+      expect(summary).toContain('rules for the matching artifacts');
     });
 
     it('should include attention section with other legacy artifacts', () => {
@@ -1058,10 +1064,10 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDetectionSummary(detection);
-      // Config files now in "待更新文件", not "待移除文件"
-      expect(summary).toContain('待更新文件');
+      // Config files now in "Files to update", not "Files to remove"
+      expect(summary).toContain('Files to update');
       expect(summary).toContain('CLAUDE.md');
-      expect(summary).toContain('需要您注意');
+      expect(summary).toContain('Needs your attention');
       expect(summary).toContain('openspec/project.md');
     });
 
@@ -1080,8 +1086,8 @@ ${OPENSPEC_MARKERS.end}`);
 
       const summary = formatDetectionSummary(detection);
       // Check both sections exist
-      expect(summary).toContain('待移除文件');
-      expect(summary).toContain('待更新文件');
+      expect(summary).toContain('Files to remove');
+      expect(summary).toContain('Files to update');
       // Check removals (only slash commands and openspec/AGENTS.md)
       expect(summary).toContain('• .claude/commands/openspec/');
       expect(summary).toContain('• openspec/AGENTS.md');
@@ -1112,8 +1118,8 @@ ${OPENSPEC_MARKERS.end}`);
       };
 
       const summary = formatDeferredGlobalPromptSummary(detection);
-      expect(summary).toContain('延迟清理全局提示词');
-      expect(summary).toContain('这些全局提示词只有在安装对应的替代 skills 后才会被移除。');
+      expect(summary).toContain('Deferred global prompts cleanup');
+      expect(summary).toContain('These global prompts will only be removed after matching replacement skills are installed');
       expect(summary).toContain(`codex: ${globalPrompt}`);
       expect(summary).toContain(globalPrompt);
     });
@@ -1139,23 +1145,30 @@ ${OPENSPEC_MARKERS.end}`);
   describe('formatProjectMdMigrationHint', () => {
     it('should return migration hint message', () => {
       const hint = formatProjectMdMigrationHint();
-      expect(hint).toContain('需要您注意');
+      expect(hint).toContain('Needs your attention');
       expect(hint).toContain('openspec/project.md');
-      expect(hint).toContain('我们不会删除此文件');
+      expect(hint).toContain('won\'t delete this file');
       expect(hint).toContain('config.yaml');
-      expect(hint).toContain('"context:"');
+      expect(hint).toContain('Ask your AI assistant');
     });
 
-    it('should include actionable instructions', () => {
+    it('should include a pasteable AI-assisted migration request', () => {
       const hint = formatProjectMdMigrationHint();
-      expect(hint).toContain('把有用的内容移到 config.yaml');
-      expect(hint).toContain('在合适的时候删除该文件');
+      expect(hint).toContain('Review openspec/project.md');
+      expect(hint).toContain('migrate its useful content to');
+      expect(hint).toContain('Do not delete project.md');
+      expect(hint).toContain('Review config.yaml, then delete project.md when ready');
     });
 
-    it('should explain the new context section benefits', () => {
+    it('should guide the agent to distill and route the content', () => {
       const hint = formatProjectMdMigrationHint();
-      expect(hint).toContain('包含进每一次 OpenSpec 请求');
-      expect(hint).toContain('更可靠');
+      expect(hint).toContain('Keep context concise');
+      expect(hint).toContain('only project-wide');
+      expect(hint).toContain('artifact creation, apply, and archive');
+      expect(hint).toContain('rules for the matching artifacts');
+      expect(hint).toContain('matching operations entry');
+      expect(hint).toContain('Leave out generic');
+      expect(hint).toContain('outdated, or verbose material');
     });
   });
 

@@ -1,22 +1,22 @@
-# 快速入门
+# Quickstart
 
-> 在新项目或现有项目中完成你的第一个变更，从想法到归档。
+> Your first change, from idea to archived, in a new or existing project.
 
-开始之前，你需要在本机安装 CLI（[安装](installation.md)），并在项目中初始化 OpenSpec（[设置你的项目](setup.md)）。
+Before you start, you need the CLI on your machine ([Installation](installation.md)) and OpenSpec initialized in your project ([Set up your project](setup.md)).
 
-## 从空项目开始
+## Start from an empty project
 
-即使还没有选定技术栈、也没有完整的架构，你也可以开始。在项目文件夹中初始化 OpenSpec，然后让 Agent 和你一起探索各种选项。在你的 AI 聊天框中：
+You can start without a chosen stack or a complete architecture. Initialize OpenSpec in your project folder, then ask your agent to explore the options with you. In your AI chat:
 
 ```text
 Help me explore a task tracker from scratch. I have not picked a stack. Compare the options and help me choose the first behavior to build.
 ```
 
-确定第一个变更需要什么，把后续的架构决策留到以后。让 Agent 提议这一个变更，然后按下面的步骤操作。随着项目成长，你可以随时重新审视架构。
+Decide what the first change needs and leave later architecture choices open. Ask your agent to propose that one change, then follow the steps below. You can revisit the architecture as the project grows.
 
-## 循环一览
+## The loop at a glance
 
-每个变更都经过相同的五个步骤：你先和你的 Agent 一起把想法想清楚，它起草计划，在代码尚未存在时你修正计划，Agent 据此构建，最后归档把实际交付的内容更新到 specs 中。
+Every change moves through the same five steps: you think the idea through with your agent, it drafts a plan, you correct the plan before any code exists, the agent builds from it, and archiving updates your specs with what shipped.
 
 ```mermaid
 flowchart LR
@@ -27,35 +27,35 @@ flowchart LR
     archive -. "next change" .-> explore
 ```
 
-下面的每个提示词都输入到你的 AI 聊天框中，也就是你让 AI 写代码的那个输入框。示例使用普通语言，因此可在各种工具中通用。你也可以直接调用 skill；语法因工具而异（[支持的工具](../reference/supported-tools.md)）。
+Every prompt below goes in your AI chat, the same place you ask for code. The examples use plain language so they work across tools. You can also invoke a skill directly; the syntax varies by tool ([supported tools](../reference/supported-tools.md)).
 
-## 第 1 步：探索
+## Step 1: Explore
 
-在要计划之前，先和你的 Agent 一起把想法想清楚。在 AI 聊天框中输入：
+Think the idea through with your agent before you ask for a plan. In your AI chat:
 
 ```text
 Help me explore how rate limiting should work in this app.
 ```
 
-探索是一种思考模式。Agent 会调查你的代码库、提出关键问题、勾勒备选方案并挑战假设。它从不写代码。它也不会写其他任何东西，除非你要求它捕获你已决定的结论、或它主动提出时你表示同意。产出是一个更清晰的想法。
+Explore is a thinking mode. The agent investigates your codebase, asks the questions that matter, sketches options, and challenges assumptions. It never writes code. It writes nothing else unless you ask it to capture what you decided, or say yes when it offers. The output is a sharper idea.
 
-在问题需要时一直停留在这个阶段。当形态感觉合适时，就交接给提案：
+Stay here as long as the problem needs. When the shape feels right, hand it off:
 
 ```text
 Propose the change we just discussed.
 ```
 
-这一行会替你启动提案，并带着你已经确定的所有内容。跳过第 2 步中的第一个提示词。
+That line starts propose for you, carrying everything you settled. Skip the first prompt in step 2.
 
-## 第 2 步：提案
+## Step 2: Propose
 
-提案把想法变成一份可评审的计划。如果从探索过来，它已经在运行了。如果是冷启动，当变更在你脑中已经清晰时，直接提问。在 AI 聊天框中输入：
+Propose turns the idea into a reviewable plan. Coming from explore, it's already running. Starting cold, when the change is clear in your head, ask directly. In your AI chat:
 
 ```text
 Propose a change to add rate limiting.
 ```
 
-Agent 会问它需要了解的问题，然后写入一个变更文件夹：
+The agent asks what it needs to, then writes a change folder:
 
 ```
 openspec/changes/add-rate-limiting/
@@ -65,46 +65,46 @@ openspec/changes/add-rate-limiting/
 └── tasks.md       the implementation checklist
 ```
 
-还没有任何代码。提案止步于计划。
+No code yet. Propose stops at the plan.
 
-## 第 3 步：评审并修正计划
+## Step 3: Review and correct the plan
 
-趁计划还只是一些文字、什么都没构建时修正它。按这个顺序阅读：
+Fix the plan while it's still words and nothing is built yet. Read in this order:
 
-- **`proposal.md`**：这是正确的问题吗？规模合适吗？
-- **`specs/`**：价值最高的阅读。你会把这些需求当作"完成"来接受吗？
-- **`tasks.md`**：任务是否覆盖了 specs，且没有超出？
+- **`proposal.md`**: is this the right problem, at the right size?
+- **`specs/`**: the highest-value read. Would you accept these requirements as done?
+- **`tasks.md`**: do the tasks cover the specs, and nothing more?
 
-要修正某个地方，两种方式都行：
+To fix something, either works:
 
-- 自己编辑文件。制品就是纯 Markdown，而文件就是计划本身。
-- 告诉你的 Agent 哪里不对（"spec 缺少未认证的情况"）。它会修订制品。
+- Edit the file yourself. The artifacts are plain markdown, and the files are the plan.
+- Tell your agent what's wrong ("the spec is missing the unauthenticated case"). It revises the artifacts.
 
-## 第 4 步：实施
+## Step 4: Apply
 
-实施把计划变成代码。开一个新的会话，因为在干净的上下文窗口上实施效果更好。在 AI 聊天框中输入：
+Apply turns the plan into code. Start a fresh chat session, since implementation goes better on a clean context window. In your AI chat:
 
 ```text
 Apply the add-rate-limiting change.
 ```
 
-Agent 读取变更文件夹，然后按 `tasks.md` 逐项推进，每完成一项就勾选一项。
+The agent reads the change folder, then works through `tasks.md`, checking off each task as it lands.
 
-- **被打断或上下文耗尽？** 开一个新会话让它再次实施。它会从第一个未勾选的任务继续。
-- **计划原来就错了？** 修正制品（第 3 步的任一方式），然后继续实施。
-- **进度**保存在 `tasks.md` 的复选框里。没有任何隐藏状态。
+- **Interrupted, or out of context?** Open a new session and ask it to apply again. It resumes at the first unchecked task.
+- **Plan turned out wrong?** Fix the artifacts (either way from step 3), then continue applying.
+- **Progress** lives in the `tasks.md` checkboxes. There is no hidden state.
 
-## 第 5 步：归档
+## Step 5: Archive
 
-归档做两件事：把变更的需求合并进你的主 specs，并把变更文件夹移入归档文件夹（在 `/openspec/changes/archive/*` 下）。
+Archiving does two things: it updates your main specs with the change's requirements, and it moves the change folder into the archive folder (in `/openspec/changes/archive/*`).
 
-当 `tasks.md` 中的每个复选框都被勾选后，在 AI 聊天框中输入：
+When every box in `tasks.md` is checked, in your AI chat:
 
 ```text
 Archive the add-rate-limiting change.
 ```
 
-逐步看一下归档做了什么：
+Step through what archiving does:
 
 ```file-steps
 ## The finished change
@@ -156,19 +156,32 @@ Archive the add-rate-limiting change.
           └── 2026-08-08-add-rate-limiting/
 ```
 
-Git 是另一件独立的事。把变更文件夹和代码一起提交，除此之外你的工作流没有任何变化。
+Git is a separate concern. Commit the change folder with the code, and nothing else about your workflow changes.
 
-## 更进一步
+### Keep or prune archived changes
 
-- [Delta specs](../reference/schemas/spec-driven/index.md#delta-specs-specmd)：如何在 delta spec 中编写行为变更。
-- [Profiles](../customize/profiles.md)：核心集之外的可选工作流（归档前验证、增量规划）。
+`openspec/changes/archive/` keeps the proposal, design, tasks, and delta for each finished change. In the archive flow above, the delta has already updated `openspec/specs/`.
 
-## 高级指南
+- **Keep the whole change folder** when you want a self-contained record in the current checkout.
+- **Remove an archived change's `specs/` folder** when Git is your spec history. Commit the archive first, then delete `openspec/changes/archive/<change>/specs/`. The proposal, design, and tasks remain in the checkout. `openspec validate --archived` still works because it checks task completion, not applied deltas.
+- **Remove the whole change folder** only when you no longer need its proposal, design, or task history in the checkout. The current specs do not change, but `openspec validate --archived` and searches of the checkout no longer include that change.
+
+> [!WARNING]
+> Keep the archive commit in your repository history if you want Git to retain the deleted files. Squashing the archive and cleanup commits together removes that intermediate snapshot.
+
+OpenSpec does not prune archived changes automatically or provide a retention setting.
+
+## Going further
+
+- [Delta specs](../reference/schemas/spec-driven/index.md#delta-specs-specmd): how to write the behavior changes in a delta spec.
+- [Profiles](../customize/profiles.md): optional workflows beyond the core set (verify before archive, incremental planning).
+
+## Advanced guides
 
 <!-- Planned pages, not yet written or in the README page map. Listed here so the quickstart routes to them once they exist. -->
 
-尚未编写；我们计划增加的指南：
+Not written yet; guides we plan to add:
 
-- **先做原型**：在写任何 spec 之前先粗写代码，然后从原型中学到的东西反向补全 proposal。
-- **迭代式构建**：一系列小变更，而不是一个大 proposal。
-- **修订已实施的变更**：实施之后计划又需要调整，但变更尚未合并或归档。
+- **Prototype first**: spike the code before any spec, then backfill the proposal from what the prototype taught you.
+- **Building iteratively**: a sequence of small changes instead of one big proposal.
+- **Revising an implemented change**: the plan needs to move again after apply, but the change hasn't merged or archived yet.

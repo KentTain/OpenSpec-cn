@@ -13,6 +13,7 @@ import {
   toRootOutput,
   withStoreFlag,
   isStoreSelectedRoot,
+  findDeclaringProjectRoot,
 } from '../../core/root-selection.js';
 import {
   loadChangeContext,
@@ -65,7 +66,7 @@ export const BATCH_STATUS_FAILURE_PAYLOAD: Record<string, unknown> = {
 
 export async function statusCommand(options: StatusOptions): Promise<void> {
   if (options.all && options.change) {
-    throw new Error('--all 和 --change 选项互斥。');
+    throw new Error('The --all and --change options are mutually exclusive.');
   }
 
   // The root resolves (and the store banner prints) before the spinner starts
@@ -79,18 +80,26 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
     return;
   }
 
-  const spinner = options.json ? undefined : ora('正在加载变更状态...').start();
+  const spinner = options.json ? undefined : ora('Loading change status...').start();
 
   try {
     const planningHome = toPlanningHome(root);
     const projectRoot = root.path;
     const rootOutput = toRootOutput(root);
-    const newChangeHint = withStoreFlag(root, 'openspec-cn new change <name>');
+    const newChangeHint = withStoreFlag(root, 'openspec new change <name>');
 
     // One store-flag decision serves the JSON `nextSteps` sentence and the text
     // `Next:` line, so a store-selected root can never carry `--store` in one
     // and drop it from the other.
     const storeOptions = isStoreSelectedRoot(root) ? { storeId: root.storeId } : {};
+    // A store holds planning artifacts only; the project declaring it is
+    // where implementation edits go (#2013).
+    const implementationRoot = isStoreSelectedRoot(root)
+      ? findDeclaringProjectRoot(root.storeId)
+      : null;
+    const statusOptions = implementationRoot
+      ? { ...storeOptions, implementationRoot }
+      : storeOptions;
 
     // Single definition of "load one change's status" so the batch and
     // single-change payloads can never drift apart.
@@ -100,7 +109,7 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
           changeDir: getChangeDir(planningHome, changeName),
           planningHome,
         }),
-        storeOptions
+        statusOptions
       );
 
     // Handle no-changes case gracefully — status is informational,
@@ -118,14 +127,14 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
         if (options.json) {
           console.log(
             JSON.stringify(
-              { changes: [], message: '没有活跃的变更。', root: rootOutput },
+              { changes: [], message: 'No active changes.', root: rootOutput },
               null,
               2
             )
           );
           return;
         }
-        console.log(`没有活跃的变更。使用以下命令创建：${newChangeHint}`);
+        console.log(`No active changes. Create one with: ${newChangeHint}`);
         return;
       }
 
@@ -197,7 +206,7 @@ export async function statusCommand(options: StatusOptions): Promise<void> {
       // who wants every change should not have to find it in --help.
       spinner?.stop();
       throw new Error(
-        `缺少必需选项 --change（或使用 --all 查看所有活跃变更）。可用的变更：\n  ${available.join('\n  ')}`
+        `Missing required option --change (or --all for every active change). Available changes:\n  ${available.join('\n  ')}`
       );
     }
 
@@ -240,13 +249,18 @@ export function printStatusText(status: ChangeStatus, options: PrintStatusTextOp
   const skippedCount = status.artifacts.filter((a) => a.status === 'skipped').length;
   const total = status.artifacts.length - skippedCount;
 
-  console.log(`变更：${status.changeName}`);
-  console.log(`Schema：${status.schemaName}`);
-  if (status.changeRoot) {
-    console.log(`变更根目录：${status.changeRoot}`);
+  console.log(`Change: ${status.changeName}`);
+  console.log(`Schema: ${status.schemaName}`);
+  if (status.warnings) {
+    for (const warning of status.warnings) {
+      console.log(chalk.yellow(`Warning: ${warning}`));
+    }
   }
-  const skippedSuffix = skippedCount > 0 ? ` (${skippedCount} 已跳过)` : '';
-  console.log(`进度：${doneCount}/${total} 个制品已完成${skippedSuffix}`);
+  if (status.changeRoot) {
+    console.log(`Change root: ${status.changeRoot}`);
+  }
+  const skippedSuffix = skippedCount > 0 ? ` (${skippedCount} skipped)` : '';
+  console.log(`Progress: ${doneCount}/${total} artifacts complete${skippedSuffix}`);
   console.log();
 
   for (const artifact of status.artifacts) {
@@ -255,11 +269,11 @@ export function printStatusText(status: ChangeStatus, options: PrintStatusTextOp
     let line = `${indicator} ${artifact.id}`;
 
     if (artifact.status === 'skipped') {
-      line += color(' (已跳过：变更声明了 skip_specs)');
+      line += color(' (skipped: change declares skip_specs)');
     }
 
     if (artifact.status === 'blocked' && artifact.missingDeps && artifact.missingDeps.length > 0) {
-      line += color(`（被阻塞：${artifact.missingDeps.join(', ')}）`);
+      line += color(` (blocked by: ${artifact.missingDeps.join(', ')})`);
     }
 
     console.log(line);
@@ -281,7 +295,7 @@ export function printStatusText(status: ChangeStatus, options: PrintStatusTextOp
   }
 
   if (status.isPlanningComplete) {
-    console.log(chalk.green('所有规划制品已完成！'));
+    console.log(chalk.green('All planning artifacts complete!'));
   }
 
   if (nextStep) {
