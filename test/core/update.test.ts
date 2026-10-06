@@ -237,7 +237,7 @@ Old instructions content
       const beforeSecondUpdate = await fs.stat(skillFile);
       const consoleSpy = vi.spyOn(console, 'log');
       await updateCommand.execute(testDir);
-      expect(consoleSpy.mock.calls.flat().map(String).join('\n')).toContain('up to date');
+      expect(consoleSpy.mock.calls.flat().map(String).join('\n')).toContain('已是最新版本');
       consoleSpy.mockRestore();
 
       expect(await fs.readFile(skillFile, 'utf-8')).toBe(refreshed);
@@ -275,9 +275,9 @@ Old instructions content
           expectedSkills.push('openspec-explore');
         } else {
           const correction = consoleSpy.mock.calls.flat().map(String)
-            .find((entry) => entry.includes('No skills or commands remain'));
+            .find((entry) => entry.includes('保留 skills 或命令'));
           expect(correction).toContain('DeepSeek Harness');
-          expect(correction).toContain('openspec config set delivery both');
+          expect(correction).toContain('openspec-cn config set delivery both');
         }
         expect((await fs.readdir(skillsDir)).sort()).toEqual(expectedSkills.sort());
         expect(await FileSystemUtils.directoryExists(path.join(testDir, '.dsh', 'commands'))).toBe(false);
@@ -285,7 +285,7 @@ Old instructions content
 
         consoleSpy.mockClear();
         await updateCommand.execute(testDir);
-        expect(consoleSpy.mock.calls.flat().map(String).join('\n')).not.toContain('Updating 1 tool(s)');
+        expect(consoleSpy.mock.calls.flat().map(String).join('\n')).not.toContain('正在更新 1 个工具');
         expect((await fs.readdir(skillsDir)).sort()).toEqual(expectedSkills.sort());
         for (const file of customFiles) {
           expect(await fs.readFile(file, 'utf-8')).toBe('custom skill instructions');
@@ -1631,8 +1631,8 @@ metadata:
         const consoleSpy = vi.spyOn(console, 'log');
         await updateCommand.execute(testDir);
         const logCalls = consoleSpy.mock.calls.flat().map(String);
-        expect(logCalls.some((entry) => entry.includes('up to date'))).toBe(true);
-        expect(logCalls.some((entry) => entry.includes('Updating 1 tool(s)'))).toBe(false);
+        expect(logCalls.some((entry) => entry.includes('已是最新版本'))).toBe(true);
+        expect(logCalls.some((entry) => entry.includes('正在更新 1 个工具'))).toBe(false);
       }
     );
 
@@ -3638,7 +3638,7 @@ More user content after markers.
 
         const consoleSpy = vi.spyOn(console, 'log');
         await updateCommand.execute(testDir);
-        expect(consoleSpy.mock.calls.flat().map(String).some((line) => line.includes('up to date')))
+        expect(consoleSpy.mock.calls.flat().map(String).some((line) => line.includes('已是最新版本')))
           .toBe(true);
       }
     );
@@ -4106,7 +4106,7 @@ More user content after markers.
       expect(await fs.readFile(path.join(grokDir, 'notes.md'), 'utf-8')).toBe('my Grok notes');
       expect((await fs.readdir(grokDir)).sort()).toEqual(['notes.md', 'skills']);
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(
-        "No skills or commands remain for Grok Build: delivery is set to 'commands' but it supports only skills."
+        "没有为 Grok Build 保留 skills 或命令：交付方式设置为 'commands'，它仅支持 skills。"
       ));
     });
 

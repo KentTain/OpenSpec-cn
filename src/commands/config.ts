@@ -135,15 +135,15 @@ function runEditor(editor: string, filePath: string): Promise<EditorOutcome> {
 
 function reportEditorFailure(editor: string, outcome: EditorOutcome): void {
   if ('error' in outcome) {
-    console.error(`Error: Could not start editor "${editor}": ${outcome.error.message}`);
+    console.error(`错误：无法启动编辑器 "${editor}"：${outcome.error.message}`);
   } else if (outcome.signal) {
-    console.error(`Error: Editor "${editor}" was terminated by ${outcome.signal}`);
+    console.error(`错误：编辑器 "${editor}" 被信号 ${outcome.signal} 终止`);
   } else {
-    console.error(`Error: Editor "${editor}" exited with code ${outcome.code}`);
+    console.error(`错误：编辑器 "${editor}" 退出，代码为 ${outcome.code}`);
   }
   // Only a missing program earns the hint: EACCES or EPERM means it exists.
   if ('error' in outcome && (outcome.error as NodeJS.ErrnoException).code === 'ENOENT') {
-    console.error('Set EDITOR or VISUAL to an installed editor command, for example: export EDITOR="code --wait"');
+    console.error('请将 EDITOR 或 VISUAL 设置为已安装的编辑器命令，例如：export EDITOR="code --wait"');
   }
 }
 
@@ -158,8 +158,8 @@ function refuseUnreadableConfig(): boolean {
   if (!isGlobalConfigUnreadable()) {
     return false;
   }
-  console.error(`Error: ${getGlobalConfigPath()} could not be parsed, so it was left unchanged.`);
-  console.error('Fix it with "openspec config edit", or reset it with "openspec config reset --all".');
+  console.error(`错误：${getGlobalConfigPath()} 无法解析，因此保持原样未修改。`);
+  console.error('请使用 "openspec-cn config edit" 修复，或使用 "openspec-cn config reset --all" 重置。');
   process.exitCode = 1;
   return true;
 }
@@ -182,52 +182,52 @@ interface WorkflowPromptMeta {
 
 export const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   propose: {
-    name: 'Propose change',
-    description: 'Create proposal, design, and tasks from a request',
+    name: '提议变更',
+    description: '根据请求创建提议、设计和任务',
   },
   explore: {
-    name: 'Explore ideas',
-    description: 'Investigate a problem before implementation',
+    name: '探索想法',
+    description: '在实现前调查问题',
   },
   new: {
-    name: 'New change',
-    description: 'Create a new change scaffold quickly',
+    name: '新建变更',
+    description: '快速创建新变更脚手架',
   },
   continue: {
-    name: 'Continue change',
-    description: 'Resume work on an existing change',
+    name: '继续变更',
+    description: '恢复对现有变更的工作',
   },
   apply: {
-    name: 'Apply tasks',
-    description: 'Implement tasks from the current change',
+    name: '应用任务',
+    description: '实现当前变更中的任务',
   },
   update: {
-    name: 'Update change',
-    description: 'Revise the planning artifacts of an existing change',
+    name: '更新变更',
+    description: '修订现有变更的规划制品',
   },
   ff: {
-    name: 'Fast-forward',
-    description: 'Run a faster implementation workflow',
+    name: '快速前进',
+    description: '运行更快的实现工作流',
   },
   sync: {
-    name: 'Sync specs',
-    description: 'Sync change artifacts with specs',
+    name: '同步规格',
+    description: '将变更制品与规格同步',
   },
   archive: {
-    name: 'Archive change',
-    description: 'Finalize and archive a completed change',
+    name: '归档变更',
+    description: '最终确定并归档已完成的变更',
   },
   'bulk-archive': {
-    name: 'Bulk archive',
-    description: 'Archive multiple completed changes together',
+    name: '批量归档',
+    description: '一起归档多个已完成的变更',
   },
   verify: {
-    name: 'Verify change',
-    description: 'Run verification checks against a change',
+    name: '验证变更',
+    description: '针对变更运行验证检查',
   },
   onboard: {
-    name: 'Onboard',
-    description: 'Guided onboarding flow for OpenSpec',
+    name: '入门指南',
+    description: 'OpenSpec 入门引导流程',
   },
 };
 
@@ -258,7 +258,7 @@ export function deriveProfileFromWorkflowSelection(selectedWorkflows: string[]):
  * Format a compact workflow summary for the profile header.
  */
 export function formatWorkflowSummary(workflows: readonly string[], profile: Profile): string {
-  return `${workflows.length} selected (${profile})`;
+  return `${workflows.length} 个已选择（${profile}）`;
 }
 
 function stableWorkflowOrder(workflows: readonly string[]): string[] {
@@ -309,10 +309,10 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
   if (added.length > 0 || removed.length > 0) {
     const tokens: string[] = [];
     if (added.length > 0) {
-      tokens.push(`added ${added.join(', ')}`);
+      tokens.push(`新增 ${added.join(', ')}`);
     }
     if (removed.length > 0) {
-      tokens.push(`removed ${removed.join(', ')}`);
+      tokens.push(`移除 ${removed.join(', ')}`);
     }
     lines.push(`workflows: ${tokens.join('; ')}`);
   }
@@ -338,11 +338,11 @@ async function maybeWarnProjectConfigDrift(
   if (!hasProjectConfigDrift(projectDir, state.workflows, state.delivery)) {
     return;
   }
-  console.log(colorize('Warning: Global config is not applied to this project. Run `openspec update` to sync.'));
+  console.log(colorize('警告：全局配置未应用于此项目。请运行 `openspec-cn update` 来同步。'));
 }
 
 function printConfigProfileApplyGuidance(): void {
-  console.log('Config updated. Run `openspec update` in your projects to apply.');
+  console.log('配置已更新。请在您的项目中运行 `openspec-cn update` 来应用。');
 }
 
 export function configPathCommand(): void {
@@ -374,17 +374,17 @@ export function configListCommand(options: { json?: boolean }): void {
     console.log(formatValueYaml(config));
 
     // Annotate profile settings
-    const profileSource = rawConfig.profile !== undefined ? '(explicit)' : '(default)';
-    const deliverySource = rawConfig.delivery !== undefined ? '(explicit)' : '(default)';
-    console.log(`\nProfile settings:`);
+    const profileSource = rawConfig.profile !== undefined ? '(显式设置)' : '(默认值)';
+    const deliverySource = rawConfig.delivery !== undefined ? '(显式设置)' : '(默认值)';
+    console.log(`\n档案设置：`);
     console.log(`  profile: ${config.profile} ${profileSource}`);
     console.log(`  delivery: ${config.delivery} ${deliverySource}`);
     if (config.profile === 'core') {
-      console.log(`  workflows: ${CORE_WORKFLOWS.join(', ')} (from core profile)`);
+      console.log(`  workflows: ${CORE_WORKFLOWS.join(', ')} (来自 core 档案)`);
     } else if (config.workflows && config.workflows.length > 0) {
-      console.log(`  workflows: ${config.workflows.join(', ')} (explicit)`);
+      console.log(`  workflows: ${config.workflows.join(', ')} (显式设置)`);
     } else {
-      console.log(`  workflows: (none)`);
+      console.log(`  workflows: (无)`);
     }
   }
 }
@@ -412,10 +412,10 @@ export function configSetCommand(key: string, value: string, options: { string?:
   const unsafeKey = hasUnsafeKeySegment(key);
   if (!keyValidation.valid && (!allowUnknown || unsafeKey)) {
     const reason = keyValidation.reason ? ` ${keyValidation.reason}.` : '';
-    console.error(`Error: Invalid configuration key "${key}".${reason}`);
-    console.error('Use "openspec config list" to see available keys.');
+    console.error(`错误：无效的配置键 "${key}"。${reason}`);
+    console.error('使用 "openspec-cn config list" 查看可用的键。');
     if (!allowUnknown && !unsafeKey) {
-      console.error('Pass --allow-unknown to bypass this check.');
+      console.error('传入 --allow-unknown 以跳过此检查。');
     }
     process.exitCode = 1;
     return;
@@ -435,7 +435,7 @@ export function configSetCommand(key: string, value: string, options: { string?:
   // Validate the new config
   const validation = validateConfig(newConfig);
   if (!validation.success) {
-    console.error(`Error: Invalid configuration - ${validation.error}`);
+    console.error(`错误：无效配置 - ${validation.error}`);
     process.exitCode = 1;
     return;
   }
@@ -446,7 +446,7 @@ export function configSetCommand(key: string, value: string, options: { string?:
 
   const displayValue =
     typeof coercedValue === 'string' ? `"${coercedValue}"` : String(coercedValue);
-  console.log(`Set ${key} = ${displayValue}`);
+  console.log(`已设置 ${key} = ${displayValue}`);
 }
 
 export function configUnsetCommand(key: string): void {
@@ -459,16 +459,16 @@ export function configUnsetCommand(key: string): void {
 
   if (existed) {
     saveGlobalConfig(config as GlobalConfig);
-    console.log(`Unset ${key} (reverted to default)`);
+    console.log(`已重置 ${key}（恢复为默认值）`);
   } else {
-    console.log(`Key "${key}" was not set`);
+    console.log(`键 "${key}" 未设置`);
   }
 }
 
 export async function configResetCommand(options: { all?: boolean; yes?: boolean }): Promise<void> {
   if (!options.all) {
-    console.error('Error: --all flag is required for reset');
-    console.error('Usage: openspec config reset --all [-y]');
+    console.error('错误：重置时必须指定 --all 参数');
+    console.error('用法：openspec-cn config reset --all [-y]');
     process.exitCode = 1;
     return;
   }
@@ -478,12 +478,12 @@ export async function configResetCommand(options: { all?: boolean; yes?: boolean
     let confirmed: boolean;
     try {
       confirmed = await confirm({
-        message: 'Reset all configuration to defaults?',
+        message: '是否将所有配置重置为默认值？',
         default: false,
       });
     } catch (error) {
       if (isPromptCancellationError(error)) {
-        console.log('Reset cancelled.');
+        console.log('重置已取消。');
         process.exitCode = 130;
         return;
       }
@@ -491,23 +491,23 @@ export async function configResetCommand(options: { all?: boolean; yes?: boolean
     }
 
     if (!confirmed) {
-      console.log('Reset cancelled.');
+      console.log('重置已取消。');
       return;
     }
   }
 
   // A reset is the one write meant to replace a file that cannot be parsed.
   saveGlobalConfig({ ...DEFAULT_CONFIG }, { replaceUnreadable: true });
-  console.log('Configuration reset to defaults');
+  console.log('配置已重置为默认值');
 }
 
 export async function configEditCommand(): Promise<void> {
   const editor = process.env.EDITOR || process.env.VISUAL;
 
   if (!editor) {
-    console.error('Error: No editor configured');
-    console.error('Set the EDITOR or VISUAL environment variable to your preferred editor');
-    console.error('Example: export EDITOR=vim');
+    console.error('错误：未配置编辑器');
+    console.error('请设置 EDITOR 或 VISUAL 环境变量为您喜欢的编辑器');
+    console.error('示例：export EDITOR=vim');
     process.exitCode = 1;
     return;
   }
@@ -533,17 +533,17 @@ export async function configEditCommand(): Promise<void> {
     const validation = validateConfig(parsedConfig);
 
     if (!validation.success) {
-      console.error(`Error: Invalid configuration - ${validation.error}`);
+      console.error(`错误：无效配置 - ${validation.error}`);
       process.exitCode = 1;
     }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      console.error(`Error: Config file not found at ${configPath}`);
+      console.error(`错误：在 ${configPath} 未找到配置文件`);
     } else if (error instanceof SyntaxError) {
-      console.error(`Error: Invalid JSON in ${configPath}`);
+      console.error(`错误：${configPath} 中包含无效的 JSON`);
       console.error(error.message);
     } else {
-      console.error(`Error: Unable to validate configuration - ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`错误：无法验证配置 - ${error instanceof Error ? error.message : String(error)}`);
     }
     process.exitCode = 1;
   }
@@ -566,14 +566,14 @@ export async function configProfileCommand(preset?: string): Promise<void> {
   }
 
   if (preset) {
-    console.error(`Error: Unknown profile preset "${preset}". Available presets: core`);
+    console.error(`错误：未知的档案预设 "${preset}"。可用预设：core`);
     process.exitCode = 1;
     return;
   }
 
   // Non-interactive check
   if (!process.stdout.isTTY) {
-    console.error('Interactive mode required. Use `openspec config profile core` or set config via environment/flags.');
+    console.error('需要交互模式。请使用 `openspec-cn config profile core` 或通过环境变量/标志设置配置。');
     process.exitCode = 1;
     return;
   }
@@ -586,41 +586,41 @@ export async function configProfileCommand(preset?: string): Promise<void> {
     const config = getGlobalConfig();
     const currentState = resolveCurrentProfileState(config);
 
-    console.log(chalk.bold('\nCurrent profile settings'));
-    console.log(`  Delivery: ${currentState.delivery}`);
-    console.log(`  Workflows: ${formatWorkflowSummary(currentState.workflows, currentState.profile)}`);
-    console.log(chalk.dim('  Delivery = where workflows are installed (skills, commands, or both)'));
-    console.log(chalk.dim('  Workflows = which actions are available (propose, explore, apply, etc.)'));
+    console.log(chalk.bold('\n当前档案设置'));
+    console.log(`  交付方式: ${currentState.delivery}`);
+    console.log(`  工作流: ${formatWorkflowSummary(currentState.workflows, currentState.profile)}`);
+    console.log(chalk.dim('  交付方式 = 工作流的安装位置（skills、命令或两者）'));
+    console.log(chalk.dim('  工作流 = 可用的工作流动作（propose、explore、apply 等）'));
     console.log();
 
     const action = await select<ProfileAction>({
-      message: 'What do you want to configure?',
+      message: '您想配置什么？',
       choices: [
         {
           value: 'both',
-          name: 'Delivery and workflows',
-          description: 'Update install mode and available actions together',
+          name: '交付方式和工作流',
+          description: '同时更新安装模式和可用动作',
         },
         {
           value: 'delivery',
-          name: 'Delivery only',
-          description: 'Change where workflows are installed',
+          name: '仅交付方式',
+          description: '更改工作流的安装位置',
         },
         {
           value: 'workflows',
-          name: 'Workflows only',
-          description: 'Change which workflow actions are available',
+          name: '仅工作流',
+          description: '更改可用的工作流动作',
         },
         {
           value: 'keep',
-          name: 'Keep current settings (exit)',
-          description: 'Leave configuration unchanged and exit',
+          name: '保持当前设置（退出）',
+          description: '不修改配置并退出',
         },
       ],
     });
 
     if (action === 'keep') {
-      console.log('No config changes.');
+      console.log('配置未变更。');
       await maybeWarnProjectConfigDrift(process.cwd(), currentState, chalk.yellow);
       return;
     }
@@ -636,28 +636,28 @@ export async function configProfileCommand(preset?: string): Promise<void> {
       const deliveryChoices: { value: Delivery; name: string; description: string }[] = [
         {
           value: 'both' as Delivery,
-          name: 'Both (skills + commands)',
-          description: 'Install workflows as both skills and slash commands',
+          name: '两者都安装（Skills + 命令）',
+          description: '同时将工作流作为技能和斜杠命令安装',
         },
         {
           value: 'skills' as Delivery,
-          name: 'Skills only',
-          description: 'Install workflows only as skills',
+          name: '仅 Skills',
+          description: '仅将工作流作为技能安装',
         },
         {
           value: 'commands' as Delivery,
-          name: 'Commands only',
-          description: 'Install workflows only as slash commands',
+          name: '仅命令',
+          description: '仅将工作流作为斜杠命令安装',
         },
       ];
       for (const choice of deliveryChoices) {
         if (choice.value === currentState.delivery) {
-          choice.name += ' [current]';
+          choice.name += ' [当前]';
         }
       }
 
       nextState.delivery = await select<Delivery>({
-        message: 'Delivery mode (how workflows are installed):',
+        message: '交付方式（工作流的安装方式）：',
         choices: deliveryChoices,
         default: currentState.delivery,
       });
@@ -683,7 +683,7 @@ export async function configProfileCommand(preset?: string): Promise<void> {
         // Its replacement, the built-in keys help tip, renders
         // "↑↓ navigate • space select • ⏎ submit" by default — a superset of
         // the hint this used to pass — so no theme override is needed here.
-        message: 'Select workflows to make available:',
+        message: '选择要启用的工作流：',
         pageSize: ALL_WORKFLOWS.length,
         theme: {
           icon: {
@@ -704,12 +704,12 @@ export async function configProfileCommand(preset?: string): Promise<void> {
 
     const diff = diffProfileState(currentState, nextState);
     if (!diff.hasChanges) {
-      console.log('No config changes.');
+      console.log('配置未变更。');
       await maybeWarnProjectConfigDrift(process.cwd(), nextState, chalk.yellow);
       return;
     }
 
-    console.log(chalk.bold('\nConfig changes:'));
+    console.log(chalk.bold('\n配置变更：'));
     for (const line of diff.lines) {
       console.log(`  ${line}`);
     }
@@ -727,7 +727,7 @@ export async function configProfileCommand(preset?: string): Promise<void> {
     const openspecDir = path.join(projectDir, OPENSPEC_DIR_NAME);
     if (fs.existsSync(openspecDir)) {
       const applyNow = await confirm({
-        message: 'Apply changes to this project now?',
+        message: '是否立即将变更应用到该项目？',
         default: true,
       });
 
@@ -735,10 +735,10 @@ export async function configProfileCommand(preset?: string): Promise<void> {
         try {
           const { UpdateCommand } = await import('../core/update.js');
           await new UpdateCommand().execute(projectDir);
-          console.log('Run `openspec update` in your other projects to apply.');
+          console.log('请在您的其他项目中运行 `openspec-cn update` 来应用。');
         } catch (error) {
-          console.error(`\`openspec update\` failed: ${asErrorMessage(error)}`);
-          console.error('Please run it manually to apply the profile changes.');
+          console.error(`\`openspec-cn update\` 失败：${asErrorMessage(error)}`);
+          console.error('请手动运行以应用档案变更。');
           process.exitCode = 1;
         }
         return;
@@ -748,7 +748,7 @@ export async function configProfileCommand(preset?: string): Promise<void> {
     printConfigProfileApplyGuidance();
   } catch (error) {
     if (isPromptCancellationError(error)) {
-      console.log('Config profile cancelled.');
+      console.log('档案配置已取消。');
       process.exitCode = 130;
       return;
     }

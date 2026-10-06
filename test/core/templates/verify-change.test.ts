@@ -19,9 +19,9 @@ describe('verify-change templates', () => {
       expect(body, label).not.toContain('`contextFiles.specs`');
       expect(body, label).not.toContain('`contextFiles.design`');
       expect(body, label).toContain('`artifactPaths.<id>.outputPath`');
-      expect(body, label).toContain('under `specs/`');
+      expect(body, label).toContain('位于 `specs/` 之下');
       expect(body, label).toContain('`contextFiles.<id>`');
-      expect(body, label).toContain('is or ends in `design.md`');
+      expect(body, label).toContain('为 `design.md` 或以其结尾');
     }
   });
 

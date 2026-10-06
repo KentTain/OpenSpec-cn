@@ -362,7 +362,7 @@ function toArchiveDiagnostic(error: unknown): ArchiveDiagnostic {
       severity: 'error',
       code: 'archive_retirement_cleanup_failed',
       message: error.message,
-      fix: 'Inspect the archived change and all recovery paths in this diagnostic; preserve any needed content before cleanup.',
+      fix: '检查此诊断中已归档的变更和所有恢复路径；在清理前保留任何需要的内容。',
     };
   }
   return {
@@ -1645,7 +1645,7 @@ export class ArchiveCommand {
             new ArchiveBlockedError(
               'archive_tasks_incomplete',
               `为变更 '${describeChangeName(changeName!)}' 找到 ${incompleteTasks} 个未完成的任务，且无法从标准输入读取回答。`,
-              `Complete the tasks or rerun with ${rerunCommand(root, changeName!, options)}`
+              `完成任务或重新运行：${rerunCommand(root, changeName!, options)}`
             )
         );
         if (!proceed) {

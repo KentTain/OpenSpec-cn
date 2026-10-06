@@ -19,15 +19,15 @@ describe('specs instruction requirement length (#1976)', () => {
     );
     const instruction = schema.artifacts.find(a => a.id === 'specs')?.instruction ?? '';
 
-    expect(instruction).toContain(`${MAX_REQUIREMENT_TEXT_LENGTH} characters or fewer`);
-    expect(instruction).toContain('split a requirement that covers several behaviors');
+    expect(instruction).toContain(`${MAX_REQUIREMENT_TEXT_LENGTH} 个字符以内`);
+    expect(instruction).toContain('把覆盖多种行为的需求拆分为');
     // Existing requirements under MODIFIED must be copied whole (scenario-loss
     // validation rejects a split), and the limit is a warning that fails --strict.
-    expect(instruction).toContain('`openspec validate --strict` fails on it.');
-    expect(instruction).toContain('Under MODIFIED, keep the existing requirement block whole');
+    expect(instruction).toContain('`openspec-cn validate --strict` 会失败');
+    expect(instruction).toContain('在 MODIFIED 下，保持既有需求块完整');
     // Strict CI catches new requirements before archive, and an existing long
     // requirement has a split path that keeps every scenario (#1976).
-    expect(instruction).toContain('flags longer descriptions in ADDED requirements and in the main spec');
-    expect(instruction).toContain('keep its header and every scenario');
+    expect(instruction).toContain('会在 ADDED 需求和主 spec 中标记更长的描述');
+    expect(instruction).toContain('保留其标题和每个场景');
   });
 });

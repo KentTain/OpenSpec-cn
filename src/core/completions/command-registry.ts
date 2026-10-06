@@ -57,12 +57,12 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
   },
   {
     name: 'version',
-    description: 'Report the installed OpenSpec version and update availability',
+    description: '报告已安装的 OpenSpec 版本及更新可用性',
     flags: [
       COMMON_FLAGS.json,
       {
         name: 'check',
-        description: 'Check the registry for a newer version',
+        description: '检查 registry 是否有更新版本',
       },
     ],
   },
@@ -80,11 +80,11 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
       {
         name: 'archived',
-        description: 'Show only archived changes',
+        description: '仅显示已归档的更改',
       },
       {
         name: 'all',
-        description: 'Show both active and archived changes',
+        description: '同时显示活跃和已归档的更改',
       },
       {
         name: 'sort',

@@ -111,14 +111,14 @@ describe('workflow list --json field usage', () => {
 
     for (const [withSync, withoutSync, workflow] of variants) {
       const syncStep = (text: string) => text.slice(
-        text.indexOf('4. **Assess delta spec sync state**'),
-        text.indexOf('5. **Perform the archive**')
+        text.indexOf('4. **评估 delta spec 同步状态**'),
+        text.indexOf('5. **执行归档**')
       );
 
       expect(syncStep(withSync)).toContain(workflow);
       expect(withoutSync).not.toContain(workflow);
-      expect(syncStep(withoutSync)).toContain('perform the delta-to-main-spec merge inline yourself');
-      expect(withoutSync).toContain('If sync is requested, perform the delta-to-main-spec merge inline');
+      expect(syncStep(withoutSync)).toContain('自行内联执行 delta 到主 spec 的合并');
+      expect(withoutSync).toContain('若请求同步，自行内联执行 delta 到主 spec 的合并');
     }
   });
 });

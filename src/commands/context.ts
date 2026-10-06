@@ -1,5 +1,5 @@
 /**
- * `openspec context` (slice 4.1): the working set a root's declarations
+ * `openspec-cn context` (slice 4.1): the working set a root's declarations
  * describe, as an agent brief (JSON), a human listing, or an editor
  * view (`--code-workspace`). Assembly is presentation over the Phase 3
  * relationship data; doctor is the health surface. The only write this
@@ -58,9 +58,9 @@ function memberLine(member: WorkingSetMember): string {
 
 function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: number): void {
   const rootLabel = workingSet.root.store_id ?? path.basename(workingSet.root.path);
-  console.log(`Working context for ${rootLabel} (${workingSet.root.path})`);
+  console.log(`${rootLabel} 的工作上下文（${workingSet.root.path}）`);
   console.log('');
-  console.log('OpenSpec root');
+  console.log('OpenSpec 根目录');
   console.log(`  ${rootLabel}  ${workingSet.root.path}`);
 
   const availableStores = workingSet.members.filter(
@@ -70,11 +70,11 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
 
   if (availableStores.length > 0) {
     console.log('');
-    console.log('Referenced stores');
+    console.log('引用的 stores');
     for (const member of availableStores) {
       console.log(memberLine(member));
       if (member.fetch) {
-        console.log(`    Fetch: ${member.fetch}`);
+        console.log(`  获取：${member.fetch}`);
       }
     }
   }
@@ -85,14 +85,14 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
     // emptied-by-omission set must not claim nothing was declared.
     console.log(
       declaredReferenceCount > 0
-        ? 'Declared references all resolve to this root; the working set is this root alone.'
-        : 'No references declared; the working set is this root alone.'
+        ? '声明的引用全部解析到此根目录；工作集仅为此根目录。'
+        : '未声明引用；工作集仅为此根目录。'
     );
   }
 
   if (unavailable.length > 0 || workingSet.status.length > 0) {
     console.log('');
-    console.log('Not available on this machine');
+    console.log('此机器上不可用');
     for (const member of unavailable) {
       if (member.status.length === 0) {
         console.log(`  - ${member.id}`);
@@ -101,14 +101,14 @@ function printHumanWorkingSet(workingSet: WorkingSet, declaredReferenceCount: nu
       for (const diagnostic of member.status) {
         console.log(`  - ${member.id}: ${diagnostic.message}`);
         if (diagnostic.fix) {
-          console.log(`    Fix: ${diagnostic.fix}`);
+          console.log(`    修复：${diagnostic.fix}`);
         }
       }
     }
     for (const diagnostic of workingSet.status) {
-      console.log(`  Note: ${diagnostic.message}`);
+      console.log(`  备注：${diagnostic.message}`);
       if (diagnostic.fix) {
-        console.log(`  Fix: ${diagnostic.fix}`);
+        console.log(`  修复：${diagnostic.fix}`);
       }
     }
   }
@@ -122,20 +122,20 @@ function writeCodeWorkspace(
   const resolved = path.resolve(outputPath);
   if (fs.existsSync(resolved) && !force) {
     throw new StoreError(
-      `Refusing to overwrite ${resolved}.`,
+      `拒绝覆盖 ${resolved}。`,
       'context_file_exists',
       {
         target: 'context.output',
-        fix: `Pass --force to overwrite, or choose a different path.`,
+        fix: `传入 --force 覆盖，或选择其他路径。`,
       }
     );
   }
   const parent = path.dirname(resolved);
   if (!fs.existsSync(parent)) {
     throw new StoreError(
-      `Output directory does not exist: ${parent}.`,
+      `输出目录不存在：${parent}。`,
       'context_output_dir_missing',
-      { target: 'context.output', fix: 'Create the directory first, or choose another path.' }
+      { target: 'context.output', fix: '先创建目录，或选择其他路径。' }
     );
   }
 
@@ -148,8 +148,8 @@ function writeCodeWorkspace(
     .map((member) => member.id);
   const summary =
     skipped.length > 0
-      ? `Wrote ${resolved} (${available + 1} folders; not available: ${skipped.join(', ')})`
-      : `Wrote ${resolved} (${available + 1} folders)`;
+      ? `已写入 ${resolved}（${available + 1} 个文件夹；不可用：${skipped.join(', ')}）`
+      : `已写入 ${resolved}（${available + 1} 个文件夹）`;
   // stderr keeps JSON stdout pure; for humans it reads inline.
   console.error(summary);
 }

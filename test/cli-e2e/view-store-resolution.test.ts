@@ -148,11 +148,11 @@ describe('openspec view root resolution', () => {
       const result = await runCLI(['view', ...storeArgs], options);
 
       expect(result.exitCode, result.stderr).toBe(0);
-      expect(result.stdout).toContain('1 specs, 1 requirements');
+      expect(result.stdout).toContain('1 个 spec，1 个需求');
       expect(result.stdout).toContain('billing');
-      expect(result.stdout).toContain('Active Changes: 2 in progress');
-      expect(result.stdout).toContain('Task Progress: 2/4 (50% complete)');
-      expect(result.stdout).not.toContain('Archived');
+      expect(result.stdout).toContain('活跃变更：2 个进行中');
+      expect(result.stdout).toContain('任务进度: 2/4 (50% 完成)');
+      expect(result.stdout).not.toContain('已归档');
       expect(result.stdout).not.toContain('2026-08-27-store-history');
       const lines = result.stdout.split(/\r?\n/);
 
@@ -228,7 +228,7 @@ describe('openspec view root resolution', () => {
       cwd: base, env: aliasEnv, timeoutMs: TIMEOUT_MS,
     });
     expect(viewed.exitCode, viewed.stderr).toBe(0);
-    expect(viewed.stdout).toContain('Active Changes: 2 in progress');
+    expect(viewed.stdout).toContain('活跃变更：2 个进行中');
     expect(viewed.stdout).not.toContain('2026-08-27-store-history');
   }, TIMEOUT_MS);
 
@@ -264,7 +264,7 @@ describe('openspec view root resolution', () => {
 
       expect(list.exitCode, list.stderr).toBe(0);
       expect(view.exitCode, view.stderr).toBe(0);
-      expect(view.stdout).toContain('OpenSpec Dashboard');
+      expect(view.stdout).toContain('OpenSpec 仪表盘');
     },
     TIMEOUT_MS
   );

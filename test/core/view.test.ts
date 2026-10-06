@@ -48,7 +48,7 @@ describe('ViewCommand', () => {
     expect(lines[implementingIndex + 1]).toBe('    └─ [spec-driven] proposal✓ specs→ design→ tasks✓');
     expect(lines[planningIndex]).toContain('50%');
     expect(lines[implementingIndex]).toContain('50%');
-    expect(lines.join('\n')).toContain('Task Progress: 2/4 (50% complete)');
+    expect(lines.join('\n')).toContain('任务进度: 2/4 (50% 完成)');
   });
 
   it('distinguishes skipped specs from completed and blocked artifacts', async () => {
@@ -66,9 +66,9 @@ describe('ViewCommand', () => {
   });
 
   it.each([
-    ['malformed YAML', 'schema: [', 'Invalid YAML'],
-    ['invalid metadata', 'schema: 123\n', 'Invalid metadata'],
-    ['unknown schema', 'schema: missing-workflow\n', "Unknown schema 'missing-workflow'"],
+    ['malformed YAML', 'schema: [', '元数据文件中的 YAML 无效'],
+    ['invalid metadata', 'schema: 123\n', '无效的元数据'],
+    ['unknown schema', 'schema: missing-workflow\n', "未知 schema 'missing-workflow'"],
   ])('warns about %s without hiding changes or breaking the dashboard', async (_name, metadata, error) => {
     const changesDir = path.join(tempDir, 'openspec', 'changes');
     for (const name of ['broken', 'healthy']) {
@@ -86,9 +86,9 @@ describe('ViewCommand', () => {
       '    └─ [spec-driven] proposal→ specs design tasks✓',
     ]);
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(stripAnsi(String(warn.mock.calls[0][0]))).toContain('Could not load workflow status for "broken":');
+    expect(stripAnsi(String(warn.mock.calls[0][0]))).toContain('无法加载 "broken" 的工作流状态：');
     expect(stripAnsi(String(warn.mock.calls[0][0]))).toContain(error);
-    expect(lines.join('\n')).toContain('Task Progress: 0/2 (0% complete)');
+    expect(lines.join('\n')).toContain('任务进度: 0/2 (0% 完成)');
   });
 
   it('renders terminal controls in workflow errors as inert text', async () => {
@@ -104,8 +104,8 @@ describe('ViewCommand', () => {
     await new ViewCommand().execute(tempDir);
 
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(stripAnsi(String(warn.mock.calls[0][0]))).toContain("Unknown schema 'missing?[2J?H??FORGED'");
-    expect(logOutput.map(stripAnsi).join('\n')).toContain('Task Progress: 0/1 (0% complete)');
+    expect(stripAnsi(String(warn.mock.calls[0][0]))).toContain("未知 schema 'missing?[2J?H??FORGED'");
+    expect(logOutput.map(stripAnsi).join('\n')).toContain('任务进度: 0/1 (0% 完成)');
   });
 
   it('renders terminal controls in every artifact state without changing workflow semantics', async () => {
@@ -140,7 +140,7 @@ describe('ViewCommand', () => {
     expect(logOutput.map(stripAnsi)).toContain(
       '    └─ [custom] 設計?[2J→ blocked?H specs?? (skipped) tasks??✓'
     );
-    expect(logOutput.map(stripAnsi).join('\n')).toContain('Task Progress: 0/1 (0% complete)');
+    expect(logOutput.map(stripAnsi).join('\n')).toContain('任务进度: 0/1 (0% 完成)');
   });
 
   it('shows changes with no tasks in Draft section, not Completed', async () => {

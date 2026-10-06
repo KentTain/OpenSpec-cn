@@ -87,33 +87,31 @@ describe('default proposal guidance', () => {
     const proposal = defaultSchema.artifacts.find(artifact => artifact.id === 'proposal');
     expect(proposal).toBeDefined();
     expect(proposal!.instruction).toContain(
-      'Name each capability for a durable system behavior'
+      '为每个能力以其可持续承载的系统行为命名'
     );
     expect(proposal!.instruction).toContain(
-      'not the work in this change'
+      '而不是以本次变更中的工作命名'
     );
-    expect(proposal!.instruction).toContain('own related requirements as the system evolves');
-    expect(proposal!.instruction).toContain('avoid broad catch-all capabilities');
+    expect(proposal!.instruction).toContain('随着系统演进能够拥有相关需求');
+    expect(proposal!.instruction).toContain('避免宽泛的"大杂烩"能力');
 
     const template = fs.readFileSync(
       path.join(repoRoot, 'schemas', 'spec-driven', 'templates', 'proposal.md'),
       'utf-8'
     );
-    expect(template).toMatch(
-      /Name each capability for a cohesive system\s+behavior that can own related requirements as the system evolves/
+    expect(template).toContain(
+      '为每个能力以其可持续承载的系统行为命名'
     );
-    expect(template).toMatch(/Do not name\s+implementation tasks or proposal sections/);
-    expect(template).toContain('Avoid broad catch-all names');
+    expect(template).toContain('而不是以实现任务或 proposal 章节命名');
+    expect(template).toContain('避免宽泛的"大杂烩"名称');
 
     const reference = fs.readFileSync(
       path.join(repoRoot, 'docs-lab', 'reference', 'schemas', 'spec-driven', 'index.md'),
       'utf-8'
     );
-    expect(reference).toMatch(
-      /Name each capability for a cohesive system\s+behavior that can own related requirements as the system evolves/
-    );
-    expect(reference).toMatch(/Do not name\s+implementation tasks or proposal sections/);
-    expect(reference).toContain('Avoid broad catch-all names');
+    expect(reference).toContain('为每个能力以其可持续承载的系统行为命名');
+    expect(reference).toContain('而不是以实现任务或 proposal 章节命名');
+    expect(reference).toContain('避免宽泛的"大杂烩"名称');
   });
 });
 
@@ -121,11 +119,11 @@ describe('default task guidance', () => {
   it('keeps tracked tasks within the pre-archive workflow (#1790)', () => {
     const tasks = defaultSchema.artifacts.find(artifact => artifact.id === 'tasks');
     expect(tasks).toBeDefined();
-    expect(tasks!.instruction).toMatch(
-      /Track implementation and verification work that can be completed before\s+archive/
+    expect(tasks!.instruction).toContain(
+      '追踪可以在归档前完成的实现和验证工作'
     );
     expect(tasks!.instruction).toMatch(
-      /preserve those steps as plain bullets in an\s+optional `## Workflow follow-up` section at the end of tasks.md/
+      /把这些步骤作为普通列表项保留在 tasks\.md 末尾的可选\s+`## Workflow follow-up` 章节中/
     );
 
     const examples = [...tasks!.instruction.matchAll(/```\s*([\s\S]*?)```/g)];
@@ -133,7 +131,7 @@ describe('default task guidance', () => {
     const implementation = examples[0][1];
     const followUp = examples[1][1];
     expect(followUp).toContain('## Workflow follow-up');
-    expect(followUp).toContain('- Verify the archived result.');
+    expect(followUp).toContain('- 验证归档后的结果。');
     expect(parseTaskLines(followUp)).toEqual([]);
     expect(parseTaskLines(`${implementation}\n${followUp}`)).toEqual(
       parseTaskLines(implementation)

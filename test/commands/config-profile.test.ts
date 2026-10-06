@@ -52,7 +52,7 @@ describe('diffProfileState workflow formatting', () => {
     );
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.lines).toEqual(['workflows: 新增 verify；移除 sync']);
+    expect(diff.lines).toEqual(['workflows: 新增 verify; 移除 sync']);
   });
 });
 
@@ -421,7 +421,7 @@ describe('config profile interactive flow', () => {
 
     expect(getGlobalConfig().delivery).toBe('skills');
     expect(confirm).toHaveBeenCalledWith({
-      message: '立即将更改应用到此项目？',
+      message: '是否立即将变更应用到该项目？',
       default: true,
     });
   });

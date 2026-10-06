@@ -113,13 +113,13 @@ function formatRelativeTime(date: Date): string {
   if (diffDays > 30) {
     return date.toLocaleDateString();
   } else if (diffDays > 0) {
-    return `${diffDays}d ago`;
+    return `${diffDays} 天前`;
   } else if (diffHours > 0) {
-    return `${diffHours}h ago`;
+    return `${diffHours} 小时前`;
   } else if (diffMins > 0) {
-    return `${diffMins}m ago`;
+    return `${diffMins} 分钟前`;
   } else {
-    return 'just now';
+    return '刚刚';
   }
 }
 
@@ -152,7 +152,7 @@ export class ListCommand {
         if (json) {
           console.log(JSON.stringify({ changes: [], ...(root ? { root } : {}) }, null, 2));
         } else {
-          console.log(all ? 'No changes found.' : archived ? 'No archived changes found.' : 'No active changes found.');
+          console.log(all ? '未找到任何变更。' : archived ? '未找到已归档的变更。' : '未找到活跃的变更。');
         }
         return;
       }
@@ -223,8 +223,8 @@ export class ListCommand {
 
       // Display results
       const groups = [
-        { heading: 'Changes:', changes: changes.filter(change => !change.archived) },
-        { heading: 'Archived Changes:', changes: changes.filter(change => change.archived) }
+        { heading: '变更：', changes: changes.filter(change => !change.archived) },
+        { heading: '已归档变更：', changes: changes.filter(change => change.archived) }
       ].filter(group => group.changes.length > 0);
       for (const [index, group] of groups.entries()) {
         if (index > 0) console.log('');
@@ -255,7 +255,7 @@ export class ListCommand {
       if (json) {
         console.log(JSON.stringify({ specs: [], ...(root ? { root } : {}) }, null, 2));
       } else {
-        console.log('No specs found.');
+        console.log('未找到规范。');
       }
       return;
     }
@@ -265,7 +265,7 @@ export class ListCommand {
       if (json) {
         console.log(JSON.stringify({ specs: [], ...(root ? { root } : {}) }, null, 2));
       } else {
-        console.log('No specs found.');
+        console.log('未找到规范。');
       }
       return;
     }
@@ -291,12 +291,12 @@ export class ListCommand {
       return;
     }
 
-    console.log('Specs:');
+    console.log('规范：');
     const padding = '  ';
     const nameWidth = Math.max(...specs.map(s => s.id.length));
     for (const spec of specs) {
       const padded = spec.id.padEnd(nameWidth);
-      console.log(`${padding}${padded}     requirements ${spec.requirementCount}`);
+      console.log(`${padding}${padded}     需求数 ${spec.requirementCount}`);
     }
   }
 }

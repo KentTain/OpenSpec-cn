@@ -88,7 +88,7 @@ describe('unrecognized keys in .openspec.yaml', () => {
     const report = await new Validator().validateChangeDeltaSpecs(testDir);
 
     expect(report.issues.some((issue) => issue.level === 'ERROR')).toBe(false);
-    expect(report.issues.some((issue) => issue.message.includes('skip_specs is set'))).toBe(true);
+    expect(report.issues.some((issue) => issue.message.includes('设置了 skip_specs'))).toBe(true);
   });
 });
 

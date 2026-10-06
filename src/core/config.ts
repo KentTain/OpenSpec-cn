@@ -71,7 +71,7 @@ export const AI_TOOLS: AIToolOption[] = [
   { name: 'GigaCode', value: 'gigacode', available: true, successLabel: 'GigaCode', skillsDir: '.gigacode' },
   { name: 'Grok Build', value: 'grok', available: true, successLabel: 'Grok Build', skillsDir: '.grok' },
   { name: 'GSD', value: 'gsd', available: true, successLabel: 'GSD', skillsDir: '.agents', detectionPaths: ['.gsd'] },
-  { name: 'Hermes Agent', value: 'hermes', available: true, successLabel: 'Hermes Agent', skillsDir: '.hermes', detectionPaths: ['.hermes', 'HERMES.md', '.hermes.md'], setupNote: "Hermes only loads skills from ~/.hermes/skills by default. Add this project's .hermes/skills directory to skills.external_dirs in ~/.hermes/config.yaml so Hermes picks up the generated OpenSpec skills." },
+  { name: 'Hermes Agent', value: 'hermes', available: true, successLabel: 'Hermes Agent', skillsDir: '.hermes', detectionPaths: ['.hermes', 'HERMES.md', '.hermes.md'], setupNote: "Hermes 默认只从 ~/.hermes/skills 加载 skills。请将本项目的 .hermes/skills 目录添加到 ~/.hermes/config.yaml 中的 skills.external_dirs，以便 Hermes 加载生成的 OpenSpec skills。" },
   { name: 'iFlow', value: 'iflow', available: true, successLabel: 'iFlow', skillsDir: '.iflow' },
   { name: 'Junie', value: 'junie', available: true, successLabel: 'Junie', skillsDir: '.junie', requiresIdeRestart: true },
   { name: 'Kilo Code', value: 'kilocode', available: true, successLabel: 'Kilo Code', skillsDir: '.kilocode', requiresIdeRestart: true },
@@ -127,7 +127,7 @@ export function getUniversalTool(): AIToolOption | undefined {
 export function universalToolFallbackHint(offeredToolIds: string[]): string | undefined {
   const universal = getUniversalTool();
   if (!universal || !offeredToolIds.includes(universal.value)) return undefined;
-  return `Tool not listed? Use --tools ${universal.value}: the vendor-neutral target that writes ${universal.skillsDir}/skills/ for any assistant.`;
+  return `工具不在列表中？使用 --tools ${universal.value}：这是与厂商无关的目标，会为任何助手写入 ${universal.skillsDir}/skills/。`;
 }
 
 /**

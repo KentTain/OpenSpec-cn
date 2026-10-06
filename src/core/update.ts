@@ -455,7 +455,7 @@ export class UpdateCommand {
       const names = zeroArtifactTools.join(', ');
       console.log(
         chalk.yellow(
-          `没有为 ${names} 保留 skills 或命令：交付方式设置为 'commands' 但 ` +
+          `没有为 ${names} 保留 skills 或命令：交付方式设置为 'commands'，` +
             `${zeroArtifactTools.length === 1 ? '它' : '它们'}仅支持 skills。` +
             `运行 'openspec-cn config set delivery both' 来生成 skills。`
         )

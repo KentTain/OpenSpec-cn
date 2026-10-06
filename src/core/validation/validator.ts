@@ -480,7 +480,7 @@ export class Validator {
       issues.push({
         level: 'ERROR',
         path: file.path,
-        message: `Delta spec found at specs/${file.path}. Delta specs must be a spec.md inside a capability folder — this file is ignored when the change is applied or archived. Move its requirements into specs/${file.expected}.`,
+        message: `在 specs/${file.path} 处发现了增量规范（delta spec）。增量规范必须是能力路径下的 spec.md —— 该文件在变更被应用或归档时会被忽略。请将其需求移入 specs/${file.expected}。`,
       });
     }
 

@@ -482,7 +482,7 @@ describe('getCliInstallInfo', () => {
     for (const [installDir, packageManager] of cases) {
       const install = getCliInstallInfo(installDir, PROJECT_ROOT);
       expect(install).toEqual({ location: installDir, packageManager, scope: 'global' });
-      expect(getCliUpdateCommand(install)).toContain('@fission-ai/openspec@latest');
+      expect(getCliUpdateCommand(install)).toContain('@studyzy/openspec-cn@latest');
     }
   });
 
@@ -613,19 +613,19 @@ describe('buildVersionReportLines', () => {
         '1.13.2',
         globalInstall,
         { status: 'available', latest: '1.14.0' },
-        'npm install -g @fission-ai/openspec@latest'
+        'npm install -g @studyzy/openspec-cn@latest'
       )
     ).toEqual([
       'OpenSpec 1.13.2 (npm, global)',
-      'Update available: 1.14.0',
-      '  npm install -g @fission-ai/openspec@latest',
+      '有可用更新：1.14.0',
+      '  npm install -g @studyzy/openspec-cn@latest',
     ]);
   });
 
   it.each([
-    ['current', '1.13.2', 'OpenSpec is up to date.'],
-    ['disabled', null, 'Update check disabled.'],
-    ['offline', null, 'Could not check for updates.'],
+    ['current', '1.13.2', 'OpenSpec 已是最新版本。'],
+    ['disabled', null, '更新检查已禁用。'],
+    ['offline', null, '无法检查更新。'],
   ] as const)('renders the %s update status', (status, latest, message) => {
     expect(buildVersionReportLines('1.13.2', globalInstall, { status, latest })).toEqual([
       'OpenSpec 1.13.2 (npm, global)',
@@ -640,7 +640,7 @@ describe('buildVersionReportLines', () => {
         { location: '/portable/openspec', packageManager: null, scope: null },
         { status: 'available', latest: '1.14.0' }
       )
-    ).toEqual(['OpenSpec 1.13.2', 'Update available: 1.14.0']);
+    ).toEqual(['OpenSpec 1.13.2', '有可用更新：1.14.0']);
   });
 });
 

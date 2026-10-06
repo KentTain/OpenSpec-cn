@@ -19,16 +19,16 @@ export function registerStoreCommand(program: Command): void {
   // entry, which shell completion scripts also consume.
   const storeGroupDescription =
     COMMAND_REGISTRY.find((entry) => entry.name === 'store')?.description ??
-    'Create and manage stores - standalone OpenSpec repos you register on this machine';
+    '创建和管理 stores - 您在本机上注册的独立 OpenSpec 仓库';
   const store = program.command('store').description(storeGroupDescription);
 
   store
     .command('setup [id]')
-    .description('Create and register a local store')
-    .option('--path <path>', 'Folder where the store should live (for example ~/openspec/<id>)')
-    .option('--init-git', 'Initialize a Git repository with an initial commit (default)')
-    .option('--no-init-git', 'Skip every Git action: no init, no initial commit')
-    .option('--remote <url>', 'Canonical clone source recorded in store.yaml')
+    .description('创建并注册本地 store')
+    .option('--path <path>', 'Store 存放的文件夹（例如 ~/openspec/<id>)')
+    .option('--init-git', '初始化 Git 仓库并创建初始提交（默认）')
+    .option('--no-init-git', '跳过所有 Git 操作：不初始化，不创建初始提交')
+    .option('--remote <url>', '记录在 store.yaml 中的规范克隆源')
     .option('--json', 'Output as JSON')
     .action(async (id: string | undefined, options: StoreSetupOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -37,9 +37,9 @@ export function registerStoreCommand(program: Command): void {
 
   store
     .command('register [path]')
-    .description('Register an existing local store')
-    .option('--id <id>', 'Store id; defaults to metadata or folder name')
-    .option('--yes', 'Confirm creating store identity metadata for a healthy OpenSpec root')
+    .description('注册现有的本地 store')
+    .option('--id <id>', 'Store id；默认使用元数据或文件夹名称')
+    .option('--yes', '确认为健康的 OpenSpec 根目录创建 store 身份元数据')
     .option('--json', 'Output as JSON')
     .action(async (inputPath: string | undefined, options: StoreRegisterOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -48,7 +48,7 @@ export function registerStoreCommand(program: Command): void {
 
   store
     .command('unregister <id>')
-    .description('Forget a local store registration without deleting files')
+    .description('清除本地 store 注册记录而不删除文件')
     .option('--json', 'Output as JSON')
     .action(async (id: string, options: StoreJsonOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -57,8 +57,8 @@ export function registerStoreCommand(program: Command): void {
 
   store
     .command('remove <id>')
-    .description('Forget a local store registration and delete its local folder')
-    .option('--yes', 'Confirm local store folder deletion')
+    .description('清除本地 store 注册记录并删除其本地文件夹')
+    .option('--yes', '确认删除本地 store 文件夹')
     .option('--json', 'Output as JSON')
     .action(async (id: string, options: StoreRemoveOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -68,7 +68,7 @@ export function registerStoreCommand(program: Command): void {
   store
     .command('list')
     .alias('ls')
-    .description('List locally registered stores')
+    .description('列出本地已注册的 stores')
     .option('--json', 'Output as JSON')
     .action(async (options: StoreJsonOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -77,7 +77,7 @@ export function registerStoreCommand(program: Command): void {
 
   store
     .command('doctor [id]')
-    .description('Check local store registration and metadata')
+    .description('检查本地 store 注册和元数据')
     .option('--json', 'Output as JSON')
     .action(async (id: string | undefined, options: StoreJsonOptions) => {
       const storeCommand = await loadStoreCommand();
@@ -119,40 +119,40 @@ export function registerStoreCommand(program: Command): void {
     if (operands.includes('--json')) {
       const message =
         attempted.length > 0
-          ? `Unknown command '${attempted[0]}' for 'openspec store'. Store subcommands: ${storeSubcommandsLine}.`
-          : `Missing subcommand for 'openspec store'. Store subcommands: ${storeSubcommandsLine}.`;
+          ? `未知命令 '${attempted[0]}'（属于 'openspec-cn store'）。store 子命令：${storeSubcommandsLine}。`
+          : `缺少子命令（'openspec-cn store'）。store 子命令：${storeSubcommandsLine}。`;
       printJson({
         status: [
           {
             severity: 'error',
             code: 'unknown_store_subcommand',
             message,
-            fix: 'Run a store subcommand, or use the lifecycle command with --store <id>.',
+            fix: '运行某个 store 子命令，或使用带 --store <id> 的生命周期命令。',
           },
         ],
       });
       process.exitCode = 1;
       return;
     }
-    let example = 'openspec new change <change-id> --store <id>';
+    let example = 'openspec-cn new change <change-id> --store <id>';
     if (!hasFlagLikeToken && attempted.length > 0 && lifecycleRedirects.has(attempted[0])) {
       if (attempted[0] === 'new') {
         const changeId = attempted[1] === 'change' && attempted[2] ? attempted[2] : '<change-id>';
-        example = `openspec new change ${changeId} --store <id>`;
+        example = `openspec-cn new change ${changeId} --store <id>`;
       } else {
-        example = `openspec ${attempted.join(' ')} --store <id>`;
+        example = `openspec-cn ${attempted.join(' ')} --store <id>`;
       }
     }
     console.error(
       attempted.length > 0
-        ? `Error: unknown command '${attempted[0]}' for 'openspec store'.`
-        : "Error: missing subcommand for 'openspec store'."
+        ? `错误: 'openspec-cn store' 的未知命令 '${attempted[0]}'。`
+        : "错误: 缺少 'openspec-cn store' 的子命令。"
     );
     console.error(
-      `Store subcommands manage store registration: ${storeSubcommandsLine}.`
+      `Store 子命令用于管理 store 注册: ${storeSubcommandsLine}.`
     );
     console.error(
-      'To create or work on a change in a store, use the normal command with --store, for example:'
+      '要在 store 中创建或处理变更，请使用带有 --store 的普通命令，例如:'
     );
     console.error(`  ${example}`);
     process.exitCode = 1;

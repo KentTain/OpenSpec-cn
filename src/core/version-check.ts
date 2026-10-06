@@ -597,14 +597,14 @@ export function buildVersionReportLines(
   if (!update) return lines;
 
   if (update.status === 'available') {
-    lines.push(`Update available: ${update.latest}`);
+    lines.push(`有可用更新：${update.latest}`);
     if (command) lines.push(`  ${command}`);
   } else if (update.status === 'current') {
-    lines.push('OpenSpec is up to date.');
+    lines.push('OpenSpec 已是最新版本。');
   } else if (update.status === 'disabled') {
-    lines.push('Update check disabled.');
+    lines.push('更新检查已禁用。');
   } else {
-    lines.push('Could not check for updates.');
+    lines.push('无法检查更新。');
   }
   return lines;
 }

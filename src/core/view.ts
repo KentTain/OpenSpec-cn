@@ -124,7 +124,7 @@ export class ViewCommand {
           } catch (error) {
             // Preserve task progress even when this change's workflow cannot be loaded.
             console.warn(chalk.yellow(this.sanitizeWorkflowText(
-              `Could not load workflow status for "${entry.name}": ${error instanceof Error ? error.message : String(error)}`
+              `无法加载 "${entry.name}" 的工作流状态：${error instanceof Error ? error.message : String(error)}`
             )));
           }
           active.push({ name: entry.name, progress, workflowStatus });

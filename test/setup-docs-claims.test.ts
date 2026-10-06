@@ -23,7 +23,8 @@ const CORE_SECTION = PROFILES.split('## 核心集合')[1].split(
 describe('setup documentation', () => {
   it('matches the AI-assisted project.md migration guidance', () => {
     const hint = formatProjectMdMigrationHint();
-    const claims = [
+    // The pasteable block shown in the docs (kept verbatim as users paste it).
+    const pastedClaims = [
       'Review openspec/project.md and migrate its useful content to',
       'Keep context concise',
       'only project-wide',
@@ -34,14 +35,28 @@ describe('setup documentation', () => {
       'outdated, or verbose material',
       'Do not delete project.md',
     ];
+    // The CLI's own localized hint lines.
+    const hintClaims = [
+      '审查 openspec/project.md',
+      'context 保持精炼',
+      '制品创建',
+      'apply 和归档',
+      '对应制品的 rules',
+      'operations 条目',
+      '不要包含泛泛',
+      '过时或冗长的内容',
+      '不要删除 project.md',
+    ];
 
-    expect(SETUP).toContain('Init does not copy legacy `openspec/project.md`');
-    for (const claim of claims) {
-      expect(hint).toContain(claim);
+    expect(SETUP).toContain('init 不会把旧的 `openspec/project.md` 复制进 `config.yaml`');
+    for (const claim of pastedClaims) {
       expect(SETUP).toContain(claim);
     }
-    expect(hint).toContain('Review config.yaml, then delete project.md when ready.');
-    expect(SETUP).toContain('Review `config.yaml`, then delete `project.md` when ready.');
+    for (const claim of hintClaims) {
+      expect(hint).toContain(claim);
+    }
+    expect(hint).toContain('审查 config.yaml 后，在合适的时候删除 project.md。');
+    expect(SETUP).toContain('审查 `config.yaml` 后，在合适的时候删除 `project.md`。');
   });
 
   it('keeps the Claude Code paths and recovery commands aligned with OpenSpec', () => {

@@ -6,7 +6,7 @@ import type { ContextOptions } from '../../commands/context.js';
 export function registerContextCommand(program: Command): void {
   const description =
     COMMAND_REGISTRY.find((entry) => entry.name === 'context')?.description ??
-    'Print the working context for the resolved OpenSpec root';
+    '打印已解析 OpenSpec 根目录的工作上下文';
 
   program
     .command('context')
@@ -15,9 +15,9 @@ export function registerContextCommand(program: Command): void {
     .addOption(
       new Option('--store-path <path>', 'Removed; register the store and use --store').hideHelp()
     )
-    .option('--json', 'Output the agent brief as JSON')
-    .option('--code-workspace <path>', 'Also write a VS Code workspace file for the set')
-    .option('--force', 'Overwrite an existing --code-workspace file')
+    .option('--json', '以 JSON 格式输出代理简报')
+    .option('--code-workspace <path>', '同时为此集合写入 VS Code 工作区文件')
+    .option('--force', '覆盖已有的 --code-workspace 文件')
     .action(async (options: ContextOptions) => {
       const { contextCommand } = await import('../../commands/context.js');
       await contextCommand(options);

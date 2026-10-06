@@ -54,8 +54,8 @@ describe('ListCommand', () => {
       await new ListCommand().execute(tempDir, 'changes', { archived: true });
 
       expect(logOutput).toEqual([
-        'Archived Changes:',
-        '  2026-01-01-old-change     1/2 tasks     just now'
+        '已归档变更：',
+        '  2026-01-01-old-change     1/2 任务        刚刚'
       ]);
     });
 
@@ -68,20 +68,20 @@ describe('ListCommand', () => {
       await new ListCommand().execute(tempDir, 'changes', { ...options, sort: 'name' });
 
       expect(logOutput).toEqual([
-        'Changes:',
-        '  a-active     No tasks      just now',
-        '  z-active     ✓ Complete    just now',
+        '变更：',
+        '  a-active     无任务           刚刚',
+        '  z-active     ✓ 完成          刚刚',
         '',
-        'Archived Changes:',
-        '  a-archived     1/2 tasks     just now',
-        '  z-archived     ✓ Complete    just now'
+        '已归档变更：',
+        '  a-archived     1/2 任务        刚刚',
+        '  z-archived     ✓ 完成          刚刚'
       ]);
     });
 
     it.each([
-      [{ archived: true }, 'No archived changes found.'],
-      [{ all: true }, 'No changes found.'],
-      [{ all: true, archived: true }, 'No changes found.']
+      [{ archived: true }, '未找到已归档的变更。'],
+      [{ all: true }, '未找到任何变更。'],
+      [{ all: true, archived: true }, '未找到任何变更。']
     ] as const)('handles a missing changes directory with options %j', async (options, message) => {
       await new ListCommand().execute(tempDir, 'changes', options);
       expect(logOutput).toEqual([message]);
@@ -92,7 +92,7 @@ describe('ListCommand', () => {
 
       await new ListCommand().execute(tempDir, 'changes', { all: true });
 
-      expect(logOutput).toEqual(['Changes:', '  active     1/2 tasks     just now']);
+      expect(logOutput).toEqual(['变更：', '  active     1/2 任务        刚刚']);
     });
 
     it('lists archived changes with --all when there are no active changes', async () => {
@@ -100,7 +100,7 @@ describe('ListCommand', () => {
 
       await new ListCommand().execute(tempDir, 'changes', { all: true });
 
-      expect(logOutput).toEqual(['Archived Changes:', '  old     1/2 tasks     just now']);
+      expect(logOutput).toEqual(['已归档变更：', '  old     1/2 任务        刚刚']);
     });
 
     it.each(['archive', ''] as const)('rejects a malformed changes/%s path', async (entry) => {
@@ -551,8 +551,8 @@ Regular text that should be ignored
 
         logOutput = [];
         await new ListCommand().execute(tempDir, 'changes', { all: true, sort: 'name' });
-        const archivedSection = logOutput.slice(logOutput.indexOf('Archived Changes:'));
-        expect(archivedSection).toContain('  mobile     ✓ Complete    just now');
+        const archivedSection = logOutput.slice(logOutput.indexOf('已归档变更：'));
+        expect(archivedSection).toContain('  mobile     ✓ 完成          刚刚');
       });
 
       it('omits warnings from --json when nothing is nested', async () => {

@@ -155,7 +155,7 @@ describe('Warp integration', () => {
 
     await new UpdateCommand().execute(projectPath);
 
-    expect(vi.mocked(console.log).mock.calls.flat().join('\n')).toContain('up to date');
+    expect(vi.mocked(console.log).mock.calls.flat().join('\n')).toContain('已是最新版本');
     expect(await fs.readFile(skillPath('openspec-explore'), 'utf8')).toBe(original);
   });
 

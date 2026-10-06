@@ -12,8 +12,8 @@ const SKILLS = fs.readFileSync(
   path.join(REPO_ROOT, 'docs-lab', 'reference', 'skills.md'),
   'utf-8'
 );
-const APPLY_INSTRUCTIONS = CLI.split('## openspec instructions')[1].split(
-  '## openspec templates'
+const APPLY_INSTRUCTIONS = CLI.split('## openspec-cn instructions')[1].split(
+  '## openspec-cn templates'
 )[0];
 const APPLY_SKILL = SKILLS.split('## openspec-apply-change')[1].split(
   '## openspec-update-change'
@@ -27,15 +27,15 @@ describe('apply documentation', () => {
       expect(APPLY_INSTRUCTIONS).toContain(field);
     }
 
-    expect(APPLY_INSTRUCTIONS).toContain('absolute path to the tracked file');
-    expect(APPLY_INSTRUCTIONS).toContain("checkbox's one-based line number");
+    expect(APPLY_INSTRUCTIONS).toContain('被追踪文件的绝对路径');
+    expect(APPLY_INSTRUCTIONS).toContain('该任务复选框在文件中从 1 开始的行号');
   });
 
   it('documents that the apply skill can update tasks across tracked files', () => {
     expect(APPLY_SKILL).toContain(
-      'tracked file identified by `sourcePath` and one-based `line`'
+      '由 `sourcePath` 和从 1 开始的 `line` 定位的被追踪文件'
     );
-    expect(APPLY_SKILL).toContain('track tasks across multiple files');
-    expect(APPLY_SKILL).not.toContain('touches only the tasks file');
+    expect(APPLY_SKILL).toContain('跨多个文件追踪任务');
+    expect(APPLY_SKILL).not.toContain('只更新 tasks 文件');
   });
 });

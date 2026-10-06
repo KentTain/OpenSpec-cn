@@ -16,15 +16,15 @@ import { PROJECT_ROOT_GUARD } from './project-root.js';
  */
 const BLOCKED_STATE_HANDOFF = optionalWorkflow(
   'continue',
-  'suggest using `/opsx:continue` to create them.',
-  'suggest completing the missing artifacts. Run `openspec status --change "<name>" --json`, select the next `ready` artifact (not `skipped` or `blocked`), and use `openspec instructions "<artifact-id>" --change "<name>" --json` for its rules and template. Keep the selected `--store <id>` on both commands.'
+  '建议使用 `/opsx:continue` 来创建它们。',
+  '建议补全缺失的制品。运行 `openspec-cn status --change "<name>" --json`，选择下一个 `ready` 制品（而非 `skipped` 或 `blocked`），并使用 `openspec-cn instructions "<artifact-id>" --change "<name>" --json` 获取其规则和模板。两条命令都要保留已选中的 `--store <id>`。'
 );
 
 /** The archive handoff shown once every task is done. */
 const ARCHIVE_HANDOFF = optionalWorkflow(
   'archive',
-  'You can archive this change with `/opsx:archive`.',
-  'You can archive this change by running `openspec archive "<name>"`.'
+  '你可以使用 `/opsx:archive` 归档此变更。',
+  '你可以运行 `openspec-cn archive "<name>"` 来归档此变更。'
 );
 
 /**
@@ -37,200 +37,187 @@ const ARCHIVE_HANDOFF = optionalWorkflow(
  * wording, add a parameter here and pass it from that surface's template.
  */
 export function getApplyInstructions(): string {
-  return `Implement tasks from an OpenSpec change.
+  return `从 OpenSpec 变更中实现任务。
 
 ${STORE_SELECTION_GUIDANCE}
 
 ${PROJECT_ROOT_GUARD}
 
-**Input**: Optionally specify a change name (e.g., \`/opsx:apply add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: 可选地指定变更名称（例如 \`/opsx:apply add-auth\`）。若省略，检查能否从对话上下文推断。若模糊或歧义，你必须提示用户从可用变更中选择。
 
-**Steps**
+**步骤**
 
-1. **Select the change**
+1. **选择变更**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run \`openspec list --json\` to get available changes and ask the user to select one
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 \`openspec-cn list --json\` 获取可用变更并让用户选择
 
-   Always announce: "Using change: <name>" and how to override (e.g., \`/opsx:apply <other>\`).
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 \`/opsx:apply <other>\`）。
 
-2. **Check status to understand the schema**
+2. **检查状态以理解 schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    \`\`\`
-   Parse the JSON to understand:
-   - \`schemaName\`: The workflow being used (e.g., "spec-driven")
-   - \`planningHome\`, \`changeRoot\`, and \`actionContext\`: planning scope and edit constraints
-   - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
+   解析 JSON 以理解：
+   - \`schemaName\`：使用的工作流（例如 "spec-driven"）
+   - \`planningHome\`、\`changeRoot\` 和 \`actionContext\`：规划范围与编辑约束
+   - 哪个产出物包含任务（spec-driven 通常是 "tasks"，其他 schema 检查状态输出）
 
-3. **Get apply instructions**
+3. **获取实现指令**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   openspec-cn instructions apply --change "<name>" --json
    \`\`\`
 
-   This returns:
-   - \`contextFiles\`: artifact ID -> array of concrete file paths (varies by schema - could be proposal/specs/design/tasks or spec/tests/implementation/docs)
-   - Progress (total, complete, remaining)
-   - Task list with status, source path, and source line
-   - Dynamic instruction based on current state
-   - Optional \`context\`: current required project instruction input from the selected root
-   - Optional \`operationGuidance\`: current advisory guidance for apply
-   - \`missingArtifacts\` (when present): required artifact ids with no output
+   此命令返回：
+   - \`contextFiles\`：制品 ID -> 具体文件路径数组（因 schema 而异 - 可能是 proposal/specs/design/tasks 或 spec/tests/implementation/docs）
+   - 进度（总计、已完成、剩余）
+   - 任务列表及状态、源路径和源行
+   - 基于当前状态的动态指令
+   - 可选的 \`context\`：来自所选根路径的当前必需项目指令输入
+   - 可选的 \`operationGuidance\`：当前 apply 的建议性指导
+   - \`missingArtifacts\`（存在时）：没有输出的必需制品 ID
 
-   **Handle states:**
-   - If \`state: "blocked"\`: show the message and pause implementation.
-     - If \`missingArtifacts\` is non-empty: ${BLOCKED_STATE_HANDOFF}
-     - Otherwise, follow the CLI instruction to create or repair the schema-configured tracking file from existing planning artifacts. Do not assume another artifact is ready or start implementation while blocked.
-   - If \`state: "all_done"\`: report that all tracked tasks are complete and suggest review or verification as appropriate before archiving
-   - Otherwise: proceed to implementation
+   **处理状态：**
+   - 若 \`state: "blocked"\`：显示消息并暂停实现。
+     - 若 \`missingArtifacts\` 非空：${BLOCKED_STATE_HANDOFF}
+     - 否则，遵循 CLI 指令从现有规划制品创建或修复 schema 配置的跟踪文件。在受阻时不要假设另一个制品已就绪，也不要开始实现。
+   - 若 \`state: "all_done"\`：报告所有跟踪的任务已完成，并建议在归档前根据情况进行审查或验证
+   - 否则：继续实现
 
-   Treat \`context\` as a required prompt-level input. Read and consider it, and
-   apply relevant project facts, conventions, and constraints while implementing.
-   Treat \`operationGuidance\` as optional additive advice. Read and consider every
-   entry, and follow entries that are applicable and compatible with the built-in
-   workflow.
+   将 \`context\` 视为必需的提示级输入。阅读并考虑它，在实现时应用相关的项目事实、约定和约束。将 \`operationGuidance\` 视为可选的补充建议。阅读并考虑每个条目，遵循适用且与内置工作流兼容的条目。
 
-   Keep both fields separate from CLI-returned state, missing artifacts, tasks,
-   progress, \`contextFiles\`, and the built-in \`instruction\`. They are not
-   evidence of task completion, do not replace the built-in instruction, and do
-   not permit bypassing a blocked state. If context conflicts with the built-in
-   instruction, an explicit user choice, or a CLI-controlled value, report the
-   conflict and preserve the controlling value. If guidance is inapplicable or
-   conflicts with those controlling inputs, do not follow it and explain why.
-   These are prompt-level behavior contracts, not enforceable checks.
+   将这两个字段与 CLI 返回的状态、缺失的制品、任务、进度、\`contextFiles\` 和内置 \`instruction\` 分开。它们不是任务完成的证据，不替代内置指令，且不允许绕过被阻塞状态。若 context 与内置指令、显式用户选择或 CLI 控制的值冲突，报告冲突并保留控制值。若 guidance 不适用或与这些控制输入冲突，不要遵循它并解释原因。这些是提示级行为契约，不是可强制执行的检查。
 
-4. **Read context files**
+4. **读取上下文文件**
 
-   Read every file path listed under \`contextFiles\` from the apply instructions output.
-   The files depend on the schema being used:
-   - **spec-driven**: proposal, specs, design, tasks
-   - Other schemas: follow the contextFiles from CLI output
+   读取实现指令输出中 \`contextFiles\` 下列出的每个文件路径。
+   文件因使用的 schema 而异：
+   - **spec-driven**：proposal、specs、design、tasks
+   - 其他 schema：遵循 CLI 输出的 contextFiles
 
-   Do not copy \`context\` or \`operationGuidance\` verbatim into implementation
-   files or planning artifacts unless the user separately asks for that content.
+   不要将 \`context\` 或 \`operationGuidance\` 逐字复制到实现文件或规划制品中，除非用户单独要求该内容。
 
-5. **Show current progress**
+5. **展示当前进度**
 
-   Display:
-   - Schema being used
-   - Progress: "N/M tasks complete"
-   - Remaining tasks overview
-   - Dynamic instruction from CLI
+   展示：
+   - 使用的 schema
+   - 进度："N/M 个任务已完成"
+   - 剩余任务概览
+   - CLI 的动态指令
 
-6. **Implement tasks (loop until done or blocked)**
+6. **实现任务（循环直至完成或受阻）**
 
-   For each pending task:
-   - Show which task is being worked on
-   - Make the code changes required
-   - Keep changes minimal and focused
-   - Before editing, confirm the checkbox at the returned \`sourcePath\` and \`line\` still matches the task description; if it does not, rerun the apply instructions and use the refreshed location
-   - Mark the task complete at its returned \`sourcePath\` and \`line\`: \`- [ ]\` → \`- [x]\`
-   - Rerun the apply instructions and confirm that task is now done and progress changed
-   - Continue to next task
+   对每个待处理任务：
+   - 展示正在处理哪个任务
+   - 进行所需的代码更改
+   - 保持更改最小且聚焦
+   - 编辑前，确认 \`sourcePath\` 和 \`line\` 返回位置的复选框仍与任务描述一致；若不一致，重新运行 apply 指令并使用刷新后的位置
+   - 在返回的 \`sourcePath\` 和 \`line\` 位置标记任务完成：\`- [ ]\` → \`- [x]\`
+   - 重新运行 apply 指令，确认该任务已完成且进度发生变化
+   - 继续下一个任务
 
-   **Pause if:**
-   - Task is unclear → ask for clarification
-   - Implementation reveals a design issue → suggest updating artifacts
-   - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
-   - Error or blocker encountered → report and wait for guidance
-   - User interrupts
+   **暂停条件：**
+   - 任务不清晰 → 请求澄清
+   - 实现揭示设计问题 → 建议更新产出物
+   - 任务需要超出 spec 和 tasks 描述的工作，或者你想删减、收窄、推迟或接受指定行为的例外来勉强适配 → 把新增的范围摆出来并询问；不要默默吸收
+   - 遇到错误或阻塞 → 报告并等待指导
+   - 用户中断
 
-7. **On completion or pause, show status**
+7. **完成或暂停时，展示状态**
 
-   Display:
-   - Tasks completed this session
-   - Overall progress: "N/M tasks complete"
-   - If all done: report that tracked tasks are complete and suggest review or verification as appropriate before archiving
-   - If paused: explain why and wait for guidance
+   展示：
+   - 本次会话完成的任务
+   - 总体进度："N/M 个任务已完成"
+   - 若全部完成：报告跟踪的任务已完成，并建议在归档前根据情况进行审查或验证
+   - 若暂停：解释原因并等待指导
 
-**Output During Implementation**
+**实现期间输出**
 
 \`\`\`
-## Implementing: <change-name> (schema: <schema-name>)
+## 实现中：<change-name>（schema: <schema-name>）
 
-Working on task 3/7: <task description>
-[...implementation happening...]
-✓ Task complete
+正在处理任务 3/7：<task description>
+[...实现进行中...]
+✓ 任务完成
 
-Working on task 4/7: <task description>
-[...implementation happening...]
-✓ Task complete
+正在处理任务 4/7：<task description>
+[...实现进行中...]
+✓ 任务完成
 \`\`\`
 
-**Output On Completion**
+**完成时输出**
 
 \`\`\`
-## Implementation Complete
+## 实现完成
 
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Progress:** 7/7 tasks complete ✓
+**变更：** <change-name>
+**Schema：** <schema-name>
+**进度：** 7/7 个任务已完成 ✓
 
-### Completed This Session
-- [x] Task 1
-- [x] Task 2
+### 本次会话已完成
+- [x] 任务 1
+- [x] 任务 2
 ...
 
-All tracked tasks are complete. Review or verify the change as appropriate
-before archiving. ${ARCHIVE_HANDOFF}
+所有跟踪的任务已完成。归档前请根据情况审查或验证该变更。 ${ARCHIVE_HANDOFF}
 \`\`\`
 
-**Output On Pause (Issue Encountered)**
+**暂停时输出（遇到问题）**
 
 \`\`\`
-## Implementation Paused
+## 实现暂停
 
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Progress:** 4/7 tasks complete
+**变更：** <change-name>
+**Schema：** <schema-name>
+**进度：** 4/7 个任务已完成
 
-### Issue Encountered
-<description of the issue>
+### 遇到的问题
+<对问题的描述>
 
-**Options:**
+**选项：**
 1. <option 1>
 2. <option 2>
-3. Other approach
+3. 其他方法
 
-What would you like to do?
+你想怎么做？
 \`\`\`
 
-**Guardrails**
-- Keep going through tasks until done or blocked
-- Always read context files before starting (from the apply instructions output)
-- If task is ambiguous, pause and ask before implementing
-- If implementation reveals issues, pause and suggest artifact updates
-- Keep code changes minimal and scoped to each task
-- Update task checkbox immediately after completing each task
-- Pause on errors, blockers, or unclear requirements - don't guess
-- When a task needs work beyond what the spec describes, surface the added scope and pause - never silently narrow, defer, or simplify away specified behavior
-- Only mark a task \`- [x]\` when its specified behavior is fully implemented, not when it is partially done or deferred
-- Use contextFiles from CLI output, don't assume specific file names
-- Use each task's sourcePath and line to update its exact checkbox
-- Do not use context or operation guidance as proof that a task is complete
-- Apply relevant project context; report conflicts with controlling workflow inputs
-- Consider every guidance entry; explain any inapplicable or conflicting advice
-- Do not copy runtime context or operation guidance into implementation files or planning artifacts
-- Preserve CLI-controlled blocked/ready/all-done behavior and completion criteria
+**护栏**
+- 持续完成任务直至完成或受阻
+- 开始前始终读取上下文文件（来自 apply 指令输出）
+- 若任务模糊，暂停并在实现前询问
+- 若实现揭示问题，暂停并建议更新制品
+- 保持代码更改最小且聚焦于每个任务
+- 完成每个任务后立即更新任务复选框
+- 使用每个任务的 sourcePath 和行号更新其确切的复选框
+- 在错误、阻塞或不明确的需求时暂停 - 不要猜测
+- 当任务需要超出 spec 描述的工作时，摆出新增的范围并暂停 - 绝不默默收窄、推迟或简化掉指定行为
+- 只有当任务的指定行为被完整实现时才将任务标记为 \`- [x]\`，而不是部分完成或推迟时
+- 使用 CLI 输出中的 contextFiles，不要假设特定文件名
+- 不要将 context 或 operation guidance 作为任务完成的证据
+- 应用相关的项目上下文；报告与控制工作流输入的冲突
+- 考虑每个 guidance 条目；解释任何不适用或冲突的建议
+- 不要将运行时 context 或 operation guidance 复制到实现文件或规划制品中
+- 保留 CLI 控制的 blocked/ready/all-done 行为和完成标准
 
-**Fluid Workflow Integration**
+**流畅工作流集成**
 
-This skill supports the "actions on a change" model:
+此 skill 支持 "对变更的操作" 模型：
 
-- **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
-- **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly`;
+- **可随时调用**：在所有产出物完成前（若存在任务）、部分实现后、与其他操作交错
+- **允许产出物更新**：若实现揭示设计问题，建议更新产出物 - 非阶段锁定，流畅工作`;
 }
 
 export function getApplyChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-apply-change',
-    description: 'Implement tasks from an OpenSpec change. Use when the user wants to start implementing, continue implementation, or work through tasks. Also use when the user says "openspec apply", "opsx apply", or "openspec implement".',
+    description: '从 OpenSpec 变更中实现任务。当用户想开始实现、继续实现或处理任务时使用。也在用户说 "openspec apply"、"opsx apply" 或 "openspec implement" 时使用。',
     instructions: getApplyInstructions(),
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -238,7 +225,7 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
 export function getOpsxApplyCommandTemplate(): CommandTemplate {
   return {
     name: 'OPSX: Apply',
-    description: 'Implement tasks from an OpenSpec change (Experimental)',
+    description: '从 OpenSpec 变更中实现任务（实验性）',
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
     content: getApplyInstructions(),

@@ -169,7 +169,7 @@ describe('InitCommand', () => {
       expect(readProjectConfig(testDir)?.context).toBeUndefined();
       expect(await fs.readFile(projectMdPath, 'utf-8')).toBe('# Migrate me later\n');
       expect(vi.mocked(console.log).mock.calls.flat().join('\n')).toContain(
-        'Ask your AI assistant'
+        '请询问您的 AI 助手'
       );
       expect(confirmMock).not.toHaveBeenCalled();
     });
@@ -756,7 +756,7 @@ describe('InitCommand', () => {
       const logCalls = vi.mocked(console.log).mock.calls.flat().map(String);
       expect(
         logCalls.some(
-          (entry) => entry.includes('Commands skipped for: amp') && entry.includes('(no adapter)')
+          (entry) => entry.includes('已跳过命令：amp') && entry.includes('（无适配器）')
         )
       ).toBe(true);
     });
@@ -782,7 +782,7 @@ describe('InitCommand', () => {
       const logCalls = vi.mocked(console.log).mock.calls.flat().map(String);
       expect(
         logCalls.some(
-          (entry) => entry.includes('Commands skipped for: gsd') && entry.includes('(no adapter)'),
+          (entry) => entry.includes('已跳过命令：gsd') && entry.includes('（无适配器）'),
         ),
       ).toBe(true);
     });
@@ -1027,15 +1027,15 @@ describe('InitCommand', () => {
       expect(applyBody).toMatch(/\/openspec-archive-change/);
 
       const dshLogCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
-      expect(dshLogCalls.some((entry) => entry.includes('Created: DeepSeek Harness'))).toBe(true);
+      expect(dshLogCalls.some((entry) => entry.includes('已创建：DeepSeek Harness'))).toBe(true);
       expect(
         dshLogCalls.some(
-          (entry) => entry.includes('Commands skipped for: dsh') && entry.includes('(no adapter)'),
+          (entry) => entry.includes('已跳过命令：dsh') && entry.includes('（无适配器）'),
         ),
       ).toBe(true);
       // The getting-started hint must use the skill name dsh actually loads
       // when the user types it (`/openspec-propose`).
-      const hintLine = dshLogCalls.find((entry) => entry.includes('Start your first change'));
+      const hintLine = dshLogCalls.find((entry) => entry.includes('发起第一个变更'));
       expect(hintLine).toBeDefined();
       expect(hintLine).toContain('/openspec-propose');
       expect(hintLine).not.toContain('/opsx:');
@@ -1055,10 +1055,10 @@ describe('InitCommand', () => {
       expect(await directoryExists(path.join(testDir, '.agents'))).toBe(false);
 
       const logCalls = vi.mocked(console.log).mock.calls.flat().map(String);
-      expect(logCalls.some((entry) => entry.includes('Start your first change'))).toBe(false);
-      const correction = logCalls.find((entry) => entry.includes('No skills or commands were generated'));
+      expect(logCalls.some((entry) => entry.includes('发起第一个变更'))).toBe(false);
+      const correction = logCalls.find((entry) => entry.includes('生成 skills 或命令'));
       expect(correction).toContain('DeepSeek Harness');
-      expect(correction).toContain('openspec config set delivery both');
+      expect(correction).toContain('openspec-cn config set delivery both');
     });
 
     it('should support Hermes Agent as an adapterless skills-only tool with a setup note', async () => {
@@ -1124,10 +1124,10 @@ describe('InitCommand', () => {
       const logCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
       if (delivery === 'both') {
         expect(logCalls.some(
-          (entry) => entry.includes('Commands skipped for: grok') && entry.includes('(no adapter)'),
+          (entry) => entry.includes('已跳过命令：grok') && entry.includes('（无适配器）'),
         )).toBe(true);
       }
-      const startHint = logCalls.find((entry) => entry.includes('Start your first change'));
+      const startHint = logCalls.find((entry) => entry.includes('发起第一个变更'));
       expect(startHint).toContain('/openspec-propose');
       expect(startHint).not.toContain('/opsx:');
     });

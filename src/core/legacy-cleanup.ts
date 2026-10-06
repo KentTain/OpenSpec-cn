@@ -690,7 +690,7 @@ export async function cleanupLegacyArtifacts(
       await FileSystemUtils.writeFile(filePath, newContent);
       result.modifiedFiles.push(fileName);
     } catch (error: any) {
-      result.errors.push(`Failed to modify ${fileName}: ${error.message}`);
+      result.errors.push(`修改 ${fileName} 失败：${error.message}`);
     }
   }
 
@@ -720,7 +720,7 @@ export async function cleanupLegacyArtifacts(
         result.deletedFiles.push(...deleted.map((name) => `${dirPath}/${name}`));
       }
     } catch (error: any) {
-      result.errors.push(`Failed to delete directory ${dirPath}: ${error.message}`);
+      result.errors.push(`删除目录 ${dirPath} 失败：${error.message}`);
     }
   }
 
@@ -741,7 +741,7 @@ export async function cleanupLegacyArtifacts(
       await fs.unlink(fullPath);
       result.deletedFiles.push(filePath);
     } catch (error: any) {
-      result.errors.push(`Failed to delete ${filePath}: ${error.message}`);
+      result.errors.push(`删除 ${filePath} 失败：${error.message}`);
     }
   }
 
@@ -751,7 +751,7 @@ export async function cleanupLegacyArtifacts(
     try {
       await settleLegacyCommandDir(projectPath, dirPath, result);
     } catch (error: any) {
-      result.errors.push(`Failed to delete directory ${dirPath}: ${error.message}`);
+      result.errors.push(`删除目录 ${dirPath} 失败：${error.message}`);
     }
   }
 
@@ -761,7 +761,7 @@ export async function cleanupLegacyArtifacts(
   );
   for (const filePath of detection.globalSlashCommandFiles) {
     if (!getManagedGlobalLegacyPromptMetadata(filePath)) {
-      result.errors.push(`Skipped unmanaged global prompt ${filePath}`);
+      result.errors.push(`已跳过未纳管的全局 prompt ${filePath}`);
       continue;
     }
 
@@ -773,7 +773,7 @@ export async function cleanupLegacyArtifacts(
         result.deletedFileReplacementLabels![filePath] = promptMatch.replacementLabel;
       }
     } catch (error: any) {
-      result.errors.push(`Failed to delete ${filePath}: ${error.message}`);
+      result.errors.push(`删除 ${filePath} 失败：${error.message}`);
     }
   }
 
@@ -785,7 +785,7 @@ export async function cleanupLegacyArtifacts(
         await fs.unlink(agentsPath);
         result.deletedFiles.push('openspec/AGENTS.md');
       } catch (error: any) {
-        result.errors.push(`Failed to delete openspec/AGENTS.md: ${error.message}`);
+        result.errors.push(`删除 openspec/AGENTS.md 失败：${error.message}`);
       }
     }
   }
@@ -814,27 +814,27 @@ export function formatCleanupSummary(result: CleanupResult): string {
     result.modifiedFiles.length > 0 ||
     keptFiles.length > 0
   ) {
-    lines.push('Cleaned up legacy files:');
+    lines.push('已清理旧版文件：');
 
     for (const file of result.deletedFiles) {
       const replacementLabel = result.deletedFileReplacementLabels?.[file]
         ?? getManagedGlobalLegacyPromptMetadata(file)?.replacementLabel;
       const replacement = replacementLabel
-        ? ` (replaced by ${replacementLabel})`
+        ? `（已由 ${replacementLabel} 取代）`
         : '';
-      lines.push(`  ✓ Removed ${file}${replacement}`);
+      lines.push(`  ✓ 已移除 ${file}${replacement}`);
     }
 
     for (const dir of result.deletedDirs) {
-      lines.push(`  ✓ Removed ${dir}/ (replaced by OpenSpec skills and commands)`);
+      lines.push(`  ✓ 已移除 ${dir}/（已由 OpenSpec skills 与命令取代）`);
     }
 
     for (const entry of keptFiles) {
-      lines.push(`  • Kept ${entry} (not created by OpenSpec)`);
+      lines.push(`  • 已保留 ${entry}（非 OpenSpec 创建）`);
     }
 
     for (const file of result.modifiedFiles) {
-      lines.push(`  ✓ Removed OpenSpec markers from ${file}`);
+      lines.push(`  ✓ 已从 ${file} 移除 OpenSpec 标记`);
     }
   }
 
@@ -849,7 +849,7 @@ export function formatCleanupSummary(result: CleanupResult): string {
     if (lines.length > 0) {
       lines.push('');
     }
-    lines.push('Errors during cleanup:');
+    lines.push('清理过程中的错误：');
     for (const error of result.errors) {
       lines.push(`  ⚠ ${error}`);
     }
@@ -873,25 +873,25 @@ function buildRemovalsList(detection: LegacyDetectionResult): Array<{ path: stri
   for (const dir of detection.slashCommandDirs) {
     // Split on both forward and backward slashes for Windows compatibility
     const toolDir = dir.split(/[\/\\]/)[0];
-    removals.push({ path: dir + '/', explanation: `replaced by ${toolDir}/skills/` });
+    removals.push({ path: dir + '/', explanation: `已由 ${toolDir}/skills/ 取代` });
   }
 
   // Slash command files (these are 100% OpenSpec-managed)
   for (const file of detection.slashCommandFiles) {
-    removals.push({ path: file, explanation: 'replaced by skills/' });
+    removals.push({ path: file, explanation: '已由 skills/ 取代' });
   }
 
   // Managed global slash command files
   for (const prompt of getLegacyGlobalPromptMatches(detection)) {
     const explanation = prompt.toolId
-      ? `replaced by .${prompt.toolId}/skills/`
-      : 'replaced by skills/';
+      ? `已由 .${prompt.toolId}/skills/ 取代`
+      : '已由 skills/ 取代';
     removals.push({ path: prompt.path, explanation });
   }
 
   // openspec/AGENTS.md (inside openspec/, it's OpenSpec-managed)
   if (detection.hasOpenspecAgents) {
-    removals.push({ path: 'openspec/AGENTS.md', explanation: 'obsolete workflow file' });
+    removals.push({ path: 'openspec/AGENTS.md', explanation: '已废弃的工作流文件' });
   }
 
   // Note: Config files (CLAUDE.md, AGENTS.md, etc.) are NEVER in the removals list
@@ -912,7 +912,7 @@ function buildUpdatesList(detection: LegacyDetectionResult): Array<{ path: strin
 
   // All config files with markers get updated (markers removed, file preserved)
   for (const file of detection.configFilesToUpdate) {
-    updates.push({ path: file, explanation: 'removing OpenSpec markers' });
+    updates.push({ path: file, explanation: '移除 OpenSpec 标记' });
   }
 
   return updates;
@@ -937,17 +937,16 @@ export function formatDetectionSummary(detection: LegacyDetectionResult): string
   }
 
   // Header - welcoming upgrade message
-  lines.push(chalk.bold('Upgrading to the new OpenSpec'));
+  lines.push(chalk.bold('升级到新版 OpenSpec'));
   lines.push('');
-  lines.push('OpenSpec now uses agent skills, the emerging standard across coding');
-  lines.push('agents. This simplifies your setup while keeping everything working');
-  lines.push('as before.');
+  lines.push('OpenSpec 现在使用 agent skills——这是各编程 agent 工具中');
+  lines.push('正在兴起的标准。这简化了您的设置，同时保持一切照常工作。');
   lines.push('');
 
   // Section 1: Files to remove entirely
   if (removals.length > 0) {
-    lines.push(chalk.bold('Files to remove'));
-    lines.push(chalk.dim('These files will be deleted entirely. Back up any custom content before proceeding:'));
+    lines.push(chalk.bold('待移除文件'));
+    lines.push(chalk.dim('这些文件将被完全删除。如有自定义内容请先备份：'));
     for (const { path } of removals) {
       lines.push(`  • ${path}`);
     }
@@ -956,8 +955,8 @@ export function formatDetectionSummary(detection: LegacyDetectionResult): string
   // Section 2: Files to update (markers removed, content preserved)
   if (updates.length > 0) {
     if (removals.length > 0) lines.push('');
-    lines.push(chalk.bold('Files to update'));
-    lines.push(chalk.dim('OpenSpec markers will be removed, your content preserved:'));
+    lines.push(chalk.bold('待更新文件'));
+    lines.push(chalk.dim('OpenSpec 标记将被移除，您的内容会保留：'));
     for (const { path } of updates) {
       lines.push(`  • ${path}`);
     }
@@ -983,8 +982,8 @@ export function formatDeferredGlobalPromptSummary(detection: LegacyDetectionResu
   }
 
   const lines: string[] = [];
-  lines.push(chalk.bold('Deferred global prompts cleanup'));
-  lines.push(chalk.dim('These global prompts will only be removed after matching replacement skills are installed.'));
+  lines.push(chalk.bold('延迟清理全局提示词'));
+  lines.push(chalk.dim('这些全局提示词只有在安装对应的替代 skills 后才会被移除。'));
   for (const prompt of deferredPrompts) {
     const toolLabel = prompt.toolId ? `${prompt.toolId}: ` : '';
     lines.push(`  • ${toolLabel}${prompt.path}`);
@@ -1181,19 +1180,19 @@ export function pickGlobalLegacyPromptFiles(
  */
 export function formatProjectMdMigrationHint(): string {
   const lines: string[] = [];
-  lines.push(chalk.yellow.bold('Needs your attention'));
+  lines.push(chalk.yellow.bold('需要您注意'));
   lines.push('  • openspec/project.md');
-  lines.push(chalk.dim('    We won\'t delete this file. It may contain useful project context.'));
+  lines.push(chalk.dim('    我们不会删除此文件。它可能包含有用的项目上下文。'));
   lines.push('');
-  lines.push(chalk.dim('    Ask your AI assistant:'));
+  lines.push(chalk.dim('    请询问您的 AI 助手：'));
   lines.push('');
-  lines.push(chalk.dim('    Review openspec/project.md and migrate its useful content to'));
-  lines.push(chalk.dim('    openspec/config.yaml. Keep context concise: include only project-wide'));
-  lines.push(chalk.dim('    facts needed during artifact creation, apply, and archive. Move'));
-  lines.push(chalk.dim('    artifact-specific guidance into rules for the matching artifacts.'));
-  lines.push(chalk.dim('    Move guidance for apply or archive into the matching operations entry.'));
-  lines.push(chalk.dim('    Leave out generic, outdated, or verbose material. Do not delete project.md.'));
+  lines.push(chalk.dim('    审查 openspec/project.md，将其有用内容迁移到'));
+  lines.push(chalk.dim('    openspec/config.yaml。context 保持精炼：只包含制品创建、'));
+  lines.push(chalk.dim('    apply 和归档时需要的项目级事实。将制品相关的指引移入'));
+  lines.push(chalk.dim('    对应制品的 rules 中。将 apply 或归档的指引移入对应的'));
+  lines.push(chalk.dim('    operations 条目。不要包含泛泛、过时或冗长的内容。'));
+  lines.push(chalk.dim('    不要删除 project.md。'));
   lines.push('');
-  lines.push(chalk.dim('    Review config.yaml, then delete project.md when ready.'));
+  lines.push(chalk.dim('    审查 config.yaml 后，在合适的时候删除 project.md。'));
   return lines.join('\n');
 }

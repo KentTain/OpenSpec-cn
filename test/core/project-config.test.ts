@@ -461,7 +461,7 @@ rules:
         );
         // Names the offending index and the shape YAML produced there.
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining("rules.specs is a string")
+          expect.stringContaining("rules.specs 是字符串")
         );
       });
 
@@ -494,12 +494,12 @@ rules:
 
         const warned = consoleWarnSpy.mock.calls
           .map((call) => call[0] as string)
-          .find((message) => message.includes("Rules for 'proposal'")) as string;
+          .find((message) => message.includes("'proposal' 的 rules")) as string;
         // Points at the exact index instead of making the reader bisect by hand.
-        expect(warned).toContain('rules.proposal[1] is a mapping');
+        expect(warned).toContain('rules.proposal[1] 是映射');
         // And says why, plus how to fix it.
-        expect(warned).toContain('unquoted ": "');
-        expect(warned).toContain('quote the whole scalar');
+        expect(warned).toContain('未加引号的 ": "');
+        expect(warned).toContain('请给整个标量加引号');
         // The well-formed artifact is not implicated.
         expect(warned).not.toContain('rules.specs');
       });
@@ -525,12 +525,12 @@ rules:
 
         const warned = consoleWarnSpy.mock.calls
           .map((call) => call[0] as string)
-          .find((message) => message.includes("Rules for 'proposal'")) as string;
-        expect(warned).toContain('rules.proposal[0] is a mapping');
-        expect(warned).toContain('rules.proposal[2] is a mapping');
-        expect(warned).toContain('rules.proposal[3] is a number');
-        expect(warned).toContain('rules.proposal[4] is null');
-        expect(warned).toContain('rules.proposal[5] is a nested list');
+          .find((message) => message.includes("'proposal' 的 rules")) as string;
+        expect(warned).toContain('rules.proposal[0] 是映射');
+        expect(warned).toContain('rules.proposal[2] 是映射');
+        expect(warned).toContain('rules.proposal[3] 是数字');
+        expect(warned).toContain('rules.proposal[4] 是null');
+        expect(warned).toContain('rules.proposal[5] 是嵌套列表');
         // The valid sibling between them is not reported.
         expect(warned).not.toContain('rules.proposal[1]');
       });

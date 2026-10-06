@@ -11,208 +11,208 @@ import { PROJECT_ROOT_GUARD } from './project-root.js';
 export function getVerifyChangeSkillTemplate(): SkillTemplate {
   return {
     name: 'openspec-verify-change',
-    description: 'Verify implementation matches OpenSpec change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent before archiving. Also use when the user says "openspec verify" or "opsx verify".',
-    instructions: `Verify that an implementation matches the change artifacts (specs, tasks, design).
+    description: '验证实现是否匹配 OpenSpec 变更产出物。当用户想在归档前确认实现完整、正确且连贯时使用。也在用户说 "openspec verify" 或 "opsx verify" 时使用。',
+    instructions: `验证实现是否匹配变更产出物（specs、tasks、design）。
 
 ${STORE_SELECTION_GUIDANCE}
 
 ${PROJECT_ROOT_GUARD}
 
-**Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: 可选地指定变更名。若省略，检查能否从对话上下文推断。若模糊或歧义，必须提示用户从可用变更中选择。
 
-**Steps**
+**步骤**
 
-1. **Select the change**
+1. **选择变更**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run \`openspec list --json\` to get available changes and ask the user to select one
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 \`openspec-cn list --json\` 获取可用变更并让用户选择
 
-   When prompting, show all active changes returned by the list, including changes with \`status: "no-tasks"\`.
-   Include the schema used for each change if available.
-   Mark changes with incomplete tasks as "(In Progress)".
+   提示时，显示列表返回的所有活跃变更，包括 \`status: "no-tasks"\` 的变更。
+   若可用，包含每个变更使用的 schema。
+   将有未完成任务的变更标记为 "(进行中)"。
 
-   Always announce: "Using change: <name>" and how to override (e.g., \`/opsx:verify <other>\`).
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 \`/opsx:verify <other>\`）。
 
-2. **Check status to understand the schema**
+2. **检查状态以了解 schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    \`\`\`
-   Parse the JSON to understand:
-   - \`schemaName\`: The workflow being used (e.g., "spec-driven")
-   - \`planningHome\`, \`changeRoot\`, \`artifactPaths\`, and \`actionContext\`: path and scope context
-   - Which artifacts exist for this change
+   解析 JSON 以了解：
+   - \`schemaName\`：使用的工作流（例如 "spec-driven"）
+   - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径与范围上下文
+   - 此变更存在哪些产出物
 
-3. **Get planning context and load artifacts**
+3. **获取规划上下文并加载产出物**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   openspec-cn instructions apply --change "<name>" --json
    \`\`\`
 
-   This returns the change directory, \`contextFiles\` (artifact ID -> array of concrete file paths), \`taskTrackingConfigured\`, and top-level \`tasks\` and \`progress\` aggregated from every concrete file matched by the schema's \`apply.tracks\` configuration that could be read. Read all available artifacts from \`contextFiles\`.
+   这返回变更目录、\`contextFiles\`（产出物 ID -> 具体文件路径数组）、\`taskTrackingConfigured\`，以及从 schema 的 \`apply.tracks\` 配置匹配到的所有可读具体文件聚合出的顶层 \`tasks\` 和 \`progress\`。从 \`contextFiles\` 读取所有可用产出物。
 
-   Treat apply \`state\` and \`instruction\` as context, not a verification verdict. Do not implement tasks or archive the change during verification.
+   将 apply 的 \`state\` 和 \`instruction\` 视为上下文，而非验证结论。验证过程中不要实现任务或归档变更。
 
-4. **Initialize verification report structure**
+4. **初始化验证报告结构**
 
-   Create a report structure with three dimensions:
-   - **Completeness**: Track tasks and spec coverage
-   - **Correctness**: Track requirement implementation and scenario coverage
-   - **Coherence**: Track design adherence and pattern consistency
+   创建包含三个维度的报告结构：
+   - **完整性**：跟踪任务和 spec 覆盖
+   - **正确性**：跟踪需求实现和场景覆盖
+   - **连贯性**：跟踪设计遵循和模式一致性
 
-   Each dimension can have CRITICAL, WARNING, or SUGGESTION issues.
+   每个维度可有 CRITICAL、WARNING 或 SUGGESTION 问题。
 
-   Verification is advisory. Respect intentional omissions such as \`skip_specs: true\`, optional design documents, and schemas without task tracking. Do not require or invent optional or intentionally omitted artifacts to obtain a clean report. \`Not verified\` describes a limit of this report, not a new archive prerequisite. Archive retains its own checks and user-confirmation behavior.
+   验证是建议性的。尊重有意的省略，例如 \`skip_specs: true\`、可选的设计文档，以及没有任务追踪的 schema。不要为了得到干净的报告而要求或虚构可选的、被有意省略的产出物。\`未验证\` 描述的是本报告的局限，不是新的归档前置条件。归档保留其自身的检查与用户确认行为。
 
-   Mark checks the schema does not define, or artifacts the status reports as intentionally skipped, as **Not applicable**. The correctness checks of a change whose readable delta specs contain REMOVED or RENAMED requirements but no ADDED or MODIFIED requirements are also **Not applicable** (see step 6). Exclude them from skipped-check counts and the archive-readiness assessment. Reserve **Not verified** for applicable checks whose evidence is missing or unusable.
+   将 schema 未定义的检查、或 status 报告为有意跳过的产出物，标记为**不适用**。当变更中可读的 delta specs 只包含 REMOVED 或 RENAMED 需求而没有 ADDED 或 MODIFIED 需求时，其正确性检查同样**不适用**（见步骤 6）。将它们排除在跳过检查计数和归档就绪评估之外。**未验证**专用于证据缺失或不可用的适用检查。
 
-   If only task evidence is available for applicable checks, verify task completion only and mark the remaining applicable checks, including **Code Pattern Consistency**, as not verified with the reason "Only task evidence available".
+   若适用检查仅有任务证据可用，只验证任务完成情况，并将其余适用检查（包括**代码模式一致性**）标记为未验证，原因写 "仅有任务证据可用"。
 
-   If artifacts cannot be read or contain no usable requirements, scenarios, or design decisions, mark the affected checks as not verified with the specific reason. Continue checks supported by the remaining evidence, but a partially checked input set is not a fully verified check. Missing requirements affect Spec Coverage and Requirement Implementation Mapping; missing scenarios affect Scenario Coverage; missing design decisions affect Design Adherence.
+   若产出物无法读取，或不含可用的需求、场景或设计决策，将受影响的检查标记为未验证并写明具体原因。继续执行其余证据支持的检查，但部分检查过的输入集不算完全验证过的检查。需求缺失影响 Spec 覆盖和需求实现映射；场景缺失影响场景覆盖；设计决策缺失影响设计遵循。
 
-5. **Verify Completeness**
+5. **验证完整性**
 
-   **Task Completion**:
-   - If \`taskTrackingConfigured\` is false, report **Task Completion** as not applicable. Do not treat empty \`tasks\` as missing evidence.
-   - Otherwise, use the top-level \`tasks\` and \`progress\` fields. They already aggregate every readable concrete file matched by \`apply.tracks\`, regardless of the tracked artifact's ID; do not infer tracking from a \`contextFiles\` key.
-   - If \`unavailableTrackingFiles\` is nonempty, mark **Task Completion** as not verified and include every unavailable path and reason. Continue using any readable task evidence, but do not infer completion from the partial \`tasks\` and \`progress\` fields.
-   - If \`taskTrackingConfigured\` is true and \`tasks\` is empty, mark **Task Completion** as not verified and record the reason from apply \`state\` and \`instruction\`. Nonzero totals alone do not establish evaluable task descriptions.
-   - Report complete vs total tasks from \`progress\`.
-   - If \`progress.remaining\` is greater than 0:
-     - Add CRITICAL issue for each listed incomplete task. If the remaining count exceeds the listed incomplete tasks, also report the incomplete checkboxes without descriptions and recommend adding descriptions and completing them. Do not infer completion from the listed tasks alone.
-     - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+   **任务完成情况**：
+   - 若 \`taskTrackingConfigured\` 为 false，将**任务完成情况**报告为不适用。不要把空的 \`tasks\` 当作缺失证据。
+   - 否则，使用顶层 \`tasks\` 和 \`progress\` 字段。它们已经聚合了 \`apply.tracks\` 匹配到的所有可读具体文件，与被追踪产出物的 ID 无关；不要从 \`contextFiles\` 的键推断追踪情况。
+   - 若 \`unavailableTrackingFiles\` 非空，将**任务完成情况**标记为未验证，并附上每个不可用路径及原因。可继续使用任何可读的任务证据，但不要从残缺的 \`tasks\` 和 \`progress\` 字段推断完成情况。
+   - 若 \`taskTrackingConfigured\` 为 true 且 \`tasks\` 为空，将**任务完成情况**标记为未验证，并记录 apply 的 \`state\` 和 \`instruction\` 中的原因。仅凭非零总数不能确立可评估的任务描述。
+   - 从 \`progress\` 报告已完成与总任务数。
+   - 若 \`progress.remaining\` 大于 0：
+     - 为每个列出的未完成任务添加 CRITICAL 问题。若剩余数量超过列出的未完成任务，还要报告没有描述的未完成复选框，并建议补充描述并完成它们。不要仅凭列出的任务推断完成情况。
+     - 建议："完成任务：<描述>" 或 "若已实现则标记为完成"
 
-   **Spec Coverage**:
-   - If status marks the spec artifact skipped by \`skip_specs: true\`, or the schema defines no spec artifact (no artifact whose \`artifactPaths.<id>.outputPath\` is under \`specs/\`), report the spec-dependent checks as not applicable.
-   - Otherwise, \`contextFiles\` is keyed by artifact id, and artifact ids come from the active schema, so do not assume an id such as \`specs\`. The spec artifacts are those whose \`artifactPaths.<id>.outputPath\` is under \`specs/\`; read their files from \`contextFiles.<id>\`. If those spec files are absent or empty, mark **Spec Coverage**, **Requirement Implementation Mapping**, and **Scenario Coverage** as not verified; do not treat any of them as clean.
-   - If delta specs exist in those spec files:
-     - Extract all requirements (marked with "### Requirement:", or listed as \`FROM:\`/\`TO:\` pairs under \`## RENAMED Requirements\`) and note the delta section each one sits under: \`## ADDED\`, \`## MODIFIED\`, \`## REMOVED\`, or \`## RENAMED Requirements\`. The section decides what the check looks for.
-     - For each ADDED or MODIFIED requirement (for MODIFIED, check the text in the delta, not the old wording):
-       - Search codebase for keywords related to the requirement
-       - Assess if implementation likely exists
-     - If ADDED or MODIFIED requirements appear unimplemented:
-       - Add CRITICAL issue: "Requirement not found: <requirement name>"
-       - Recommendation: "Implement requirement X: <description>"
-     - For each REMOVED requirement, the change asks for the behavior to be gone, so invert the check:
-       - Search codebase for the removed behavior. Matches in \`openspec/\` artifacts or docs, or in code that serves only the Migration note or an ADDED requirement, are not evidence by themselves. Report any code path that still delivers the removed behavior, including one shared with an ADDED requirement.
-       - Finding no implementation is the expected result. Never report a REMOVED requirement as "Requirement not found" or recommend implementing it.
-       - If the behavior is still present:
-         - Add CRITICAL issue: "Removed requirement still implemented: <requirement name>"
-         - Recommendation: "Remove the remaining implementation at <file>:<lines>, following the requirement's Migration note if it has one"
-     - For each RENAMED entry (\`FROM:\`/\`TO:\`), the name changes but the behavior stays, so check the TO requirement for that unchanged behavior:
-       - Do not report the FROM name as missing, and do not require code symbols, identifiers, or file names to be renamed.
-       - If the TO name also appears under MODIFIED, its behavior is checked there against the MODIFIED text; skip it here.
-       - Otherwise, read the baseline requirement in the main spec at \`<planningHome.root>/openspec/specs/<capability-path>/spec.md\`, using the same capability path as the delta spec: the requirement under the FROM name, or under the TO name only when the FROM name is absent because the main spec is already synced. Its body and scenarios are the evidence for the behavior the TO requirement keeps.
-       - Search codebase for that behavior and assess if it is still implemented.
-       - If it appears unimplemented:
-         - Add CRITICAL issue: "Renamed requirement not found: <TO name>"
-         - Recommendation: "Restore the behavior of <TO name> (renamed from <FROM name>); a rename must not change behavior"
-       - If the baseline requirement cannot be found or read, mark **Spec Coverage** as not verified for that entry with the reason. Never count an unchecked rename as passing.
+   **Spec 覆盖**：
+   - 若 status 因 \`skip_specs: true\` 标记 spec 产出物被跳过，或 schema 未定义 spec 产出物（没有任何产出物的 \`artifactPaths.<id>.outputPath\` 位于 \`specs/\` 之下），将依赖 spec 的检查报告为不适用。
+   - 否则，\`contextFiles\` 以产出物 ID 为键，产出物 ID 来自活跃 schema，因此不要假设存在诸如 \`specs\` 的 ID。spec 产出物是那些 \`artifactPaths.<id>.outputPath\` 位于 \`specs/\` 之下的产出物；从 \`contextFiles.<id>\` 读取它们的文件。若这些 spec 文件缺失或为空，将 **Spec 覆盖**、**需求实现映射**和**场景覆盖**标记为未验证；不要把它们中的任何一个当作通过。
+   - 若这些 spec 文件中存在 delta specs：
+     - 提取所有需求（以 "### Requirement:" 标记，或在 \`## RENAMED Requirements\` 下列为 \`FROM:\`/\`TO:\` 对），并记录每条需求所在的 delta 区块：\`## ADDED\`、\`## MODIFIED\`、\`## REMOVED\` 或 \`## RENAMED Requirements\`。区块决定检查什么。
+     - 对每条 ADDED 或 MODIFIED 需求（MODIFIED 检查 delta 中的文本，而非旧措辞）：
+       - 在代码库中搜索与需求相关的关键词
+       - 评估实现是否可能存在
+     - 若 ADDED 或 MODIFIED 需求似乎未实现：
+       - 添加 CRITICAL 问题："未找到需求：<需求名>"
+       - 建议："实现需求 X：<描述>"
+     - 对每条 REMOVED 需求，变更要求该行为消失，因此反转检查：
+       - 在代码库中搜索被移除的行为。\`openspec/\` 产出物或文档中的匹配，或仅服务于 Migration 说明或某条 ADDED 需求的代码，本身不构成证据。报告任何仍在提供被移除行为的代码路径，包括与 ADDED 需求共享的路径。
+       - 找不到实现是预期结果。绝不把 REMOVED 需求报告为 "未找到需求"，也不建议实现它。
+       - 若行为仍然存在：
+         - 添加 CRITICAL 问题："被移除的需求仍有实现：<需求名>"
+         - 建议："移除 <file>:<lines> 处的剩余实现；若该需求有 Migration 说明，请遵循它"
+     - 对每条 RENAMED 条目（\`FROM:\`/\`TO:\`），名称改变但行为保持，因此检查 TO 需求所保留的该行为：
+       - 不要把 FROM 名称报告为缺失，也不要要求重命名代码符号、标识符或文件名。
+       - 若 TO 名称也出现在 MODIFIED 下，其行为在彼处对照 MODIFIED 文本检查；此处跳过。
+       - 否则，读取主 spec 中 \`<planningHome.root>/openspec/specs/<capability-path>/spec.md\` 的基线需求，使用与 delta spec 相同的 capability 路径：优先取 FROM 名称下的需求；仅当 FROM 名称不存在（主 spec 已同步）时取 TO 名称。其正文和场景就是 TO 需求所保留行为的证据。
+       - 在代码库中搜索该行为并评估是否仍有实现。
+       - 若似乎未实现：
+         - 添加 CRITICAL 问题："未找到重命名需求：<TO 名称>"
+         - 建议："恢复 <TO 名称>（由 <FROM 名称> 重命名而来）的行为；重命名不得改变行为"
+       - 若找不到或无法读取基线需求，将该条目的 **Spec 覆盖**标记为未验证并写明原因。绝不把未检查的重命名计为通过。
 
-6. **Verify Correctness**
+6. **验证正确性**
 
-   If the delta specs are readable and contain at least one REMOVED or RENAMED requirement but no ADDED or MODIFIED requirements (the change only removes or renames requirements), report **Requirement Implementation Mapping** and **Scenario Coverage** as **Not applicable**. The REMOVED and RENAMED checks under Spec Coverage are the evidence for such a change (each RENAMED entry is checked there against its baseline behavior), so do not mark these two checks as not verified. A delta spec with no parseable requirements at all is unusable evidence, not a removal-only change: mark these checks as not verified.
+   若 delta specs 可读且至少包含一条 REMOVED 或 RENAMED 需求、但没有 ADDED 或 MODIFIED 需求（变更只移除或重命名需求），将**需求实现映射**和**场景覆盖**报告为**不适用**。此类变更的证据就是 Spec 覆盖下的 REMOVED 和 RENAMED 检查（每条 RENAMED 条目在那里对照其基线行为检查），因此不要把这两项检查标记为未验证。完全没有可解析需求的 delta spec 属于不可用证据，而非仅移除的变更：将这些检查标记为未验证。
 
-   **Requirement Implementation Mapping**:
-   - For each ADDED or MODIFIED requirement from delta specs (REMOVED entries, and RENAMED entries without a MODIFIED block, were settled under Spec Coverage):
-     - Search codebase for implementation evidence
-     - If found, note file paths and line ranges
-     - Assess if implementation matches requirement intent
-     - If divergence detected:
-       - Add WARNING: "Implementation may diverge from spec: <details>"
-       - Recommendation: "Review <file>:<lines> against requirement X"
+   **需求实现映射**：
+   - 对 delta specs 中的每条 ADDED 或 MODIFIED 需求（REMOVED 条目以及没有 MODIFIED 块的 RENAMED 条目已在 Spec 覆盖下处理）：
+     - 在代码库中搜索实现证据
+     - 若找到，记录文件路径和行范围
+     - 评估实现是否匹配需求意图
+     - 若检测到偏离：
+       - 添加 WARNING："实现可能偏离 spec：<详情>"
+       - 建议："对照需求 X 审查 <file>:<lines>"
 
-   **Scenario Coverage**:
-   - For each scenario under an ADDED or MODIFIED requirement in delta specs (marked with "#### Scenario:"):
-     - Check if conditions are handled in code
-     - Check if tests exist covering the scenario
-     - If scenario appears uncovered:
-       - Add WARNING: "Scenario not covered: <scenario name>"
-       - Recommendation: "Add test or implementation for scenario: <description>"
-   - Skip scenarios under a REMOVED requirement; that behavior is meant to be gone.
+   **场景覆盖**：
+   - 对 delta specs 中 ADDED 或 MODIFIED 需求下的每个场景（以 "#### Scenario:" 标记）：
+     - 检查代码中是否处理了这些条件
+     - 检查是否存在覆盖该场景的测试
+     - 若场景似乎未覆盖：
+       - 添加 WARNING："场景未覆盖：<场景名>"
+       - 建议："为场景添加测试或实现：<描述>"
+   - 跳过 REMOVED 需求下的场景；该行为本就应消失。
 
-7. **Verify Coherence**
+7. **验证连贯性**
 
-   **Design Adherence**:
-   - If the schema defines no design artifact (no artifact with id \`design\`, and none whose \`artifactPaths.<id>.outputPath\` is or ends in \`design.md\`), report **Design Adherence** as not applicable.
-   - If the design artifact's \`contextFiles.<id>\` file exists:
-     - Extract key decisions (look for sections like "Decision:", "Approach:", "Architecture:")
-     - Verify implementation follows those decisions
-     - If contradiction detected:
-       - Add WARNING: "Design decision not followed: <decision>"
-       - Recommendation: "Update implementation or revise design.md to match reality"
-   - Otherwise, if the design artifact's \`contextFiles.<id>\` file is absent or empty: mark **Design Adherence** as not verified. With other supporting artifacts, **Code Pattern Consistency** still runs; the task-only case remains limited to task completion.
+   **设计遵循**：
+   - 若 schema 未定义 design 产出物（没有 ID 为 \`design\` 的产出物，也没有任何产出物的 \`artifactPaths.<id>.outputPath\` 为 \`design.md\` 或以其结尾），将**设计遵循**报告为不适用。
+   - 若 design 产出物的 \`contextFiles.<id>\` 文件存在：
+     - 提取关键决策（查找 "Decision:"、"Approach:"、"Architecture:" 等章节）
+     - 验证实现是否遵循这些决策
+     - 若检测到矛盾：
+       - 添加 WARNING："未遵循设计决策：<决策>"
+       - 建议："更新实现或修订 design.md 以匹配现实"
+   - 否则，若 design 产出物的 \`contextFiles.<id>\` 文件缺失或为空：将**设计遵循**标记为未验证。有其他支撑产出物时**代码模式一致性**仍然执行；仅有任务的情形仍限于任务完成情况。
 
-   **Code Pattern Consistency**:
-   - If implementation changes cannot be identified, mark **Code Pattern Consistency** as not verified and explain the missing evidence.
-   - Otherwise, review new code for consistency with project patterns
-   - Check file naming, directory structure, coding style
-   - If significant deviations found:
-     - Add SUGGESTION: "Code pattern deviation: <details>"
-     - Recommendation: "Consider following project pattern: <example>"
+   **代码模式一致性**：
+   - 若无法识别实现变更，将**代码模式一致性**标记为未验证，并说明缺失的证据。
+   - 否则，审查新代码与项目模式的一致性
+   - 检查文件命名、目录结构、编码风格
+   - 若发现显著偏差：
+     - 添加 SUGGESTION："代码模式偏差：<详情>"
+     - 建议："考虑遵循项目模式：<示例>"
 
-8. **Generate Verification Report**
+8. **生成验证报告**
 
-   **Summary Scorecard**:
+   **汇总记分卡**：
    \`\`\`markdown
-   ## Verification Report: <change-name>
+   ## 验证报告：<change-name>
 
-   ### Summary
-   | Dimension    | Status           |
+   ### 汇总
+   | 维度         | 状态               |
    |--------------|------------------|
-   | Completeness | X/Y tasks, N reqs|
-   | Correctness  | M/N reqs covered |
-   | Coherence    | Followed/Issues  |
+   | 完整性       | X/Y 任务，N 个需求|
+   | 正确性       | M/N 需求已覆盖    |
+   | 连贯性       | 已遵循/问题       |
    \`\`\`
 
-   In each Status cell, report the results of checks that ran and \`Not verified (<reason>)\` for every skipped check. If all checks in a dimension were skipped, start the cell with \`Not verified\`. Never score a skipped check as passing. Treat every not verified or partially verified check as skipped in the final assessment. Count only ADDED and MODIFIED requirements in N, and report REMOVED and RENAMED requirements separately (for example, "1 removal confirmed, 1 rename verified"). For a change that only removes or renames requirements, the Correctness cell reads \`Not applicable (no ADDED or MODIFIED requirements)\`.
+   在每个状态格中，报告已执行检查的结果，每个跳过的检查写 \`未验证（<原因>）\`。若某维度的全部检查都被跳过，状态格以 \`未验证\` 开头。绝不把跳过的检查计为通过。最终评估中把每个未验证或部分验证的检查视为跳过。N 只统计 ADDED 和 MODIFIED 需求，REMOVED 和 RENAMED 需求单独报告（例如 "确认 1 项移除，验证 1 项重命名"）。对仅移除或重命名需求的变更，正确性格写 \`不适用（无 ADDED 或 MODIFIED 需求）\`。
 
-   **Issues by Priority**:
+   **按优先级分组的问题**：
 
-   1. **CRITICAL** (Must fix before archive):
-      - Incomplete tasks
-      - Missing requirement implementations
-      - Removed requirements still implemented
-      - Renamed requirements whose behavior is no longer implemented
-      - Each with specific, actionable recommendation
+   1. **CRITICAL**（归档前必须修复）：
+      - 未完成任务
+      - 缺失的需求实现
+      - 被移除的需求仍有实现
+      - 行为不再实现的重命名需求
+      - 每个附带具体、可操作的建议
 
-   2. **WARNING** (Should fix):
-      - Spec/design divergences
-      - Missing scenario coverage
-      - Each with specific recommendation
+   2. **WARNING**（应修复）：
+      - Spec/设计偏离
+      - 缺失的场景覆盖
+      - 每个附带具体建议
 
-   3. **SUGGESTION** (Nice to fix):
-      - Pattern inconsistencies
-      - Minor improvements
-      - Each with specific recommendation
+   3. **SUGGESTION**（最好修复）：
+      - 模式不一致
+      - 次要改进
+      - 每个附带具体建议
 
-   **Final Assessment**:
-   - If CRITICAL issues: "X critical issue(s) found. Fix before archiving." If any check was skipped, also name every skipped check and its reason.
-   - If no CRITICAL issues, one or more warnings, and no checks were skipped: "No critical issues. Y warning(s) to consider. Ready for archive (with noted improvements)."
-   - If only suggestions and no checks were skipped: "No critical issues or warnings. Z suggestion(s) to consider. Ready for archive (with noted improvements)."
-   - If no issues and no checks were skipped: "All checks passed. Ready for archive."
-   - If any check was skipped and there are no CRITICAL issues: do not claim readiness. Say "No critical issues found in the checks that ran. <check(s)> not verified: <reason>." Include the warning count when nonzero.
-   - Include the suggestion count when nonzero in every final assessment.
+   **最终评估**：
+   - 若有 CRITICAL 问题："发现 X 个严重问题。归档前请修复。"若有检查被跳过，还要列出每个被跳过的检查及其原因。
+   - 若无 CRITICAL 问题、有一个或多个警告、且没有检查被跳过："无严重问题。有 Y 个警告需考虑。可归档（带有注明的改进）。"
+   - 若仅有建议且没有检查被跳过："无严重问题或警告。有 Z 个建议需考虑。可归档（带有注明的改进）。"
+   - 若无任何问题且没有检查被跳过："所有检查通过。可以归档。"
+   - 若有检查被跳过且没有 CRITICAL 问题：不要声称可归档。说 "已执行的检查中未发现严重问题。<检查> 未验证：<原因>。"警告数非零时一并给出。
+   - 每个最终评估中，建议数非零时都要给出。
 
-**Verification Heuristics**
+**验证启发式**
 
-- **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
-- **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
-- **Coherence**: Look for glaring inconsistencies, don't nitpick style
-- **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
-- **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
+- **完整性**：聚焦客观清单项（复选框、需求列表）
+- **正确性**：使用关键词搜索、文件路径分析、合理推断 - 不要求完全确定
+- **连贯性**：寻找明显不一致，不挑剔风格
+- **误报**：不确定时，优先 SUGGESTION 而非 WARNING，WARNING 而非 CRITICAL
+- **可操作性**：每个问题必须有具体建议，适用时附文件/行引用
 
-**Output Format**
+**输出格式**
 
-Use clear markdown with:
-- Table for summary scorecard
-- Grouped lists for issues (CRITICAL/WARNING/SUGGESTION)
-- Code references in format: \`file.ts:123\`
-- Specific, actionable recommendations
-- No vague suggestions like "consider reviewing"`,
+使用清晰的 markdown：
+- 表格用于汇总记分卡
+- 分组列表用于问题（CRITICAL/WARNING/SUGGESTION）
+- 代码引用格式：\`file.ts:123\`
+- 具体、可操作的建议
+- 不要模糊建议如"考虑审查"`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: '需要 openspec-cn CLI。',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -220,206 +220,206 @@ Use clear markdown with:
 export function getOpsxVerifyCommandTemplate(): CommandTemplate {
   return {
     name: 'OPSX: Verify',
-    description: 'Verify implementation matches change artifacts before archiving',
+    description: '归档前验证实现是否匹配变更产出物',
     category: 'Workflow',
     tags: ['workflow', 'verify', 'experimental'],
-    content: `Verify that an implementation matches the change artifacts (specs, tasks, design).
+    content: `验证实现是否匹配变更产出物（specs、tasks、design）。
 
 ${STORE_SELECTION_GUIDANCE}
 
 ${PROJECT_ROOT_GUARD}
 
-**Input**: Optionally specify a change name after \`/opsx:verify\` (e.g., \`/opsx:verify add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: 可选地在 \`/opsx:verify\` 后指定变更名（例如 \`/opsx:verify add-auth\`）。若省略，检查能否从对话上下文推断。若模糊或歧义，必须提示用户从可用变更中选择。
 
-**Steps**
+**步骤**
 
-1. **Select the change**
+1. **选择变更**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run \`openspec list --json\` to get available changes and ask the user to select one
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 \`openspec-cn list --json\` 获取可用变更并让用户选择
 
-   When prompting, show all active changes returned by the list, including changes with \`status: "no-tasks"\`.
-   Include the schema used for each change if available.
-   Mark changes with incomplete tasks as "(In Progress)".
+   提示时，显示列表返回的所有活跃变更，包括 \`status: "no-tasks"\` 的变更。
+   若可用，包含每个变更使用的 schema。
+   将有未完成任务的变更标记为 "(进行中)"。
 
-   Always announce: "Using change: <name>" and how to override (e.g., \`/opsx:verify <other>\`).
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 \`/opsx:verify <other>\`）。
 
-2. **Check status to understand the schema**
+2. **检查状态以了解 schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    \`\`\`
-   Parse the JSON to understand:
-   - \`schemaName\`: The workflow being used (e.g., "spec-driven")
-   - \`planningHome\`, \`changeRoot\`, \`artifactPaths\`, and \`actionContext\`: path and scope context
-   - Which artifacts exist for this change
+   解析 JSON 以了解：
+   - \`schemaName\`：使用的工作流（例如 "spec-driven"）
+   - \`planningHome\`、\`changeRoot\`、\`artifactPaths\` 和 \`actionContext\`：路径与范围上下文
+   - 此变更存在哪些产出物
 
-3. **Get planning context and load artifacts**
+3. **获取规划上下文并加载产出物**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   openspec-cn instructions apply --change "<name>" --json
    \`\`\`
 
-   This returns the change directory, \`contextFiles\` (artifact ID -> array of concrete file paths), \`taskTrackingConfigured\`, and top-level \`tasks\` and \`progress\` aggregated from every concrete file matched by the schema's \`apply.tracks\` configuration that could be read. Read all available artifacts from \`contextFiles\`.
+   这返回变更目录、\`contextFiles\`（产出物 ID -> 具体文件路径数组）、\`taskTrackingConfigured\`，以及从 schema 的 \`apply.tracks\` 配置匹配到的所有可读具体文件聚合出的顶层 \`tasks\` 和 \`progress\`。从 \`contextFiles\` 读取所有可用产出物。
 
-   Treat apply \`state\` and \`instruction\` as context, not a verification verdict. Do not implement tasks or archive the change during verification.
+   将 apply 的 \`state\` 和 \`instruction\` 视为上下文，而非验证结论。验证过程中不要实现任务或归档变更。
 
-4. **Initialize verification report structure**
+4. **初始化验证报告结构**
 
-   Create a report structure with three dimensions:
-   - **Completeness**: Track tasks and spec coverage
-   - **Correctness**: Track requirement implementation and scenario coverage
-   - **Coherence**: Track design adherence and pattern consistency
+   创建包含三个维度的报告结构：
+   - **完整性**：跟踪任务和 spec 覆盖
+   - **正确性**：跟踪需求实现和场景覆盖
+   - **连贯性**：跟踪设计遵循和模式一致性
 
-   Each dimension can have CRITICAL, WARNING, or SUGGESTION issues.
+   每个维度可有 CRITICAL、WARNING 或 SUGGESTION 问题。
 
-   Verification is advisory. Respect intentional omissions such as \`skip_specs: true\`, optional design documents, and schemas without task tracking. Do not require or invent optional or intentionally omitted artifacts to obtain a clean report. \`Not verified\` describes a limit of this report, not a new archive prerequisite. Archive retains its own checks and user-confirmation behavior.
-   Mark checks the schema does not define, or artifacts the status reports as intentionally skipped, as **Not applicable**. The correctness checks of a change whose readable delta specs contain REMOVED or RENAMED requirements but no ADDED or MODIFIED requirements are also **Not applicable** (see step 6). Exclude them from skipped-check counts and the archive-readiness assessment. Reserve **Not verified** for applicable checks whose evidence is missing or unusable.
+   验证是建议性的。尊重有意的省略，例如 \`skip_specs: true\`、可选的设计文档，以及没有任务追踪的 schema。不要为了得到干净的报告而要求或虚构可选的、被有意省略的产出物。\`未验证\` 描述的是本报告的局限，不是新的归档前置条件。归档保留其自身的检查与用户确认行为。
+   将 schema 未定义的检查、或 status 报告为有意跳过的产出物，标记为**不适用**。当变更中可读的 delta specs 只包含 REMOVED 或 RENAMED 需求而没有 ADDED 或 MODIFIED 需求时，其正确性检查同样**不适用**（见步骤 6）。将它们排除在跳过检查计数和归档就绪评估之外。**未验证**专用于证据缺失或不可用的适用检查。
 
-   If only task evidence is available for applicable checks, verify task completion only and mark the remaining applicable checks, including **Code Pattern Consistency**, as not verified with the reason "Only task evidence available".
+   若适用检查仅有任务证据可用，只验证任务完成情况，并将其余适用检查（包括**代码模式一致性**）标记为未验证，原因写 "仅有任务证据可用"。
 
-   If artifacts cannot be read or contain no usable requirements, scenarios, or design decisions, mark the affected checks as not verified with the specific reason. Continue checks supported by the remaining evidence, but a partially checked input set is not a fully verified check. Missing requirements affect Spec Coverage and Requirement Implementation Mapping; missing scenarios affect Scenario Coverage; missing design decisions affect Design Adherence.
+   若产出物无法读取，或不含可用的需求、场景或设计决策，将受影响的检查标记为未验证并写明具体原因。继续执行其余证据支持的检查，但部分检查过的输入集不算完全验证过的检查。需求缺失影响 Spec 覆盖和需求实现映射；场景缺失影响场景覆盖；设计决策缺失影响设计遵循。
 
-5. **Verify Completeness**
+5. **验证完整性**
 
-   **Task Completion**:
-   - If \`taskTrackingConfigured\` is false, report **Task Completion** as not applicable. Do not treat empty \`tasks\` as missing evidence.
-   - Otherwise, use the top-level \`tasks\` and \`progress\` fields. They already aggregate every readable concrete file matched by \`apply.tracks\`, regardless of the tracked artifact's ID; do not infer tracking from a \`contextFiles\` key.
-   - If \`unavailableTrackingFiles\` is nonempty, mark **Task Completion** as not verified and include every unavailable path and reason. Continue using any readable task evidence, but do not infer completion from the partial \`tasks\` and \`progress\` fields.
-   - If \`taskTrackingConfigured\` is true and \`tasks\` is empty, mark **Task Completion** as not verified and record the reason from apply \`state\` and \`instruction\`. Nonzero totals alone do not establish evaluable task descriptions.
-   - Report complete vs total tasks from \`progress\`.
-   - If \`progress.remaining\` is greater than 0:
-     - Add CRITICAL issue for each listed incomplete task. If the remaining count exceeds the listed incomplete tasks, also report the incomplete checkboxes without descriptions and recommend adding descriptions and completing them. Do not infer completion from the listed tasks alone.
-     - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+   **任务完成情况**：
+   - 若 \`taskTrackingConfigured\` 为 false，将**任务完成情况**报告为不适用。不要把空的 \`tasks\` 当作缺失证据。
+   - 否则，使用顶层 \`tasks\` 和 \`progress\` 字段。它们已经聚合了 \`apply.tracks\` 匹配到的所有可读具体文件，与被追踪产出物的 ID 无关；不要从 \`contextFiles\` 的键推断追踪情况。
+   - 若 \`unavailableTrackingFiles\` 非空，将**任务完成情况**标记为未验证，并附上每个不可用路径及原因。可继续使用任何可读的任务证据，但不要从残缺的 \`tasks\` 和 \`progress\` 字段推断完成情况。
+   - 若 \`taskTrackingConfigured\` 为 true 且 \`tasks\` 为空，将**任务完成情况**标记为未验证，并记录 apply 的 \`state\` 和 \`instruction\` 中的原因。仅凭非零总数不能确立可评估的任务描述。
+   - 从 \`progress\` 报告已完成与总任务数。
+   - 若 \`progress.remaining\` 大于 0：
+     - 为每个列出的未完成任务添加 CRITICAL 问题。若剩余数量超过列出的未完成任务，还要报告没有描述的未完成复选框，并建议补充描述并完成它们。不要仅凭列出的任务推断完成情况。
+     - 建议："完成任务：<描述>" 或 "若已实现则标记为完成"
 
-   **Spec Coverage**:
-   - If status marks the spec artifact skipped by \`skip_specs: true\`, or the schema defines no spec artifact (no artifact whose \`artifactPaths.<id>.outputPath\` is under \`specs/\`), report the spec-dependent checks as not applicable.
-   - Otherwise, \`contextFiles\` is keyed by artifact id, and artifact ids come from the active schema, so do not assume an id such as \`specs\`. The spec artifacts are those whose \`artifactPaths.<id>.outputPath\` is under \`specs/\`; read their files from \`contextFiles.<id>\`. If those spec files are absent or empty, mark **Spec Coverage**, **Requirement Implementation Mapping**, and **Scenario Coverage** as not verified; do not treat any of them as clean.
-   - If delta specs exist in those spec files:
-     - Extract all requirements (marked with "### Requirement:", or listed as \`FROM:\`/\`TO:\` pairs under \`## RENAMED Requirements\`) and note the delta section each one sits under: \`## ADDED\`, \`## MODIFIED\`, \`## REMOVED\`, or \`## RENAMED Requirements\`. The section decides what the check looks for.
-     - For each ADDED or MODIFIED requirement (for MODIFIED, check the text in the delta, not the old wording):
-       - Search codebase for keywords related to the requirement
-       - Assess if implementation likely exists
-     - If ADDED or MODIFIED requirements appear unimplemented:
-       - Add CRITICAL issue: "Requirement not found: <requirement name>"
-       - Recommendation: "Implement requirement X: <description>"
-     - For each REMOVED requirement, the change asks for the behavior to be gone, so invert the check:
-       - Search codebase for the removed behavior. Matches in \`openspec/\` artifacts or docs, or in code that serves only the Migration note or an ADDED requirement, are not evidence by themselves. Report any code path that still delivers the removed behavior, including one shared with an ADDED requirement.
-       - Finding no implementation is the expected result. Never report a REMOVED requirement as "Requirement not found" or recommend implementing it.
-       - If the behavior is still present:
-         - Add CRITICAL issue: "Removed requirement still implemented: <requirement name>"
-         - Recommendation: "Remove the remaining implementation at <file>:<lines>, following the requirement's Migration note if it has one"
-     - For each RENAMED entry (\`FROM:\`/\`TO:\`), the name changes but the behavior stays, so check the TO requirement for that unchanged behavior:
-       - Do not report the FROM name as missing, and do not require code symbols, identifiers, or file names to be renamed.
-       - If the TO name also appears under MODIFIED, its behavior is checked there against the MODIFIED text; skip it here.
-       - Otherwise, read the baseline requirement in the main spec at \`<planningHome.root>/openspec/specs/<capability-path>/spec.md\`, using the same capability path as the delta spec: the requirement under the FROM name, or under the TO name only when the FROM name is absent because the main spec is already synced. Its body and scenarios are the evidence for the behavior the TO requirement keeps.
-       - Search codebase for that behavior and assess if it is still implemented.
-       - If it appears unimplemented:
-         - Add CRITICAL issue: "Renamed requirement not found: <TO name>"
-         - Recommendation: "Restore the behavior of <TO name> (renamed from <FROM name>); a rename must not change behavior"
-       - If the baseline requirement cannot be found or read, mark **Spec Coverage** as not verified for that entry with the reason. Never count an unchecked rename as passing.
+   **Spec 覆盖**：
+   - 若 status 因 \`skip_specs: true\` 标记 spec 产出物被跳过，或 schema 未定义 spec 产出物（没有任何产出物的 \`artifactPaths.<id>.outputPath\` 位于 \`specs/\` 之下），将依赖 spec 的检查报告为不适用。
+   - 否则，\`contextFiles\` 以产出物 ID 为键，产出物 ID 来自活跃 schema，因此不要假设存在诸如 \`specs\` 的 ID。spec 产出物是那些 \`artifactPaths.<id>.outputPath\` 位于 \`specs/\` 之下的产出物；从 \`contextFiles.<id>\` 读取它们的文件。若这些 spec 文件缺失或为空，将 **Spec 覆盖**、**需求实现映射**和**场景覆盖**标记为未验证；不要把它们中的任何一个当作通过。
+   - 若这些 spec 文件中存在 delta specs：
+     - 提取所有需求（以 "### Requirement:" 标记，或在 \`## RENAMED Requirements\` 下列为 \`FROM:\`/\`TO:\` 对），并记录每条需求所在的 delta 区块：\`## ADDED\`、\`## MODIFIED\`、\`## REMOVED\` 或 \`## RENAMED Requirements\`。区块决定检查什么。
+     - 对每条 ADDED 或 MODIFIED 需求（MODIFIED 检查 delta 中的文本，而非旧措辞）：
+       - 在代码库中搜索与需求相关的关键词
+       - 评估实现是否可能存在
+     - 若 ADDED 或 MODIFIED 需求似乎未实现：
+       - 添加 CRITICAL 问题："未找到需求：<需求名>"
+       - 建议："实现需求 X：<描述>"
+     - 对每条 REMOVED 需求，变更要求该行为消失，因此反转检查：
+       - 在代码库中搜索被移除的行为。\`openspec/\` 产出物或文档中的匹配，或仅服务于 Migration 说明或某条 ADDED 需求的代码，本身不构成证据。报告任何仍在提供被移除行为的代码路径，包括与 ADDED 需求共享的路径。
+       - 找不到实现是预期结果。绝不把 REMOVED 需求报告为 "未找到需求"，也不建议实现它。
+       - 若行为仍然存在：
+         - 添加 CRITICAL 问题："被移除的需求仍有实现：<需求名>"
+         - 建议："移除 <file>:<lines> 处的剩余实现；若该需求有 Migration 说明，请遵循它"
+     - 对每条 RENAMED 条目（\`FROM:\`/\`TO:\`），名称改变但行为保持，因此检查 TO 需求所保留的该行为：
+       - 不要把 FROM 名称报告为缺失，也不要要求重命名代码符号、标识符或文件名。
+       - 若 TO 名称也出现在 MODIFIED 下，其行为在彼处对照 MODIFIED 文本检查；此处跳过。
+       - 否则，读取主 spec 中 \`<planningHome.root>/openspec/specs/<capability-path>/spec.md\` 的基线需求，使用与 delta spec 相同的 capability 路径：优先取 FROM 名称下的需求；仅当 FROM 名称不存在（主 spec 已同步）时取 TO 名称。其正文和场景就是 TO 需求所保留行为的证据。
+       - 在代码库中搜索该行为并评估是否仍有实现。
+       - 若似乎未实现：
+         - 添加 CRITICAL 问题："未找到重命名需求：<TO 名称>"
+         - 建议："恢复 <TO 名称>（由 <FROM 名称> 重命名而来）的行为；重命名不得改变行为"
+       - 若找不到或无法读取基线需求，将该条目的 **Spec 覆盖**标记为未验证并写明原因。绝不把未检查的重命名计为通过。
 
-6. **Verify Correctness**
+6. **验证正确性**
 
-   If the delta specs are readable and contain at least one REMOVED or RENAMED requirement but no ADDED or MODIFIED requirements (the change only removes or renames requirements), report **Requirement Implementation Mapping** and **Scenario Coverage** as **Not applicable**. The REMOVED and RENAMED checks under Spec Coverage are the evidence for such a change (each RENAMED entry is checked there against its baseline behavior), so do not mark these two checks as not verified. A delta spec with no parseable requirements at all is unusable evidence, not a removal-only change: mark these checks as not verified.
+   若 delta specs 可读且至少包含一条 REMOVED 或 RENAMED 需求、但没有 ADDED 或 MODIFIED 需求（变更只移除或重命名需求），将**需求实现映射**和**场景覆盖**报告为**不适用**。此类变更的证据就是 Spec 覆盖下的 REMOVED 和 RENAMED 检查（每条 RENAMED 条目在那里对照其基线行为检查），因此不要把这两项检查标记为未验证。完全没有可解析需求的 delta spec 属于不可用证据，而非仅移除的变更：将这些检查标记为未验证。
 
-   **Requirement Implementation Mapping**:
-   - For each ADDED or MODIFIED requirement from delta specs (REMOVED entries, and RENAMED entries without a MODIFIED block, were settled under Spec Coverage):
-     - Search codebase for implementation evidence
-     - If found, note file paths and line ranges
-     - Assess if implementation matches requirement intent
-     - If divergence detected:
-       - Add WARNING: "Implementation may diverge from spec: <details>"
-       - Recommendation: "Review <file>:<lines> against requirement X"
+   **需求实现映射**：
+   - 对 delta specs 中的每条 ADDED 或 MODIFIED 需求（REMOVED 条目以及没有 MODIFIED 块的 RENAMED 条目已在 Spec 覆盖下处理）：
+     - 在代码库中搜索实现证据
+     - 若找到，记录文件路径和行范围
+     - 评估实现是否匹配需求意图
+     - 若检测到偏离：
+       - 添加 WARNING："实现可能偏离 spec：<详情>"
+       - 建议："对照需求 X 审查 <file>:<lines>"
 
-   **Scenario Coverage**:
-   - For each scenario under an ADDED or MODIFIED requirement in delta specs (marked with "#### Scenario:"):
-     - Check if conditions are handled in code
-     - Check if tests exist covering the scenario
-     - If scenario appears uncovered:
-       - Add WARNING: "Scenario not covered: <scenario name>"
-       - Recommendation: "Add test or implementation for scenario: <description>"
-   - Skip scenarios under a REMOVED requirement; that behavior is meant to be gone.
+   **场景覆盖**：
+   - 对 delta specs 中 ADDED 或 MODIFIED 需求下的每个场景（以 "#### Scenario:" 标记）：
+     - 检查代码中是否处理了这些条件
+     - 检查是否存在覆盖该场景的测试
+     - 若场景似乎未覆盖：
+       - 添加 WARNING："场景未覆盖：<场景名>"
+       - 建议："为场景添加测试或实现：<描述>"
+   - 跳过 REMOVED 需求下的场景；该行为本就应消失。
 
-7. **Verify Coherence**
+7. **验证连贯性**
 
-   **Design Adherence**:
-   - If the schema defines no design artifact (no artifact with id \`design\`, and none whose \`artifactPaths.<id>.outputPath\` is or ends in \`design.md\`), report **Design Adherence** as not applicable.
-   - If the design artifact's \`contextFiles.<id>\` file exists:
-     - Extract key decisions (look for sections like "Decision:", "Approach:", "Architecture:")
-     - Verify implementation follows those decisions
-     - If contradiction detected:
-       - Add WARNING: "Design decision not followed: <decision>"
-       - Recommendation: "Update implementation or revise design.md to match reality"
-   - Otherwise, if the design artifact's \`contextFiles.<id>\` file is absent or empty: mark **Design Adherence** as not verified. With other supporting artifacts, **Code Pattern Consistency** still runs; the task-only case remains limited to task completion.
+   **设计遵循**：
+   - 若 schema 未定义 design 产出物（没有 ID 为 \`design\` 的产出物，也没有任何产出物的 \`artifactPaths.<id>.outputPath\` 为 \`design.md\` 或以其结尾），将**设计遵循**报告为不适用。
+   - 若 design 产出物的 \`contextFiles.<id>\` 文件存在：
+     - 提取关键决策（查找 "Decision:"、"Approach:"、"Architecture:" 等章节）
+     - 验证实现是否遵循这些决策
+     - 若检测到矛盾：
+       - 添加 WARNING："未遵循设计决策：<决策>"
+       - 建议："更新实现或修订 design.md 以匹配现实"
+   - 否则，若 design 产出物的 \`contextFiles.<id>\` 文件缺失或为空：将**设计遵循**标记为未验证。有其他支撑产出物时**代码模式一致性**仍然执行；仅有任务的情形仍限于任务完成情况。
 
-   **Code Pattern Consistency**:
-   - If implementation changes cannot be identified, mark **Code Pattern Consistency** as not verified and explain the missing evidence.
-   - Otherwise, review new code for consistency with project patterns
-   - Check file naming, directory structure, coding style
-   - If significant deviations found:
-     - Add SUGGESTION: "Code pattern deviation: <details>"
-     - Recommendation: "Consider following project pattern: <example>"
+   **代码模式一致性**：
+   - 若无法识别实现变更，将**代码模式一致性**标记为未验证，并说明缺失的证据。
+   - 否则，审查新代码与项目模式的一致性
+   - 检查文件命名、目录结构、编码风格
+   - 若发现显著偏差：
+     - 添加 SUGGESTION："代码模式偏差：<详情>"
+     - 建议："考虑遵循项目模式：<示例>"
 
-8. **Generate Verification Report**
+8. **生成验证报告**
 
-   **Summary Scorecard**:
+   **汇总记分卡**：
    \`\`\`markdown
-   ## Verification Report: <change-name>
+   ## 验证报告：<change-name>
 
-   ### Summary
-   | Dimension    | Status           |
+   ### 汇总
+   | 维度         | 状态               |
    |--------------|------------------|
-   | Completeness | X/Y tasks, N reqs|
-   | Correctness  | M/N reqs covered |
-   | Coherence    | Followed/Issues  |
+   | 完整性       | X/Y 任务，N 个需求|
+   | 正确性       | M/N 需求已覆盖    |
+   | 连贯性       | 已遵循/问题       |
    \`\`\`
 
-   In each Status cell, report the results of checks that ran and \`Not verified (<reason>)\` for every skipped check. If all checks in a dimension were skipped, start the cell with \`Not verified\`. Never score a skipped check as passing. Treat every not verified or partially verified check as skipped in the final assessment. Count only ADDED and MODIFIED requirements in N, and report REMOVED and RENAMED requirements separately (for example, "1 removal confirmed, 1 rename verified"). For a change that only removes or renames requirements, the Correctness cell reads \`Not applicable (no ADDED or MODIFIED requirements)\`.
+   在每个状态格中，报告已执行检查的结果，每个跳过的检查写 \`未验证（<原因>）\`。若某维度的全部检查都被跳过，状态格以 \`未验证\` 开头。绝不把跳过的检查计为通过。最终评估中把每个未验证或部分验证的检查视为跳过。N 只统计 ADDED 和 MODIFIED 需求，REMOVED 和 RENAMED 需求单独报告（例如 "确认 1 项移除，验证 1 项重命名"）。对仅移除或重命名需求的变更，正确性格写 \`不适用（无 ADDED 或 MODIFIED 需求）\`。
 
-   **Issues by Priority**:
+   **按优先级分组的问题**：
 
-   1. **CRITICAL** (Must fix before archive):
-      - Incomplete tasks
-      - Missing requirement implementations
-      - Removed requirements still implemented
-      - Renamed requirements whose behavior is no longer implemented
-      - Each with specific, actionable recommendation
+   1. **CRITICAL**（归档前必须修复）：
+      - 未完成任务
+      - 缺失的需求实现
+      - 被移除的需求仍有实现
+      - 行为不再实现的重命名需求
+      - 每个附带具体、可操作的建议
 
-   2. **WARNING** (Should fix):
-      - Spec/design divergences
-      - Missing scenario coverage
-      - Each with specific recommendation
+   2. **WARNING**（应修复）：
+      - Spec/设计偏离
+      - 缺失的场景覆盖
+      - 每个附带具体建议
 
-   3. **SUGGESTION** (Nice to fix):
-      - Pattern inconsistencies
-      - Minor improvements
-      - Each with specific recommendation
+   3. **SUGGESTION**（最好修复）：
+      - 模式不一致
+      - 次要改进
+      - 每个附带具体建议
 
-   **Final Assessment**:
-   - If CRITICAL issues: "X critical issue(s) found. Fix before archiving." If any check was skipped, also name every skipped check and its reason.
-   - If no CRITICAL issues, one or more warnings, and no checks were skipped: "No critical issues. Y warning(s) to consider. Ready for archive (with noted improvements)."
-   - If only suggestions and no checks were skipped: "No critical issues or warnings. Z suggestion(s) to consider. Ready for archive (with noted improvements)."
-   - If no issues and no checks were skipped: "All checks passed. Ready for archive."
-   - If any check was skipped and there are no CRITICAL issues: do not claim readiness. Say "No critical issues found in the checks that ran. <check(s)> not verified: <reason>." Include the warning count when nonzero.
-   - Include the suggestion count when nonzero in every final assessment.
+   **最终评估**：
+   - 若有 CRITICAL 问题："发现 X 个严重问题。归档前请修复。"若有检查被跳过，还要列出每个被跳过的检查及其原因。
+   - 若无 CRITICAL 问题、有一个或多个警告、且没有检查被跳过："无严重问题。有 Y 个警告需考虑。可归档（带有注明的改进）。"
+   - 若仅有建议且没有检查被跳过："无严重问题或警告。有 Z 个建议需考虑。可归档（带有注明的改进）。"
+   - 若无任何问题且没有检查被跳过："所有检查通过。可以归档。"
+   - 若有检查被跳过且没有 CRITICAL 问题：不要声称可归档。说 "已执行的检查中未发现严重问题。<检查> 未验证：<原因>。"警告数非零时一并给出。
+   - 每个最终评估中，建议数非零时都要给出。
 
-**Verification Heuristics**
+**验证启发式**
 
-- **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
-- **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
-- **Coherence**: Look for glaring inconsistencies, don't nitpick style
-- **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
-- **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
+- **完整性**：聚焦客观清单项（复选框、需求列表）
+- **正确性**：使用关键词搜索、文件路径分析、合理推断 - 不要求完全确定
+- **连贯性**：寻找明显不一致，不挑剔风格
+- **误报**：不确定时，优先 SUGGESTION 而非 WARNING，WARNING 而非 CRITICAL
+- **可操作性**：每个问题必须有具体建议，适用时附文件/行引用
 
-**Output Format**
+**输出格式**
 
-Use clear markdown with:
-- Table for summary scorecard
-- Grouped lists for issues (CRITICAL/WARNING/SUGGESTION)
-- Code references in format: \`file.ts:123\`
-- Specific, actionable recommendations
-- No vague suggestions like "consider reviewing"`
+使用清晰的 markdown：
+- 表格用于汇总记分卡
+- 分组列表用于问题（CRITICAL/WARNING/SUGGESTION）
+- 代码引用格式：\`file.ts:123\`
+- 具体、可操作的建议
+- 不要模糊建议如"考虑审查"`
   };
 }

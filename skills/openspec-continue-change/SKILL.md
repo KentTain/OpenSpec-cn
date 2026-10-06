@@ -1,134 +1,134 @@
 ---
 name: openspec-continue-change
-description: Continue working on an OpenSpec change by creating the next artifact. Use when the user wants to progress their change, create the next artifact, or continue their workflow. Also use when the user says "openspec continue" or "opsx continue".
-allowed-tools: Bash(openspec:*)
+description: 通过创建下一个产出物来继续处理 OpenSpec 变更。当用户想推进变更、创建下一个产出物或继续工作流时使用。也在用户说 "openspec continue" 或 "opsx continue" 时使用。
+allowed-tools: Bash(openspec-cn:*)
 license: MIT
-compatibility: Requires openspec CLI.
+compatibility: 需要 openspec-cn CLI。
 metadata:
   author: openspec
   version: "1.0"
 ---
 
-Continue working on a change by creating the next artifact.
+通过创建下一个产出物来继续处理变更。
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**存储选择：** 若用户指定了一个存储（存储是注册在本机上的独立 OpenSpec 仓库）或工作位于某个存储中，请运行 `openspec-cn store list --json` 发现已注册的存储 ID，然后在读写 spec 和变更的命令上传递 `--store <id>`（`new change`、`status`、`instructions`、`list`、`show`、`validate`、`archive`、`doctor`、`context`、`schemas`、`view`）。选定后，将 `--store <id>` 视为在当前工作流其余部分中固定不变。以下每个未限定范围的命令示例均为简写形式：运行前请追加该标志。例如，运行 `openspec-cn status --change "<name>" --json --store "<id>"`，而非下面展示的未限定形式。其他命令不接受此标志。命令输出的提示已包含该标志；在后续操作中请保留它。若不指定存储，命令将对最近的本地 `openspec/` 根目录生效。
 
-**Project check:** These steps expect a project that already uses OpenSpec. Before the first step that writes anything (`new change`, `archive`, `sync specs`, or authoring an artifact file), confirm the project has a root: run `openspec list --json` (with `--store <id>` when a store is selected, since the store is then the root) and read `root`. A root object means the project is set up. `"root": null` means it is not - there is no `openspec/` directory here, and a write such as `openspec new change` would create one as a side effect. The command also exits non-zero, which is that answer rather than a broken CLI, so read the JSON instead of retrying or working around it.
+**项目检查：** 以下步骤期望项目已经在使用 OpenSpec。在第一个会写入任何内容的步骤之前（`new change`、`archive`、`sync specs`，或撰写任何产出物文件），确认项目已有根目录：运行 `openspec-cn list --json`（当选择了 store 时加上 `--store <id>`，因为此时 store 就是根目录），并读取 `root`。root 是一个对象表示项目已配置好。`"root": null` 表示尚未配置 —— 这里没有 `openspec/` 目录，而像 `openspec-cn new change` 这样的写入操作会作为副作用创建它。该命令还会以非零状态退出，这是它给出的答案而不是 CLI 坏了，因此请读取 JSON，不要重试或绕过它。
 
-One `"root": null` is not about setup: when a `status` error message starts with `Declared in` or `Invalid store declaration in` and names this project's `openspec/config.yaml` (or `config.yml`), the project does use OpenSpec through a store it declares, which this machine cannot resolve (the store is not registered, or the `store:` line is malformed). Do not treat it as uninitialized and skip the branches below: stop before writing and show the user that error's `message` and `fix`.
+有一种 `"root": null` 与配置无关：当某条 `status` 错误消息以 `中声明` 或 `中的 store 声明无效` 结尾，并指向本项目的 `openspec/config.yaml`（或 `config.yml`）时，说明本项目确实通过它声明的某个 store 在使用 OpenSpec，只是本机无法解析该 store（store 未注册，或 `store:` 行格式有误）。不要把它当作未初始化而跳过下面的分支：请在写入前停下，把该错误的 `message` 和 `fix` 展示给用户。
 
-Otherwise, with no root, what happens next depends on how this workflow was reached:
+否则，在没有根目录的情况下，接下来怎么做取决于这个工作流是如何被触发的：
 
-- **Auto-selected**: you chose this workflow yourself, without the user naming OpenSpec, naming this skill, or running its slash command. Stop using OpenSpec and answer the request normally, as you would with no OpenSpec installed. Do not ask them to set anything up and do not mention OpenSpec setup.
-- **Explicit OpenSpec request**: the user named OpenSpec, named this skill, or ran its slash command. Stop before writing and ask how to proceed: set this project up (`openspec init`), target a store they already have (`--store <id>`), or continue without OpenSpec for this request. Wait for their answer.
+- **自动选用**：这个工作流是你自己选的，用户没有提到 OpenSpec、没有点名这个 skill，也没有运行它的斜杠命令。停止使用 OpenSpec，按平常方式回答请求，就像没安装 OpenSpec 一样。不要要求他们做任何配置，也不要提及 OpenSpec 配置。
+- **明确要求 OpenSpec**：用户提到了 OpenSpec、点名了这个 skill，或运行了它的斜杠命令。在写入前停下并询问如何继续：为本项目做配置（`openspec-cn init`）、指向他们已有的某个 store（`--store <id>`），还是本次请求不使用 OpenSpec 继续。等待他们的答复。
 
-In both branches, never create the root as a side effect: do not run `openspec init` until the user asks for it, do not hand-create `openspec/` files, and do not let a command create it.
+无论走哪个分支，都绝不能把创建根目录当作副作用：在用户要求之前不要运行 `openspec-cn init`，不要手工创建 `openspec/` 文件，也不要让任何命令创建它。
 
-**Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: 可选地指定变更名。若省略，检查能否从对话上下文推断。若模糊或歧义，你必须提示用户从可用变更中选择。
 
-**Steps**
+**步骤**
 
-1. **Select the change**
+1. **选择变更**
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes sorted by most recently modified, and ask the user to select one
+   若提供了名称，使用它。否则：
+   - 从对话上下文推断（若用户提到了某个变更）
+   - 若仅有一个活跃变更则自动选择
+   - 若存在歧义，运行 `openspec-cn list --json` 获取按最近修改排序的可用变更，并让用户选择
 
-   When prompting, present the top 3-4 most recently modified changes as options, showing:
-   - Change name
-   - Status (e.g., "0/5 tasks", "complete", "no tasks")
-   - How recently it was modified (from `lastModified` field)
+   提示时，展示最近修改的前 3-4 个变更作为选项，显示：
+   - 变更名称
+   - 状态（例如 "0/5 tasks"、"complete"、"no tasks"）
+   - 最近修改时间（来自 `lastModified` 字段）
 
-   Mark the most recently modified change as "(Recommended)" since it's likely what the user wants to continue.
+   将最近修改的变更标记为 "(推荐)"，因为这很可能是用户想继续的。
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/openspec-continue-change <other>`).
+   始终宣告："使用变更：<name>"，以及如何覆盖（例如 `/openspec-continue-change <other>`）。
 
-2. **Check current status**
+2. **检查当前状态**
    ```bash
-   openspec status --change "<name>" --json
+   openspec-cn status --change "<name>" --json
    ```
-   Parse the JSON to understand current state. The response includes:
-   - `schemaName`: The workflow schema being used (e.g., "spec-driven")
-   - `artifacts`: Array of artifacts with their status ("done", "skipped", "ready", "blocked")
-   - `isPlanningComplete`: Boolean indicating if all planning artifacts are complete. Older CLI versions expose the same value as `isComplete`.
-   - `planningHome`, `changeRoot`, `artifactPaths`, and `actionContext`: path and scope context. Use these instead of assuming repo-local paths.
+   解析 JSON 以理解当前状态。响应包括：
+   - `schemaName`：使用的工作流 schema（例如 "spec-driven"）
+   - `artifacts`：制品数组及其状态（"done"、"skipped"、"ready"、"blocked"）
+   - `isPlanningComplete`：布尔值，表示所有规划制品是否已完成。较旧 CLI 版本以 `isComplete` 暴露相同值。
+   - `planningHome`、`changeRoot`、`artifactPaths` 和 `actionContext`：路径和作用域上下文。请使用这些值而非假设仓库本地路径。
 
-3. **Act based on status**:
-
-   ---
-
-   **Before anything else, finish a partly written artifact**:
-   - An artifact whose output is a glob pattern (e.g. `specs/**/*.md`) reads `done` as soon as one matching file exists, so a run interrupted while writing its files leaves it `done` with some still missing
-   - For each such `done` artifact, first get its instructions and read any completed dependencies needed to determine the expected files. Then compare those files with `artifactPaths.<id>.existingOutputPaths`. For spec-driven's `specs`, read the proposal and check for one `specs/<capability-path>/spec.md` per capability it lists; resolve each expected path against `changeRoot` before comparing path identity
-   - If any are missing, write only the missing files, and STOP - that counts as this invocation's ONE artifact. If you cannot tell whether a file was left out on purpose, ask the user
+3. **基于状态行动**：
 
    ---
 
-   **If all planning artifacts are complete (`isPlanningComplete: true`, or legacy `isComplete: true`)**:
-   - Congratulate the user
-   - Show final status including the schema used
-   - Suggest: "Planning is complete! You can now implement this change. Once implementation and any tracked work are complete, archive it."
-   - STOP
+   **首先，完成一个只写了一部分的产出物**：
+   - 输出为 glob 模式（例如 `specs/**/*.md`）的制品，只要存在一个匹配文件就会读取为 `done`，因此一次在写入多个文件时被中断的运行会让它保持 `done` 但仍缺少部分文件
+   - 对每个此类 `done` 制品，先获取其指令并读取任何已完成的依赖，以确定预期的文件。然后将这些文件与 `artifactPaths.<id>.existingOutputPaths` 比较。对 spec-driven 的 `specs`，阅读 proposal 并检查它列出的每个能力是否都有一个 `specs/<capability-path>/spec.md`；比较路径同一性前先将每个预期路径对 `changeRoot` 解析
+   - 若有缺失，只写入缺失的文件，然后停止 —— 这算作本次调用的唯一一个制品。若无法判断某个文件是否是有意省略的，请询问用户
 
    ---
 
-   **If artifacts are ready to create** (status shows artifacts with `status: "ready"`):
-   - Pick the FIRST artifact with `status: "ready"` from the status output
-   - Get its instructions:
+   **若所有规划制品已完成（`isPlanningComplete: true`，或旧版 `isComplete: true`）**：
+   - 祝贺用户
+   - 展示最终状态，包括使用的 schema
+   - 建议："规划完成！现在可以实现此变更。实现及所有跟踪的工作完成后，归档它。"
+   - 停止
+
+   ---
+
+   **若产出物已就绪可创建**（状态显示有 `status: "ready"` 的产出物）：
+   - 从状态输出中选取第一个 `status: "ready"` 的产出物
+   - 获取其指令：
      ```bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     openspec-cn instructions <artifact-id> --change "<name>" --json
      ```
-   - Parse the JSON. The key fields are:
-     - `context`: Project background (constraints for you - do NOT include in output)
-     - `rules`: Artifact-specific rules (constraints for you - do NOT include in output)
-     - `template`: The structure to use for your output file
-     - `instruction`: Schema-specific guidance
-     - `resolvedOutputPath`: Resolved path or pattern to write the artifact
-     - `dependencies`: Completed artifacts to read for context (entries with `skipped: true` have no files - do not look for them)
-     - `skipped`/`warning`: present when the change declares skip_specs and this artifact must NOT be created - pick another artifact
-   - **Create the artifact file**:
-     - Read any completed dependency files for context - always re-read them from disk, even if you saw them earlier in the conversation (the user may have edited them)
-     - If the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
-     - Otherwise use `template` as the structure - fill in its sections
-     - Apply `context` and `rules` as constraints when writing - but do NOT copy them into the file
-     - Write to the `resolvedOutputPath` specified in instructions. If it is a glob pattern, choose the concrete file path using the schema instruction and the change's context
-   - Show what was created and what's now unlocked
-   - STOP after creating ONE artifact
+   - 解析 JSON。关键字段：
+     - `context`：项目背景（给你的约束 - 不要包含在输出中）
+     - `rules`：产出物特定规则（给你的约束 - 不要包含在输出中）
+     - `template`：输出文件使用的结构
+     - `instruction`：schema 特定指导
+     - `resolvedOutputPath`：写入产出物的已解析路径或模式
+     - `dependencies`：已完成的需要读取以获取上下文的产出物（带有 `skipped: true` 的条目无文件 - 不要查找它们）
+     - `skipped`/`warning`：当变更声明 skip_specs 且此产出物必须不创建时出现 - 选择另一个产出物
+   - **创建产出物文件**：
+     - 读取所有已完成的依赖文件以获取上下文 - 始终从磁盘重新读取，即使在对话中之前已看到（用户可能已编辑过）
+     - 若 `instruction` 字段将创建委托给特定 skill 或命令，则调用它来生成产出物，而不是自己写入文件，然后验证产出物文件是否存在于 `resolvedOutputPath`
+     - 否则使用 `template` 作为结构 - 填写其各节
+     - 写入时将 `context` 和 `rules` 作为约束应用 - 但不要将它们复制到文件中
+     - 写入指令中指定的 `resolvedOutputPath`。若它是 glob 模式，根据 schema 指令和变更的上下文选择具体文件路径
+   - 展示已创建的内容以及现在解锁了什么
+   - 每次仅创建一个产出物，创建后即停止
 
    ---
 
-   **If no artifacts are ready (all blocked)**:
-   - This shouldn't happen with a valid schema
-   - Show status and suggest checking for issues
+   **若没有产出物就绪（全部受阻）**：
+   - 这在有效 schema 中不应发生
+   - 展示状态并建议检查问题
 
-4. **After creating an artifact, show progress**
+4. **创建产出物后，展示进度**
    ```bash
-   openspec status --change "<name>"
+   openspec-cn status --change "<name>"
    ```
 
-**Output**
+**输出**
 
-After each invocation, show:
-- Which artifact was created
-- Schema workflow being used
-- Current progress (N/M complete)
-- What artifacts are now unlocked
-- Prompt: "Want to continue? Just ask me to continue or tell me what to do next."
+每次调用后，展示：
+- 创建了哪个产出物
+- 使用的 schema 工作流
+- 当前进度（N/M 已完成）
+- 现在解锁了哪些产出物
+- 提示："想继续吗？只要让我继续或告诉我接下来做什么。"
 
-**Artifact Creation Guidelines**
+**产出物创建指南**
 
-The artifact types and their purpose depend on the schema. The `instruction` field from the instructions output is the authoritative guidance for each artifact - follow it even when the artifact has a familiar name (proposal.md, tasks.md, etc.), since custom schemas may define different content or a different process for the same file names.
+产出物类型及其用途取决于 schema。指令输出中的 `instruction` 字段是每个产出物的权威指导 — 即使产出物名称熟悉（proposal.md、tasks.md 等）也应遵循它，因为自定义 schema 可能为相同文件名定义不同内容或不同流程。
 
-If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly.
+若 `instruction` 字段指示你使用特定 skill 或命令创建产出物，则调用它而非直接写入产出物。
 
-**Guardrails**
-- Create ONE artifact per invocation
-- Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)
-- Never skip artifacts or create out of order
-- If context is unclear, ask the user before creating
-- Verify the artifact file exists after writing before marking progress
-- Use the schema's artifact sequence, don't assume specific artifact names
-- **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
-  - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
-  - These guide what you write, but should never appear in the output
+**护栏**
+- 每次调用仅创建一个产出物
+- 始终在创建新产出物之前读取依赖产出物 - 从磁盘重新读取，而非对话记忆（文件可能自你上次看到后已变更）
+- 绝不跳过产出物或乱序创建
+- 若上下文不清，创建前先询问用户
+- 在标记进度之前，先验证写入后产出物文件确实存在
+- 使用 schema 的产出物顺序，不要假设特定的产出物名称
+- **重要提示**：`context` 和 `rules` 是给你的约束，不是文件内容
+  - 不要将 `<context>`、`<rules>`、`<project_context>` 块复制到产出物中
+  - 这些指导你写什么，但绝不应出现在输出中

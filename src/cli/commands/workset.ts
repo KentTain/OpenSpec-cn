@@ -21,23 +21,23 @@ function collectMember(value: string, previous: string[]): string[] {
 export function registerWorksetCommand(program: Command): void {
   const groupDescription =
     COMMAND_REGISTRY.find((entry) => entry.name === 'workset')?.description ??
-    'Compose, keep, and open personal working views (purely local)';
+    '组合、保存和打开个人工作视图（纯本地）';
   const workset = program.command('workset').description(groupDescription);
   // Parsed at the group level so `openspec workset --json` keeps the
   // one-JSON-document contract instead of a raw Commander error. The
   // parent option matches anywhere; actions read optsWithGlobals().
-  workset.addOption(new Option('--json', 'Output as JSON').hideHelp());
+  workset.addOption(new Option('--json', '以 JSON 格式输出').hideHelp());
 
   workset
     .command('create [name]')
-    .description('Compose and save a named working view of folders you choose')
+    .description('组合并保存一个您选择的文件夹命名工作视图')
     .option(
       '--member <member>',
-      'Member folder as <path> or <name>=<path>; repeatable, first is the primary',
+      '成员文件夹，格式为 <path> 或 <name>=<path>；可重复，第一个为主目录',
       collectMember,
       [] as string[]
     )
-    .option('--tool <id>', 'Preferred tool to open this workset with')
+    .option('--tool <id>', '打开此 workset 的首选工具')
     .option('--json', 'Output as JSON')
     .action(async (name: string | undefined, _options: WorksetCreateOptions, command: Command) => {
       const worksetCommand = await loadWorksetCommand();
@@ -47,7 +47,7 @@ export function registerWorksetCommand(program: Command): void {
   workset
     .command('list')
     .alias('ls')
-    .description('Show saved worksets with their members')
+    .description('显示已保存的 worksets 及其成员')
     .option('--json', 'Output as JSON')
     .action(async (_options: { json?: boolean }, command: Command) => {
       const worksetCommand = await loadWorksetCommand();
@@ -56,13 +56,13 @@ export function registerWorksetCommand(program: Command): void {
 
   workset
     .command('open <name>')
-    .description('Open a saved workset in your tool (editor window or agent session)')
-    .option('--tool <id>', 'Open with this tool just this once')
+    .description('在您的工具中打开已保存的 workset（编辑器窗口或代理会话）')
+    .option('--tool <id>', '仅本次使用此工具打开')
     .addOption(
       // Parsed so Commander never owns the error; rejected in the
       // action with one JSON document. Hidden because help should not
       // advertise a mode that only rejects.
-      new Option('--json', 'Not supported for open').hideHelp()
+      new Option('--json', 'open 不支持').hideHelp()
     )
     .action(async (name: string, _options: WorksetOpenOptions, command: Command) => {
       const worksetCommand = await loadWorksetCommand();
@@ -71,8 +71,8 @@ export function registerWorksetCommand(program: Command): void {
 
   workset
     .command('remove <name>')
-    .description('Delete a saved workset (member folders are never touched)')
-    .option('--yes', 'Confirm removal non-interactively')
+    .description('删除已保存的 workset（成员文件夹不会被触及）')
+    .option('--yes', '非交互式确认删除')
     .option('--json', 'Output as JSON')
     .action(async (name: string, _options: WorksetRemoveOptions, command: Command) => {
       const worksetCommand = await loadWorksetCommand();
@@ -99,8 +99,8 @@ export function registerWorksetCommand(program: Command): void {
     );
     const message =
       attempted.length > 0
-        ? `Unknown command '${attempted[0]}' for 'openspec workset'. Workset subcommands: ${subcommandsLine}.`
-        : `Missing subcommand for 'openspec workset'. Workset subcommands: ${subcommandsLine}.`;
+        ? `未知命令 '${attempted[0]}'（属于 'openspec-cn workset'）。workset 子命令：${subcommandsLine}。`
+        : `缺少子命令（'openspec-cn workset'）。workset 子命令：${subcommandsLine}。`;
     if (workset.opts().json) {
       printJson({
         status: [
@@ -108,7 +108,7 @@ export function registerWorksetCommand(program: Command): void {
             severity: 'error',
             code: 'unknown_workset_subcommand',
             message,
-            fix: 'Run one of the workset subcommands.',
+            fix: '运行某个 workset 子命令。',
           } satisfies StoreDiagnostic,
         ],
       });

@@ -83,7 +83,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status', '--change', 'scaffolded-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('scaffolded-change');
-      expect(result.stdout).toContain('0/4 artifacts complete');
+      expect(result.stdout).toContain('进度：0/4 个制品已完成');
     });
 
     it('shows status for a change with proposal only', async () => {
@@ -94,7 +94,7 @@ describe('artifact-workflow CLI commands', () => {
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('minimal-change');
       expect(result.stdout).toContain('spec-driven');
-      expect(result.stdout).toContain('1/4 artifacts complete');
+      expect(result.stdout).toContain('进度：1/4 个制品已完成');
     });
 
     it('shows status for a change with proposal and design', async () => {
@@ -102,7 +102,7 @@ describe('artifact-workflow CLI commands', () => {
 
       const result = await runCLI(['status', '--change', 'partial-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('2/4 artifacts complete');
+      expect(result.stdout).toContain('进度：2/4 个制品已完成');
       expect(result.stdout).toContain('[x]');
     });
 
@@ -165,7 +165,7 @@ describe('artifact-workflow CLI commands', () => {
 
       const json = JSON.parse(result.stdout);
       expect(json.artifacts.map((a: any) => a.id)).toEqual(['proposal', 'specs', 'design', 'tasks']);
-      expect(json.nextSteps[0]).toContain('openspec instructions specs');
+      expect(json.nextSteps[0]).toContain('openspec-cn instructions specs');
     });
 
     // #906: the text surface reported state and no verb, so someone resuming a
@@ -190,7 +190,7 @@ describe('artifact-workflow CLI commands', () => {
 
         expect(result.exitCode).toBe(0);
         expect(lastLine(result)).toBe(
-          'Next: openspec instructions specs --change "resume-planning" --json'
+          'Next: openspec-cn instructions specs --change "resume-planning" --json'
         );
       });
 
@@ -202,9 +202,9 @@ describe('artifact-workflow CLI commands', () => {
         expect(result.exitCode).toBe(0);
         // The completion line alone reads as "you are done" even while tasks
         // remain, so it must be followed by the command that resumes the work.
-        expect(result.stdout).toContain('All planning artifacts complete!');
+        expect(result.stdout).toContain('所有规划制品已完成！');
         expect(lastLine(result)).toBe(
-          'Next: openspec instructions apply --change "resume-apply" --json'
+          'Next: openspec-cn instructions apply --change "resume-apply" --json'
         );
       });
 
@@ -246,7 +246,7 @@ describe('artifact-workflow CLI commands', () => {
         const ready = await runCLI(['status', '--change', 'lean-change'], { cwd: tempDir });
         expect(ready.exitCode).toBe(0);
         expect(lastLine(ready)).toBe(
-          'Next: openspec instructions plan --change "lean-change" --json'
+          'Next: openspec-cn instructions plan --change "lean-change" --json'
         );
 
         await fs.writeFile(path.join(changeDir, 'plan.md'), '# Plan\n\nThe plan.\n');
@@ -254,7 +254,7 @@ describe('artifact-workflow CLI commands', () => {
         const complete = await runCLI(['status', '--change', 'lean-change'], { cwd: tempDir });
         expect(complete.exitCode).toBe(0);
         expect(lastLine(complete)).toBe(
-          'Next: openspec instructions apply --change "lean-change" --json'
+          'Next: openspec-cn instructions apply --change "lean-change" --json'
         );
       });
 
@@ -273,7 +273,7 @@ describe('artifact-workflow CLI commands', () => {
         // change forbids.
         expect(result.stdout).toContain('[~] specs');
         expect(lastLine(result)).toBe(
-          'Next: openspec instructions design --change "skip-next-step" --json'
+          'Next: openspec-cn instructions design --change "skip-next-step" --json'
         );
       });
 
@@ -315,8 +315,8 @@ describe('artifact-workflow CLI commands', () => {
 
       const result = await runCLI(['status', '--change', 'complete-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('4/4 artifacts complete');
-      expect(result.stdout).toContain('All planning artifacts complete!');
+      expect(result.stdout).toContain('进度：4/4 个制品已完成');
+      expect(result.stdout).toContain('所有规划制品已完成！');
       expect(result.stdout).not.toContain('All artifacts complete!');
     });
 
@@ -339,9 +339,9 @@ describe('artifact-workflow CLI commands', () => {
       expect(status.isPlanningComplete).toBe(true);
       expect(status.isComplete).toBe(true);
       expect(status.nextSteps[0]).toContain(
-        'openspec instructions apply --change "planned-change" --json'
+        'openspec-cn instructions apply --change "planned-change" --json'
       );
-      expect(status.nextSteps[0]).not.toContain('before implementation');
+      expect(status.nextSteps[0]).not.toContain('implementation');
       expect(apply.state).toBe('ready');
       expect(apply.progress.remaining).toBe(1);
     });
@@ -377,7 +377,7 @@ describe('artifact-workflow CLI commands', () => {
       expect(JSON.parse(instructionsResult.stdout)).toMatchObject({
         skipped: true,
         existingOutputPaths: [],
-        warning: expect.stringContaining('Do not create spec files'),
+        warning: expect.stringContaining('请不要创建 spec 文件'),
       });
       await expect(fs.stat(path.join(changeDir, 'specs'))).rejects.toMatchObject({ code: 'ENOENT' });
     });
@@ -385,8 +385,8 @@ describe('artifact-workflow CLI commands', () => {
     it('exits gracefully when no changes exist', async () => {
       const result = await runCLI(['status'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('No active changes');
-      expect(result.stdout).toContain('openspec new change');
+      expect(result.stdout).toContain('没有活跃的变更');
+      expect(result.stdout).toContain('openspec-cn new change');
     });
 
     it('exits gracefully with JSON when no changes exist', async () => {
@@ -395,7 +395,7 @@ describe('artifact-workflow CLI commands', () => {
 
       const json = JSON.parse(result.stdout);
       expect(json.changes).toEqual([]);
-      expect(json.message).toBe('No active changes.');
+      expect(json.message).toBe('没有活跃的变更。');
     });
 
     it('errors when --change is missing and lists available changes', async () => {
@@ -404,7 +404,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Missing required option --change');
+      expect(output).toContain('缺少必需选项 --change');
       expect(output).toContain('some-change');
     });
 
@@ -414,7 +414,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status', '--change', 'nonexistent'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain("Change 'nonexistent' not found");
+      expect(output).toContain("未找到变更 'nonexistent'");
       expect(output).toContain('existing-change');
     });
 
@@ -436,35 +436,35 @@ describe('artifact-workflow CLI commands', () => {
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain("Schema 'unknown' not found");
+      expect(output).toContain("未找到 Schema 'unknown'");
     });
 
     it('rejects path traversal in change name', async () => {
       const result = await runCLI(['status', '--change', '../foo'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid change name');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects absolute path in change name', async () => {
       const result = await runCLI(['status', '--change', '/etc/passwd'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid change name');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects slashes in change name', async () => {
       const result = await runCLI(['status', '--change', 'foo/bar'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid change name');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects hidden directory names', async () => {
       const result = await runCLI(['status', '--change', '.hidden'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid change name');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('rejects the reserved archive directory name', async () => {
@@ -473,7 +473,7 @@ describe('artifact-workflow CLI commands', () => {
       const result = await runCLI(['status', '--change', 'archive'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid change name');
+      expect(output).toContain('无效的变更名称');
     });
 
     it('accepts digit-leading change names that exist on disk (#1308)', async () => {
@@ -484,7 +484,7 @@ describe('artifact-workflow CLI commands', () => {
       });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('2026-07-04-voice-copilot-v1');
-      expect(result.stdout).toContain('2/4 artifacts complete');
+      expect(result.stdout).toContain('进度：2/4 个制品已完成');
     });
   });
 
@@ -665,8 +665,8 @@ rules:
       const result = await runCLI(['instructions', '--change', 'test-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Missing required argument <artifact>');
-      expect(output).toContain('Valid artifacts');
+      expect(output).toContain('缺少必要参数 <artifact>');
+      expect(output).toContain('可用产出物');
     });
 
     it('errors for unknown artifact', async () => {
@@ -677,8 +677,8 @@ rules:
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain("Artifact 'unknown-artifact' not found");
-      expect(output).toContain('Valid artifacts');
+      expect(output).toContain("未找到产出物 'unknown-artifact'");
+      expect(output).toContain('可用产出物');
     });
 
     it('accepts digit-leading change names that exist on disk (#1308)', async () => {
@@ -697,7 +697,7 @@ rules:
     it('shows template paths for default schema', async () => {
       const result = await runCLI(['templates'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Schema: spec-driven');
+      expect(result.stdout).toContain('Schema：spec-driven');
       expect(result.stdout).toContain('proposal:');
       expect(result.stdout).toContain('design:');
       expect(result.stdout).toContain('specs:');
@@ -707,7 +707,7 @@ rules:
     it('shows template paths for specified schema', async () => {
       const result = await runCLI(['templates', '--schema', 'spec-driven'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Schema: spec-driven');
+      expect(result.stdout).toContain('Schema：spec-driven');
       expect(result.stdout).toContain('proposal:');
       expect(result.stdout).toContain('design:');
     });
@@ -727,7 +727,7 @@ rules:
       const result = await runCLI(['templates', '--schema', 'nonexistent'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain("Schema 'nonexistent' not found");
+      expect(output).toContain("未找到 Schema 'nonexistent'");
     });
   });
 
@@ -736,7 +736,7 @@ rules:
       const result = await runCLI(['new', 'change', 'my-new-feature'], { cwd: tempDir });
       expect(result.exitCode).toBe(0);
       const output = getOutput(result);
-      expect(output).toContain("Created change 'my-new-feature'");
+      expect(output).toContain("已创建变更 'my-new-feature'");
 
       const changeDir = path.join(changesDir, 'my-new-feature');
       const stat = await fs.stat(changeDir);
@@ -917,7 +917,7 @@ The system SHALL support the example behavior.
       const result = await runCLI(['new', 'change', 'existing-change'], { cwd: tempDir });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('exists');
+      expect(output).toContain('已存在');
     });
 
     it('errors when name argument is missing', async () => {
@@ -935,9 +935,9 @@ The system SHALL support the example behavior.
       });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('## Apply: apply-change');
-      expect(result.stdout).toContain('Schema: spec-driven');
-      expect(result.stdout).toContain('### Context Files');
-      expect(result.stdout).toContain('### Instruction');
+      expect(result.stdout).toContain('Schema：spec-driven');
+      expect(result.stdout).toContain('### 上下文文件');
+      expect(result.stdout).toContain('### 指令');
     });
 
     it('shows blocked state when required artifacts are missing', async () => {
@@ -958,10 +958,10 @@ operations:
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Blocked');
-      expect(result.stdout).toContain('Missing artifacts: tasks');
-      expect(result.stdout).toContain('### Project Context (required instruction input)');
-      expect(result.stdout).toContain('### Operation Guidance (advisory)');
+      expect(result.stdout).toContain('已阻塞');
+      expect(result.stdout).toContain('缺失的产出物：tasks');
+      expect(result.stdout).toContain('### 项目上下文（必填的指令输入）');
+      expect(result.stdout).toContain('### 操作指引（建议性）');
     });
 
     it('outputs JSON for apply instructions', async () => {
@@ -1051,12 +1051,12 @@ operations:
       );
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('### Instruction');
-      expect(result.stdout).toContain('### Project Context (required instruction input)');
+      expect(result.stdout).toContain('### 指令');
+      expect(result.stdout).toContain('### 项目上下文（必填的指令输入）');
       expect(result.stdout).toContain('Project background');
-      expect(result.stdout).toContain('### Operation Guidance (advisory)');
+      expect(result.stdout).toContain('### 操作指引（建议性）');
       expect(result.stdout).toContain('- Keep summaries concise');
-      expect(result.stdout).not.toContain('### Project Context (advisory)');
+      expect(result.stdout).not.toContain('### 项目上下文（建议性）');
     });
 
     it('omits absent operation inputs without changing apply state behavior', async () => {
@@ -1144,7 +1144,7 @@ operations:
 
       expect(result.exitCode).toBe(0);
       const matches = result.stderr.match(
-        /Guidance for operation 'apply' must be an array of strings/g
+        /操作 'apply' 的 guidance 必须是字符串数组/g
       );
       expect(matches).toHaveLength(1);
       expect(JSON.parse(result.stdout).operationGuidance).toBeUndefined();
@@ -1215,7 +1215,7 @@ apply:
       });
       expect(result.exitCode).toBe(0);
       // Should show the instruction from spec-driven schema apply block
-      expect(result.stdout).toContain('work through pending tasks');
+      expect(result.stdout).toContain('逐项完成待办任务');
     });
 
     it('shows all_done state when all tasks are complete', async () => {
@@ -1245,12 +1245,12 @@ operations:
         cwd: tempDir,
       });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('complete ✓');
-      expect(result.stdout).toContain('All tracked tasks are complete');
-      expect(result.stdout).toContain('as appropriate before archiving');
-      expect(result.stdout).not.toContain('ready to be archived');
-      expect(result.stdout).toContain('### Project Context (required instruction input)');
-      expect(result.stdout).toContain('### Operation Guidance (advisory)');
+      expect(result.stdout).toContain('已完成 ✓');
+      expect(result.stdout).toContain('所有跟踪的任务已完成');
+      expect(result.stdout).toContain('归档前请根据情况审查或验证该变更');
+      expect(result.stdout).not.toContain('可以归档');
+      expect(result.stdout).toContain('### 项目上下文（必填的指令输入）');
+      expect(result.stdout).toContain('### 操作指引（建议性）');
 
       const jsonResult = await runCLI(
         ['instructions', 'apply', '--change', 'done-apply', '--json'],
@@ -1262,7 +1262,7 @@ operations:
       const json = JSON.parse(jsonResult.stdout);
       expect(json.state).toBe('all_done');
       expect(json.progress).toEqual({ total: 2, complete: 2, remaining: 0 });
-      expect(json.instruction).toContain('All tracked tasks are complete');
+      expect(json.instruction).toContain('所有跟踪的任务已完成');
     });
 
     it('uses spec-driven schema apply configuration', async () => {
@@ -1274,7 +1274,7 @@ operations:
         { cwd: tempDir }
       );
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Schema: spec-driven');
+      expect(result.stdout).toContain('Schema：spec-driven');
     });
 
     it('spec-driven schema uses apply block configuration', async () => {
@@ -1382,7 +1382,7 @@ artifacts:
       // All artifacts exist, should be ready with default instruction
       expect(json.schemaName).toBe('no-apply-full');
       expect(json.state).toBe('ready');
-      expect(json.instruction).toContain('All required artifacts complete');
+      expect(json.instruction).toContain('所有必需的产出物已完成');
     });
   });
 
@@ -1446,12 +1446,12 @@ operations:
       );
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('## Archive Inputs: archive-text-inputs');
-      expect(result.stdout).toContain('### Project Context (required instruction input)');
+      expect(result.stdout).toContain('## 归档输入：archive-text-inputs');
+      expect(result.stdout).toContain('### 项目上下文（必填的指令输入）');
       expect(result.stdout).toContain('Archive background');
-      expect(result.stdout).toContain('### Operation Guidance (advisory)');
+      expect(result.stdout).toContain('### 操作指引（建议性）');
       expect(result.stdout).toContain('- Summarize the outcome');
-      expect(result.stdout).not.toContain('### Project Context (advisory)');
+      expect(result.stdout).not.toContain('### 项目上下文（建议性）');
     });
 
     it('succeeds with valid empty inputs and omits optional JSON fields', async () => {
@@ -1476,7 +1476,7 @@ operations:
       expect(json.context).toBeUndefined();
       expect(json.operationGuidance).toBeUndefined();
       expect(textResult.stdout).toContain(
-        'No project context or operation guidance configured.'
+        '未配置项目上下文或操作指南。'
       );
     });
 
@@ -1493,11 +1493,11 @@ operations:
 
       expect(missing.exitCode).toBe(1);
       expect(JSON.parse(missing.stdout).status[0].message).toContain(
-        'Missing required option --change'
+        '缺少必需选项 --change'
       );
       expect(invalid.exitCode).toBe(1);
       expect(JSON.parse(invalid.stdout).status[0].message).toContain(
-        "Change 'missing-change' not found"
+        "未找到变更 'missing-change'"
       );
     });
 
@@ -1567,25 +1567,25 @@ operations:
     it('status command help shows description', async () => {
       const result = await runCLI(['status', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Display artifact completion status');
+      expect(result.stdout).toContain('显示变更的产出物完成状态');
     });
 
     it('instructions command help shows description', async () => {
       const result = await runCLI(['instructions', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Output enriched instructions');
+      expect(result.stdout).toContain('输出制品、apply 或 archive 的增强指令');
     });
 
     it('templates command help shows description', async () => {
       const result = await runCLI(['templates', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Show resolved template paths');
+      expect(result.stdout).toContain('显示 Schema 中所有产出物的已解析模板路径');
     });
 
     it('new command help shows description', async () => {
       const result = await runCLI(['new', '--help']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Create new items');
+      expect(result.stdout).toContain('创建新项目');
     });
   });
 
@@ -1594,7 +1594,7 @@ operations:
       const result = await runCLI(['experimental', '--tool', 'claude'], { cwd: tempDir });
       // May succeed or fail depending on setup, but should show deprecation notice
       const output = getOutput(result);
-      expect(output).toContain('deprecated');
+      expect(output).toContain('已弃用');
     });
 
     it('errors for unknown tool', async () => {
@@ -1603,7 +1603,7 @@ operations:
       });
       expect(result.exitCode).toBe(1);
       const output = getOutput(result);
-      expect(output).toContain('Invalid tool(s): unknown-tool');
+      expect(output).toContain('无效工具：unknown-tool');
     });
 
     it('creates skills for the shared agents target', async () => {

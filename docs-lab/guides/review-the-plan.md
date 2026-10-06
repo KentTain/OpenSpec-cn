@@ -1,36 +1,36 @@
-# Review the plan
+# 评审计划
 
-> The two-minute pass that catches wrong turns before they're code.
+> 用两分钟过一遍，在错误变成代码之前抓住它们。
 
 <!-- Partial draft: the plan-review sections are still headings only. -->
 
-## The two-minute pass
+## 两分钟过一遍
 
-## What good requirements look like
+## 好的需求长什么样
 
-## What good scenarios look like
+## 好的场景长什么样
 
-## Pushing back
+## 提出异议
 
-## Advanced: verify after apply
+## 进阶：实施后验证
 
-Before archiving, check that the code does what the scenarios describe. The optional
-[verify skill](../reference/skills.md#openspec-verify-change) can help find gaps.
+在归档之前，检查代码是否实现了场景所描述的行为。可选的
+[verify skill](../reference/skills.md#openspec-verify-change) 可以帮助发现缺口。
 
-### Keep a record when checks are hard to track
+### 当检查难以追踪时保留记录
 
-Use the change's `tasks.md` or an existing test report. For each check, record:
+使用该变更的 `tasks.md` 或现有的测试报告。对每项检查，记录：
 
-- **Scenario**: the requirement and scenario it checks, with a link to that version of the spec.
-- **Check**: the test or manual check and what should happen.
-- **Result**: pass, fail, not run, or unknown. Link to the original run or dated observation.
-- **Tested version**: the code revision or build tested, and where it ran.
+- **场景**：它检查的需求和场景，附上 spec 该版本的链接。
+- **检查**：测试或人工检查，以及预期结果。
+- **结果**：通过、失败、未运行或未知。链接到原始运行记录或带日期的观察。
+- **测试版本**：被测试的代码版本或构建，以及运行位置。
 
-### Review the results
+### 审查结果
 
-- **Open the source.** Confirm the result in the linked run or report. A checked task or an agent's summary alone does not prove the test passed.
-- **Look for gaps.** Check that every scenario has a result. A passing test on one device or environment does not cover another. Keep missing and failed checks visible.
-- **Check for changes.** Rerun checks affected by changes to the requirements, code, or environment. Unrelated documentation edits may leave earlier results valid.
+- **打开来源。** 在链接的运行记录或报告中确认结果。仅凭勾选的任务或 agent 的总结不能证明测试通过。
+- **寻找缺口。** 检查每个场景都有结果。在一个设备或环境上通过的测试不能覆盖另一个。让缺失和失败的检查保持可见。
+- **检查变更。** 对需求、代码或环境的变化所影响的检查重新运行。无关的文档编辑不会使早期结果失效。
 
-**Archiving does not enforce these checks.** If passing results are required for
-release, enforce that in your CI or release process.
+**归档不强制执行这些检查。** 如果发布要求检查必须通过，
+请在你的 CI 或发布流程中强制执行。

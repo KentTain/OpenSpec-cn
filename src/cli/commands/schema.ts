@@ -6,19 +6,19 @@ import { Command } from 'commander';
 export function registerSchemaCommand(program: Command): void {
   const schemaCmd = program
     .command('schema')
-    .description('Manage workflow schemas [experimental]');
+    .description('管理工作流 Schema [实验性]');
 
   // Experimental warning
   schemaCmd.hook('preAction', () => {
-    console.error('Note: Schema commands are experimental and may change.');
+    console.error('注意：Schema 命令处于实验阶段，可能会发生变化。');
   });
 
   // schema which
   schemaCmd
     .command('which [name]')
-    .description('Show where a schema resolves from')
+    .description('显示 Schema 的解析来源')
     .option('--json', 'Output as JSON')
-    .option('--all', 'List all schemas with their resolution sources')
+    .option('--all', '列出所有 Schema 及其解析来源')
     .action(async (name?: string, options?: { json?: boolean; all?: boolean }) => {
       const { schemaWhichCommand } = await import('../../commands/schema.js');
       await schemaWhichCommand(name, options);
@@ -27,9 +27,9 @@ export function registerSchemaCommand(program: Command): void {
   // schema validate
   schemaCmd
     .command('validate [name]')
-    .description('Validate a schema structure and templates')
+    .description('验证 Schema 结构和模板')
     .option('--json', 'Output as JSON')
-    .option('--verbose', 'Show detailed validation steps')
+    .option('--verbose', '显示详细验证步骤')
     .action(async (name?: string, options?: { json?: boolean; verbose?: boolean }) => {
       const { schemaValidateCommand } = await import('../../commands/schema.js');
       await schemaValidateCommand(name, options);
@@ -38,9 +38,9 @@ export function registerSchemaCommand(program: Command): void {
   // schema fork
   schemaCmd
     .command('fork <source> [name]')
-    .description('Copy an existing schema to project for customization')
+    .description('复制现有 Schema 到项目中以进行自定义')
     .option('--json', 'Output as JSON')
-    .option('--force', 'Overwrite existing destination')
+    .option('--force', '覆盖现有目标')
     .action(async (source: string, name?: string, options?: { json?: boolean; force?: boolean }) => {
       const { schemaForkCommand } = await import('../../commands/schema.js');
       await schemaForkCommand(source, name, options);
@@ -49,13 +49,13 @@ export function registerSchemaCommand(program: Command): void {
   // schema init
   schemaCmd
     .command('init <name>')
-    .description('Create a new project-local schema')
+    .description('创建一个新的项目本地 Schema')
     .option('--json', 'Output as JSON')
-    .option('--description <text>', 'Schema description')
-    .option('--artifacts <list>', 'Comma-separated artifact IDs (proposal,specs,design,tasks)')
-    .option('--default', 'Set as project default schema')
-    .option('--no-default', 'Do not prompt to set as default')
-    .option('--force', 'Overwrite existing schema')
+    .option('--description <text>', 'Schema 描述')
+    .option('--artifacts <list>', '逗号分隔的 Artifact ID (proposal,specs,design,tasks)')
+    .option('--default', '设为项目默认 Schema')
+    .option('--no-default', '不提示设为默认')
+    .option('--force', '覆盖现有 Schema')
     .action(async (
       name: string,
       options?: {

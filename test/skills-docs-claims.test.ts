@@ -14,9 +14,7 @@ const ARCHIVE_SECTION = SKILLS.split('## openspec-archive-change')[1].split(
 
 describe('skills documentation', () => {
   it('documents archive sync with and without the sync workflow (#1975)', () => {
-    expect(ARCHIVE_SECTION).toContain('When `openspec-sync-specs` is installed');
-    expect(ARCHIVE_SECTION).toContain(
-      'Otherwise, it merges the delta specs into the main specs itself.'
-    );
+    expect(ARCHIVE_SECTION).toContain('当 `openspec-sync-specs` 已安装时');
+    expect(ARCHIVE_SECTION).toContain('否则，它自行把增量规范合并进主 specs');
   });
 });

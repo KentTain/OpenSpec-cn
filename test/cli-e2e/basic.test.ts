@@ -69,7 +69,7 @@ describe('openspec CLI e2e basics', () => {
     expect(JSON.parse(changes.stdout).changes).toEqual([]);
     const specs = await runCLI(['list', '--specs'], { cwd: cloneDir, env });
     expect(specs.exitCode).toBe(0);
-    expect(specs.stdout).toContain('No specs found.');
+    expect(specs.stdout).toContain('未找到规范。');
     // Seven subprocesses (3 CLI, 4 git): ~2.6s on the Windows runner, past 10s under load.
   }, 60_000);
 
@@ -90,7 +90,7 @@ describe('openspec CLI e2e basics', () => {
       .join(', ');
     const normalizedOutput = result.stdout.replace(/\s+/g, ' ').trim();
     expect(normalizedOutput).toContain(
-      `Use "all", "none", or a comma-separated list of: ${expectedTools}`
+      `使用 "all"、"none" 或逗号分隔的列表：${expectedTools}`
     );
     expect(normalizedOutput).toContain('--language <language>');
   });
@@ -158,7 +158,7 @@ describe('openspec CLI e2e basics', () => {
       });
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toMatch(/^OpenSpec \S+ \(source\)\nUpdate check disabled\.\n$/);
+      expect(result.stdout).toMatch(/^OpenSpec \S+ \(source\)\n更新检查已禁用。\n$/);
       expect(result.stderr).toBe('');
     });
 
@@ -282,7 +282,7 @@ describe('openspec CLI e2e basics', () => {
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toBe(output);
-      expect(result.stderr).toContain('Warning: "openspec change list" is deprecated. Use "openspec list".');
+      expect(result.stderr).toContain('警告："openspec-cn change list" 已弃用。请使用 "openspec-cn list"。');
     });
 
     it('preserves JSON output and warns on stderr', async () => {
@@ -293,7 +293,7 @@ describe('openspec CLI e2e basics', () => {
       expect(JSON.parse(result.stdout)).toEqual([
         { id: 'c1', title: 'Test Change', deltaCount: 1, taskStatus: { total: 0, completed: 0 } },
       ]);
-      expect(result.stderr).toContain('Warning: "openspec change list" is deprecated. Use "openspec list".');
+      expect(result.stderr).toContain('警告："openspec-cn change list" 已弃用。请使用 "openspec-cn list"。');
     });
 
     it('rejects the unsupported --all option', async () => {
@@ -393,7 +393,7 @@ describe('openspec CLI e2e basics', () => {
     const projectDir = await prepareFixture('tmp-init');
     const result = await runCLI(['validate', 'does-not-exist'], { cwd: projectDir });
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain("Unknown item 'does-not-exist'");
+    expect(result.stderr).toContain("未知项目 'does-not-exist'");
   });
 
   describe('init command non-interactive options', () => {
@@ -412,9 +412,9 @@ describe('openspec CLI e2e basics', () => {
         path.join(emptyProjectDir, 'openspec', 'config.yaml'),
         'utf-8',
       );
-      expect(config).toContain('Language: French');
-      expect(config).toContain('All artifacts must be written in French.');
-      expect(config).toContain('Keep OpenSpec structural headings and SHALL/MUST keywords in English.');
+      expect(config).toContain('语言：French');
+      expect(config).toContain('所有制品必须用 French 编写。');
+      expect(config).toContain('OpenSpec 结构标题与 SHALL/MUST 关键字保持英文。');
 
       const created = await runCLI(['new', 'change', 'language-check'], {
         cwd: emptyProjectDir,
@@ -425,7 +425,7 @@ describe('openspec CLI e2e basics', () => {
         { cwd: emptyProjectDir },
       );
       expect(instructions.exitCode).toBe(0);
-      expect(JSON.parse(instructions.stdout).context).toContain('Language: French');
+      expect(JSON.parse(instructions.stdout).context).toContain('语言：French');
     });
 
     it('initializes with --tools all option', async () => {
@@ -442,7 +442,7 @@ describe('openspec CLI e2e basics', () => {
       });
       expect(result.timedOut).toBe(false);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec Setup Complete');
+      expect(result.stdout).toContain('OpenSpec 设置完成');
 
       // Check that skills were created for multiple tools
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/openspec-explore/SKILL.md');
@@ -463,7 +463,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec Setup Complete');
+      expect(result.stdout).toContain('OpenSpec 设置完成');
       expect(result.stdout).toContain('Claude Code');
 
       // New init creates skills, not CLAUDE.md
@@ -480,7 +480,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'agents'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec Setup Complete');
+      expect(result.stdout).toContain('OpenSpec 设置完成');
 
       const skillPath = path.join(emptyProjectDir, '.agents', 'skills', 'openspec-explore', 'SKILL.md');
       expect(await fileExists(skillPath)).toBe(true);
@@ -493,9 +493,9 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'zed'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec Setup Complete');
+      expect(result.stdout).toContain('OpenSpec 设置完成');
       expect(result.stdout).toContain('Zed Agent');
-      expect(result.stdout).not.toContain('Restart your IDE');
+      expect(result.stdout).not.toContain('请重启你的 IDE');
 
       const skillPath = path.join(emptyProjectDir, '.agents', 'skills', 'openspec-explore', 'SKILL.md');
       expect(await fileExists(skillPath)).toBe(true);
@@ -522,7 +522,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'none'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('OpenSpec Setup Complete');
+      expect(result.stdout).toContain('OpenSpec 设置完成');
 
       // With --tools none, no tool skills should be created
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/openspec-explore/SKILL.md');
@@ -539,8 +539,8 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'invalid-tool'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('Invalid tool(s): invalid-tool');
-      expect(result.stderr).toContain('Available values:');
+      expect(result.stderr).toContain('无效工具：invalid-tool');
+      expect(result.stderr).toContain('可用值：');
     });
 
     it('returns error when combining reserved keywords with explicit ids', async () => {
@@ -550,7 +550,7 @@ describe('openspec CLI e2e basics', () => {
 
       const result = await runCLI(['init', '--tools', 'all,claude'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('Cannot combine reserved values "all" or "none" with specific tool IDs');
+      expect(result.stderr).toContain('不能将保留值 "all" 或 "none" 与具体工具 ID 组合使用');
     });
   });
 
@@ -585,8 +585,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('no answer could be read from stdin');
-      expect(output).toContain('openspec archive add-greeting --yes');
+      expect(output).toContain('无法从标准输入读取回答');
+      expect(output).toContain('openspec-cn archive add-greeting --yes');
 
       // The change is untouched: nothing was archived or merged.
       expect(await fileExists(path.join(projectDir, 'openspec', 'changes', 'add-greeting', 'proposal.md'))).toBe(true);
@@ -600,8 +600,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('1 incomplete task(s) found');
-      expect(output).toContain('openspec archive add-greeting --yes');
+      expect(output).toContain('个未完成的任务');
+      expect(output).toContain('openspec-cn archive add-greeting --yes');
     });
 
     it('keeps the caller\'s own flags in the suggested rerun', async () => {
@@ -612,7 +612,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec archive add-greeting --skip-specs --yes');
+      expect(output).toContain('openspec-cn archive add-greeting --skip-specs --yes');
     });
 
     it('reports the skip-validation prompt the same way', async () => {
@@ -622,8 +622,8 @@ describe('openspec CLI e2e basics', () => {
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
       expect(output).not.toContain('force closed the prompt');
-      expect(output).toContain('Skipping validation requires confirmation');
-      expect(output).toContain('openspec archive add-greeting --no-validate --yes');
+      expect(output).toContain('跳过验证需要确认');
+      expect(output).toContain('openspec-cn archive add-greeting --no-validate --yes');
     });
 
     it('archives normally once that flag is passed', async () => {
@@ -640,7 +640,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('A change name is required');
+      expect(output).toContain('需要指定变更名');
       expect(await fileExists(path.join(projectDir, 'openspec', 'changes', 'add-greeting', 'proposal.md'))).toBe(true);
     });
 
@@ -675,7 +675,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec archive add-greeting --yes --store team-store');
+      expect(output).toContain('openspec-cn archive add-greeting --yes --store team-store');
     });
 
     it('keeps --store in front of the `--` for a dash-leading change name', async () => {
@@ -712,7 +712,7 @@ describe('openspec CLI e2e basics', () => {
 
       const output = `${result.stdout}${result.stderr}`;
       expect(result.exitCode).toBe(1);
-      expect(output).toContain('openspec archive --yes --store team-store -- --force');
+      expect(output).toContain('openspec-cn archive --yes --store team-store -- --force');
     });
   });
 });

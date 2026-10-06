@@ -18,7 +18,7 @@ function assertSpecPath(specsDir: string, specPath: string): void {
     relativePath.startsWith(`..${path.sep}`) ||
     path.isAbsolute(relativePath)
   ) {
-    throw new Error(`Path is outside the allowed directory: ${specPath}`);
+    throw new Error(`路径位于允许的目录之外：${specPath}`);
   }
 
   try {
@@ -52,7 +52,7 @@ function validateRequirementIndex(spec: Spec, requirementOpt?: string): number |
   if (!requirementOpt) return undefined;
   const index = Number.parseInt(requirementOpt, 10);
   if (!Number.isInteger(index) || index < 1 || index > spec.requirements.length) {
-    throw new Error(`Requirement ${requirementOpt} not found`);
+    throw new Error(`未找到需求 ${requirementOpt}`);
   }
   return index - 1; // convert to 0-based
 }
@@ -108,11 +108,11 @@ export class SpecCommand {
       if (canPrompt && specIds.length > 0) {
         const { select } = await import('@inquirer/prompts');
         specId = await select({
-          message: 'Select a spec to show',
+          message: '选择要显示的规范',
           choices: specIds.map(id => ({ name: id, value: id })),
         });
       } else {
-        throw new Error('Missing required argument <spec-id>');
+        throw new Error('缺少必需参数 <spec-id>');
       }
     }
 
@@ -122,12 +122,12 @@ export class SpecCommand {
       // Root-aware callers get the absolute path; the cwd-based noun form
       // keeps its historical forward-slash relative message on all platforms.
       const displayPath = this.rootPath ? specPath : `openspec/specs/${specId}/spec.md`;
-      throw new Error(`Spec '${specId}' not found at ${displayPath}`);
+      throw new Error(`未找到规范 '${specId}'，路径：${displayPath}`);
     }
 
     if (options.json) {
       if (options.requirements && options.requirement) {
-        throw new Error('Options --requirements and --requirement cannot be used together');
+        throw new Error('选项 --requirements 和 --requirement 不能同时使用');
       }
       const parsed = parseSpecFromFile(this.specsDir, specPath, specId);
       const filtered = filterSpec(parsed, options);
@@ -155,7 +155,7 @@ export async function specShowCommand(
     const cmd = new SpecCommand();
     await cmd.show(specId, options as any);
   } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`错误：${error instanceof Error ? error.message : '未知错误'}`);
     process.exitCode = 1;
   }
 }
@@ -163,7 +163,7 @@ export async function specShowCommand(
 export async function specListCommand(options: { json?: boolean; long?: boolean }): Promise<void> {
   try {
     if (!existsSync(SPECS_DIR)) {
-      console.log('No items found');
+      console.log('未找到项目');
       return;
     }
 
@@ -193,7 +193,7 @@ export async function specListCommand(options: { json?: boolean; long?: boolean 
       console.log(JSON.stringify(specs, null, 2));
     } else {
       if (specs.length === 0) {
-        console.log('No items found');
+        console.log('未找到项目');
         return;
       }
       if (!options.long) {
@@ -205,7 +205,7 @@ export async function specListCommand(options: { json?: boolean; long?: boolean 
       });
     }
   } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`错误：${error instanceof Error ? error.message : '未知错误'}`);
     process.exitCode = 1;
   }
 }
@@ -221,11 +221,11 @@ export async function specValidateCommand(
       if (canPrompt && specIds.length > 0) {
         const { select } = await import('@inquirer/prompts');
         specId = await select({
-          message: 'Select a spec to validate',
+          message: '选择要验证的规范',
           choices: specIds.map(id => ({ name: id, value: id })),
         });
       } else {
-        throw new Error('Missing required argument <spec-id>');
+        throw new Error('缺少必需参数 <spec-id>');
       }
     }
 
@@ -233,7 +233,7 @@ export async function specValidateCommand(
     assertSpecPath(SPECS_DIR, specPath);
     
     if (!existsSync(specPath)) {
-      throw new Error(`Spec '${specId}' not found at openspec/specs/${specId}/spec.md`);
+      throw new Error(`未找到规范 '${specId}'，路径：openspec/specs/${specId}/spec.md`);
     }
 
     const validator = new Validator(options.strict);
@@ -244,9 +244,9 @@ export async function specValidateCommand(
       console.log(JSON.stringify(report, null, 2));
     } else {
       if (report.valid) {
-        console.log(`Specification '${specId}' is valid`);
+        console.log(`规范 '${specId}' 有效`);
       } else {
-        console.error(`Specification '${specId}' has issues`);
+        console.error(`规范 '${specId}' 存在问题`);
         report.issues.forEach(issue => {
           const label = issue.level === 'ERROR' ? 'ERROR' : issue.level;
           const prefix = issue.level === 'ERROR' ? '✗' : issue.level === 'WARNING' ? '⚠' : 'ℹ';
@@ -256,7 +256,7 @@ export async function specValidateCommand(
     }
     process.exitCode = report.valid ? 0 : 1;
   } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`错误：${error instanceof Error ? error.message : '未知错误'}`);
     process.exitCode = 1;
   }
 }
